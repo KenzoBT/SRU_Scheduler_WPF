@@ -418,7 +418,6 @@ namespace Schedule_WPF
                 classList[classIndex].StartTime = start;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
                 classList[classIndex].Classroom = new ClassRoom(bldg, room);
                 // Give the newLabel the class information
-                MessageBox.Show("Here!");
                 receiver.Content = sourceLabel.Content;
                 receiver.Background = sourceLabel.Background;
                 receiver.Tag = sourceLabel.Tag;
