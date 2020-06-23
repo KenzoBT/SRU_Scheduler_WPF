@@ -1,0 +1,313 @@
+﻿<Window x:Class="Schedule_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Schedule_WPF"
+        xmlns:c="clr-namespace:Schedule_WPF"
+        mc:Ignorable="d"
+        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png">
+    
+    <!-- Resources (Data / Styles) of this specific window -->
+    <Window.Resources>
+        <sys:String x:Key="Set_ClassRoom_Bldg">---</sys:String>
+        <sys:Int32 x:Key="Set_ClassRoom_Num">000</sys:Int32>
+        <sys:String x:Key="Set_Prof_FN">---</sys:String>
+        <sys:String x:Key="Set_Prof_LN">---</sys:String>
+        <sys:String x:Key="Set_Prof_ID">---</sys:String>
+        <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="5,0,0,5"/>
+            
+        </Style>
+        <Style TargetType="{x:Type TextBlock}" x:Key="CenterAlign">
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="{x:Type TextBlock}" x:Key="DragRow">
+            <EventSetter Event="MouseMove" Handler="MouseMoveOnGridRow"/>
+        </Style>
+        <Style TargetType="{x:Type Label}" x:Key="DragLabel">
+            <EventSetter Event="MouseMove" Handler="MouseMoveOnAssignedClass"/>
+        </Style>
+        <Style TargetType="{x:Type TextBlock}" x:Key="TruncateOverflow">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <EventSetter Event="MouseMove" Handler="MouseMoveOnGridRow"/>
+        </Style>
+        <!-- Custom style for all TabItem controls -->
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="MinWidth" Value="75" />
+            <!-- To set changes of style based on triggers we need to edit the template -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid Name="Panel">
+                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Panel" Property="Background" Value="#058F27" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter TargetName="Panel" Property="Background" Value="#505050" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Grid for the layout of the whole window --> 
+    <Grid Background="#272727">
+        <TabControl TabStripPlacement="Top">
+            
+            <!-- Scheduler Tab -->
+            <TabItem Header="Scheduler" Margin="-3">
+
+                <!-- Grid for the layout of "Schedule" Tab -->
+                <Grid Margin="-3" Name="ScheduleTabGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*" />
+                        <RowDefinition Height="1.2*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- MWF Timetable Area -->
+                    <Grid Name="MWF" Grid.Column="0" Background="#CACACA">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="10*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="10*"/>
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <Viewbox HorizontalAlignment="Center" Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Margin="0 7 0 7" Foreground="Black">MWF Timetable</TextBlock>
+                        </Viewbox>
+                    </Grid>
+
+                    <!-- TR Timetable Area -->
+                    <Grid Name="TR" Grid.Column="1" Background="#DDDDDD">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="10*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="10*"/>
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <Viewbox HorizontalAlignment="Center" Grid.Column="1" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
+                            <TextBlock Margin="0 7 0 7" Foreground="Black">TR Timetable</TextBlock>
+                        </Viewbox>
+                    </Grid>
+
+                    <!-- Bottom Area (Classes, ColorKey, QuickActions)-->
+                    <Grid Name="Unassigned_Classes" Grid.Row="1" Grid.ColumnSpan="2" Background="#AAAAAA">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="2.8*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="0.4*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Unassigned Classes Grid -->
+                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Margin="15,0,15,15">
+                            <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ProfessorName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}">
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </ScrollViewer>
+                        <!-- Online Classes List -->
+                        <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Online Classes</Label>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" Margin="15,0,15,15">
+                            <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding ProfessorName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}">
+                                    </DataGridTextColumn>
+                                    <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online">
+                                    </DataGridCheckBoxColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </ScrollViewer>
+                        <!-- Professor Color Key -->
+                        <Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">Professor Key</Label>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="2" Margin="15,0,15,15">
+                            <ListView Name="Professor_Key_List" ScrollViewer.CanContentScroll="True">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="15"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" Content="" Height="15" Background="{Binding Prof_Color}"/>
+                                            <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding FullName}" MinWidth="150" Margin="5,0,0,0"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </ScrollViewer>
+                        <Grid Grid.Row="1" Grid.Column="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="15" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.5*" />
+                                <ColumnDefinition Width="4*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Name="btn_AddClassRoom" ToolTip="Add a Classroom" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddClassRoom_Click">
+                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                            <Button Name="btn_AddClass" ToolTip="Add a Class" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Width="35" Height="35">
+                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                            <Button Name="btn_AddProfessor" ToolTip="Add a Professor" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddProfessor_Click">
+                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                            <Button Name="btn_SaveChanges" ToolTip="Save Changes" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Width="35" Height="35">
+                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+            </TabItem>
+
+            <!-- ClassList Tab -->
+            <TabItem Header="Class List">
+                <Grid Margin="-3" Background="#DDDDDD">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="60"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="30"/>
+                    </Grid.ColumnDefinitions>
+                    <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
+                        <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Classes</TextBlock>
+                    </Viewbox>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
+                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource CenterAlign}">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding ProfessorName}" Header="Professor" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online">
+                                </DataGridCheckBoxColumn>
+                                <DataGridTextColumn Binding="{Binding BuildingName}" Header="Building" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding RoomNumber}" Header="Room Number" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- Professors Info Tab -->
+            <TabItem Header="Professors">
+                <Grid Margin="-3" Background="#DDDDDD">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="60"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="30"/>
+                    </Grid.ColumnDefinitions>
+                    <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
+                        <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Professors</TextBlock>
+                    </Viewbox>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
+                        <DataGrid x:Name="Full_Professors_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding SRUID}" Header="SRU ID" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Color">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Background="{Binding Prof_Color}" Width="30"></TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            
+        </TabControl>
+    </Grid>
+</Window>

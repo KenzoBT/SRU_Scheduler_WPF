@@ -1,0 +1,15 @@
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Release\Schedule_WPF.exe.config
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Release\Schedule_WPF.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Release\Schedule_WPF.pdb
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\MainWindow.g.cs
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\App.g.cs
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF_MarkupCompile.cache
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF_MarkupCompile.lref
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\MainWindow.baml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.g.resources
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.Properties.Resources.resources
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.csproj.GenerateResource.cache
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.csproj.CoreCompileInputs.cache
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.pdb
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Release\Schedule_WPF.csprojAssemblyReference.cache
