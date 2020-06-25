@@ -2,7 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Schedule_WPF"
+             xmlns:kz="clr-namespace:Schedule_WPF.Models"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <kz:ProfessorList x:Key="Professor_List_View"/>
+        <kz:ClassList x:Key="Classes_List_View"/>
+        <kz:EmptyClassList x:Key="Unassigned_Classes_List_View"/>
+        <kz:EmptyClassList x:Key="Online_Classes_List_View"/>
+        
     </Application.Resources>
 </Application>

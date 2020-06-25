@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="AddClassRoomDialog" Height="300" Width="405" ResizeMode="NoResize" ShowInTaskbar="False">
+        Title="AddClassRoomDialog" Height="350" Width="405" ResizeMode="NoResize" ShowInTaskbar="False">
     <Grid Background="#dddddd">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="0.3*"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="0.3*"/>
@@ -32,6 +33,10 @@
             <TextBlock FontSize="16" VerticalAlignment="Center">Room # :</TextBlock>
             <TextBox Name="Number_Text" Margin="23,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
         </WrapPanel>
-        <Button Grid.Row="5" Grid.Column="1" HorizontalAlignment="Center" Width="150" Click="SubmitData"  FontSize="16">Submit</Button>
+        <WrapPanel Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" >
+            <TextBlock FontSize="16" VerticalAlignment="Center">Seat Capacity :</TextBlock>
+            <TextBox Name="Seats_Text" Margin="23,0,0,0" Width="160" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
+        </WrapPanel>
+        <Button Grid.Row="6" Grid.Column="1" HorizontalAlignment="Center" Width="150" Click="SubmitData"  FontSize="16">Submit</Button>
     </Grid>
 </Window>

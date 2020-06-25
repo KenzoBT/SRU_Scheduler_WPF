@@ -13,13 +13,21 @@
     <Window.Resources>
         <sys:String x:Key="Set_ClassRoom_Bldg">---</sys:String>
         <sys:Int32 x:Key="Set_ClassRoom_Num">000</sys:Int32>
+        <sys:Int32 x:Key="Set_ClassRoom_Seats">000</sys:Int32>
         <sys:String x:Key="Set_Prof_FN">---</sys:String>
         <sys:String x:Key="Set_Prof_LN">---</sys:String>
         <sys:String x:Key="Set_Prof_ID">---</sys:String>
+        <sys:String x:Key="Set_Class_Dept">---</sys:String>
+        <sys:String x:Key="Set_Class_Name">---</sys:String>
+        <sys:String x:Key="Set_Class_Professor">---</sys:String>
+        <sys:Int32 x:Key="Set_Class_CRN">000</sys:Int32>
+        <sys:Int32 x:Key="Set_Class_Number">000</sys:Int32>
+        <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
+        <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>
+        <sys:Boolean x:Key="Set_Class_Online">false</sys:Boolean>
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
             <Setter Property="TextAlignment" Value="Left"/>
             <Setter Property="Margin" Value="5,0,0,5"/>
-            
         </Style>
         <Style TargetType="{x:Type TextBlock}" x:Key="CenterAlign">
             <Setter Property="TextAlignment" Value="Center"/>
@@ -125,9 +133,9 @@
                             <ColumnDefinition Width="0.4*"/>
                         </Grid.ColumnDefinitions>
                         <!-- Unassigned Classes Grid -->
-                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
+                        <Label x:Name="Dandy" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Margin="15,0,15,15">
-                            <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList">
+                            <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList" CanUserAddRows="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
@@ -139,9 +147,9 @@
                                     </DataGridTextColumn>
                                     <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding ProfessorName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}">
+                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -149,7 +157,7 @@
                         <!-- Online Classes List -->
                         <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Online Classes</Label>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" Margin="15,0,15,15">
-                            <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList">
+                            <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
@@ -161,11 +169,11 @@
                                     </DataGridTextColumn>
                                     <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding ProfessorName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                    <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}">
+                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
-                                    <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online">
+                                    <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online" IsReadOnly="True">
                                     </DataGridCheckBoxColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -204,7 +212,7 @@
                             <Button Name="btn_AddClassRoom" ToolTip="Add a Classroom" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddClassRoom_Click">
                                 <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Button>
-                            <Button Name="btn_AddClass" ToolTip="Add a Class" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Width="35" Height="35">
+                            <Button Name="btn_AddClass" ToolTip="Add a Class" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddClass_Click">
                                 <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Button>
                             <Button Name="btn_AddProfessor" ToolTip="Add a Professor" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddProfessor_Click">
@@ -239,7 +247,7 @@
                         <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Classes</TextBlock>
                     </Viewbox>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
-                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False">
+                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
@@ -251,15 +259,21 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource CenterAlign}">
+                                <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding ProfessorName}" Header="Professor" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
+                                <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
-                                <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online">
+                                <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online" IsReadOnly="True">
                                 </DataGridCheckBoxColumn>
-                                <DataGridTextColumn Binding="{Binding BuildingName}" Header="Building" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                <DataGridTextColumn Binding="{Binding ClassDay}" Header="Days" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding RoomNumber}" Header="Room Number" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                <DataGridTextColumn Binding="{Binding StartTime.FullTime}" Header="Time" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding Classroom.Location}" Header="Building" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding Classroom.RoomNum}" Header="Room Number" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding Classroom.AvailableSeats}" Header="Capacity" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -287,7 +301,7 @@
                         <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Professors</TextBlock>
                     </Viewbox>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
-                        <DataGrid x:Name="Full_Professors_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False">
+                        <DataGrid x:Name="Full_Professors_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>

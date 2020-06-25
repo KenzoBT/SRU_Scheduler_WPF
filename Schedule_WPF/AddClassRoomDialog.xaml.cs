@@ -28,8 +28,10 @@ namespace Schedule_WPF
         {
             string building = Building_Text.Text;
             int roomNum = Int32.Parse(Number_Text.Text);
+            int seats = Int32.Parse(Seats_Text.Text);
             Application.Current.MainWindow.Resources["Set_ClassRoom_Bldg"] = building;
             Application.Current.MainWindow.Resources["Set_ClassRoom_Num"] = roomNum;
+            Application.Current.MainWindow.Resources["Set_ClassRoom_Seats"] = seats;
             this.Close();
         }
 

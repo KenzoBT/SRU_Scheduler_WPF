@@ -56,13 +56,28 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddClassDialog.xaml.cs">
+      <DependentUpon>AddClassDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddClassRoomDialog.xaml.cs">
       <DependentUpon>AddClassRoomDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="AddProfessorDialog.xaml.cs">
       <DependentUpon>AddProfessorDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Classes.cs" />
+    <Compile Include="Models\ClassList.cs" />
+    <Compile Include="Models\ClassRoom.cs" />
+    <Compile Include="Models\EmptyClassList.cs" />
+    <Compile Include="Models\ProfessorList.cs" />
+    <Compile Include="Models\Professors.cs" />
+    <Compile Include="Models\RGB_Color.cs" />
+    <Compile Include="Models\Timeslot.cs" />
     <Compile Include="Settings.cs" />
+    <Page Include="AddClassDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AddClassRoomDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
