@@ -16,11 +16,12 @@ using System.Xml.Serialization;
 using Schedule_WPF.Properties;
 using System.ComponentModel;
 using Schedule_WPF.Models;
+using System.Diagnostics;
 
 namespace Schedule_WPF
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Main Window of the program
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -29,48 +30,48 @@ namespace Schedule_WPF
         Timeslot[] times_TR = { new Timeslot("08:00", "09:15", "AM"), new Timeslot("09:30", "10:45", "AM"), new Timeslot("11:00", "12:15", "AM"), new Timeslot("12:30", "01:45", "PM"), new Timeslot("02:00", "03:15", "PM"), new Timeslot("03:30", "04:45", "PM"), new Timeslot("05:00", "06:15", "PM") };
         ObservableCollection<ClassRoom> classrooms = new ObservableCollection<ClassRoom>(new ClassRoom[] { new ClassRoom("ATS", 215, 40), new ClassRoom("ATS", 347, 40), new ClassRoom("ATS", 117, 40), new ClassRoom("ATS", 999, 40) });
         ProfessorList professors = (ProfessorList)Application.Current.FindResource("Professor_List_View");
-        RGB_Color[] colorPalette = { new RGB_Color(244,67,54), new RGB_Color(156,39,176), new RGB_Color(63,81,181), new RGB_Color(3,169,244), new RGB_Color(0,150,136), new RGB_Color(139,195,74), new RGB_Color(255,235,59), new RGB_Color(255,152,0), new RGB_Color(233,30,99), new RGB_Color(103,58,183), new RGB_Color(33,150,243), new RGB_Color(0,188,212), new RGB_Color(76,175,80), new RGB_Color(205,220,57), new RGB_Color(255,193,7), new RGB_Color(255,87,34) };
-        pairs colorPairs;
+        RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
+        Pairs colorPairs;
         ClassList classList = (ClassList)Application.Current.FindResource("Classes_List_View");
         EmptyClassList unassignedClasses = (EmptyClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
         EmptyClassList onlineClasses = (EmptyClassList)Application.Current.FindResource("Online_Classes_List_View");
-
 
         ////////////// START OF EXECUTION ////////////////
         public MainWindow()
         {
             InitializeComponent();
-
             // Read from excel to get data
-            readExcel();
+            ReadExcel();
 
             // Assign professor colors 
-            assignProfColors();
+            AssignProfColors();
 
             // Draw timetables for MWF / TR
-            drawTimeTables();
+            DrawTimeTables();
 
             // Fill Unassigned Classes List
-            fillUnassigned();
+            FillUnassigned();
 
+            // Bind professors list to the Professor color key
+            BindProfessorKey();
             // Bind classes list to the "Classes" tab dataGrid of the GUI
-            bindClassList();
+            BindClassList();
             // Bind professors list to the "Professors" tab dataGrid of the GUI
-            bindProfList();
+            BindProfList();
         }
 
-        public void readExcel() // Read from excel to fill up classList + classrooms + professors (Called by MainWindow)
+        public void ReadExcel() // Read from excel to fill up classList + classrooms + professors (Called by MainWindow)
         {
 
         }
 
-        public void drawTimeTables() // Draw the GUI grids for MWF - TR (Called by MainWindow)
+        public void DrawTimeTables() // Draw the GUI grids for MWF - TR (Called by MainWindow)
         {
-            timeTableSetup(MWF, times_MWF);
-            timeTableSetup(TR, times_TR);
+            TimeTableSetup(MWF, times_MWF);
+            TimeTableSetup(TR, times_TR);
         }
 
-        public void timeTableSetup(Grid parentGrid, Timeslot[] times) // Creates a GUI grid dynamically based on timeslots + classrooms (Called by drawTimeTables())
+        public void TimeTableSetup(Grid parentGrid, Timeslot[] times) // Creates a GUI grid dynamically based on timeslots + classrooms (Called by drawTimeTables())
         {
             String parentName = parentGrid.Name; // Used to uniquely identify the timeslots
             Grid timeTable = new Grid();
@@ -172,10 +173,10 @@ namespace Schedule_WPF
             parentGrid.Children.Add(timeTable);
 
             // Populate the empty timeslots with our available information
-            populateTimeTable(timeTable, times);
+            PopulateTimeTable(timeTable, times);
         }
 
-        public void populateTimeTable(Grid timeTable, Timeslot[] times) // Populate the GUI grid based on class information (Called by timeTableSetup())
+        public void PopulateTimeTable(Grid timeTable, Timeslot[] times) // Populate the GUI grid based on class information (Called by timeTableSetup())
         {
             string days = "";
             if (times.Length == times_MWF.Length)
@@ -205,7 +206,7 @@ namespace Schedule_WPF
             }
         } 
 
-        public void fillUnassigned() // Fill unassigned classes list (GUI) & online classes list with classes that have not been put in the GUI grid
+        public void FillUnassigned() // Fill unassigned classes list (GUI) & online classes list with classes that have not been put in the GUI grid
         {
             for (int i = 0; i < classList.Count; i++)
             {
@@ -226,18 +227,18 @@ namespace Schedule_WPF
             Unassigned_Classes_Grid.ItemsSource = unassignedClasses;
         }  
 
-        public void assignProfColors() // !!! call it during excel reading // Give professors a color key based on the palette defined above + Save assigned colors to XML file
+        public void AssignProfColors() // !!! call it during excel reading // Give professors a color key based on the palette defined above + Save assigned colors to XML file
         {
+            //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorsConfig.xml";
+            string filename = "ColorConfigurations.xml";
             string fullPath = System.IO.Path.Combine(tempPath, filename);
-            XmlSerializer ser = new XmlSerializer(typeof(pairs));
+            XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(fullPath))
             {
-                colorPairs = new pairs();
-                colorPairs.colorPairings = new List<ProfColors>();
-                colorPairs.colorPairings.Add(new ProfColors { ProfName = "John Doe", Color = "0.0.0" });
+                colorPairs = new Pairs();
+                colorPairs.ColorPairings = new List<ProfColors>();
                 
                 using (FileStream fs = new FileStream(fullPath, FileMode.OpenOrCreate))
                 {
@@ -246,21 +247,21 @@ namespace Schedule_WPF
             }
             using (FileStream fs = new FileStream(fullPath, FileMode.OpenOrCreate))
             {
-                colorPairs = ser.Deserialize(fs) as pairs;
+                colorPairs = ser.Deserialize(fs) as Pairs;
             }
             // go through the professor array
             // if color not already set, add it based on next item on the palette (palette index is set at 0 the first time of execution on a user PC)
             for (int i = 0; i < professors.Count; i++)
             {
                 bool found = false;
-                for (int n = 0; n < colorPairs.colorPairings.Count; n++)
+                for (int n = 0; n < colorPairs.ColorPairings.Count; n++)
                 {
-                    if (professors[i].FullName == colorPairs.colorPairings[n].ProfName)
+                    if (professors[i].FullName == colorPairs.ColorPairings[n].ProfName)
                     {
                         //MessageBox.Show("Found " + professors[i].FullName + "!");
                         found = true;
-                        //MessageBox.Show("Reassigning " + colorPairs.colorPairings[n].Color + " to " + professors[i].FullName + ".");
-                        professors[i].profRGB = stringToRGB(colorPairs.colorPairings[n].Color);
+                        //MessageBox.Show("Reassigning " + colorPairs.ColorPairings[n].Color + " to " + professors[i].FullName + ".");
+                        professors[i].profRGB = StringToRGB(colorPairs.ColorPairings[n].Color);
                         break;
                     }
                 }
@@ -281,7 +282,7 @@ namespace Schedule_WPF
                         professors[i].profRGB = new RGB_Color((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
                     }
                     // Add it to pairings list
-                    colorPairs.colorPairings.Add(new ProfColors { ProfName = professors[i].FullName, Color = professors[i].profRGB.colorString });
+                    colorPairs.ColorPairings.Add(new ProfColors { ProfName = professors[i].FullName, Color = professors[i].profRGB.colorString });
                     //MessageBox.Show("Added " + professors[i].FullName + " + " + professors[i].profRGB.colorString);
                 }
             }
@@ -290,66 +291,67 @@ namespace Schedule_WPF
             {
                 ser.Serialize(fs, colorPairs);
             }
-            Properties.Settings.Default.Save();
+            Settings.Default.Save();
             // Reassign colors to professors in classlist
             for (int i = 0; i < classList.Count; i++)
             {
-                for (int n = 0; n < colorPairs.colorPairings.Count; n++)
+                for (int n = 0; n < colorPairs.ColorPairings.Count; n++)
                 {
-                    if (classList[i].Prof.FullName == colorPairs.colorPairings[n].ProfName)
+                    if (classList[i].Prof.FullName == colorPairs.ColorPairings[n].ProfName)
                     {
-                        classList[i].Prof.profRGB = stringToRGB(colorPairs.colorPairings[n].Color);
+                        classList[i].Prof.profRGB = StringToRGB(colorPairs.ColorPairings[n].Color);
                         break;
                     }
                 }
             }
-            fillProfessorKey();
         }
 
-        public void fillProfessorKey()
+        public void BindProfessorKey()
         {
             Professor_Key_List.ItemsSource = professors;
         } // Fill professor color key list in the GUI
 
-        public void bindClassList()
+        public void BindClassList()
         {
             Full_Classes_Grid.ItemsSource = classList;
         }
 
-        public void bindProfList()
+        public void BindProfList()
         {
             Full_Professors_Grid.ItemsSource = professors;
         }
 
-        public void saveChanges()
+        public void SaveChanges()
         {
 
         } // Writes to excel file
 
         // ADD / REMOVE functionality (Professors, Classrooms, Classes)
         // Professors
-        public void addProfessor(Professors prof)
+        public void AddProfessor(Professors prof)
         {
             professors.Add(prof);
-            // Assign color
-            assignProfColors();
+            AssignProfColors();
         }
         private void Btn_AddProfessor_Click(object sender, RoutedEventArgs e)
         {
             AddProfessorDialog addProfDialog = new AddProfessorDialog();
             addProfDialog.ShowDialog();
-            // If operation successful ------- IMPLEMENT CHECK 
-            string fName = Resources["Set_Prof_FN"].ToString();
-            string lName = Resources["Set_Prof_LN"].ToString();
-            string id = Resources["Set_Prof_ID"].ToString();
-            addProfessor(new Professors(fName, lName, id));
+            if (Boolean.Parse(Resources["Set_Prof_Success"].ToString()) == true)
+            {
+                string fName = Resources["Set_Prof_FN"].ToString();
+                string lName = Resources["Set_Prof_LN"].ToString();
+                string id = Resources["Set_Prof_ID"].ToString();
+                AddProfessor(new Professors(fName, lName, id));
+                Resources["Set_Prof_Success"] = false;
+            }
         }
-        public void removeProfessor(string name)
+        public void RemoveProfessor(string name)
         {
 
         }
         // Classrooms
-        public void addClassroom(ClassRoom room)
+        public void AddClassroom(ClassRoom room)
         {
             // Add Classroom to classroom list
             classrooms.Add(room);
@@ -359,24 +361,28 @@ namespace Schedule_WPF
             Grid child2 = FindName("TR_") as Grid;
             TR.Children.Remove(child2);
             // Redraw Grids
-            drawTimeTables();
+            DrawTimeTables();
         }
         private void Btn_AddClassRoom_Click(object sender, RoutedEventArgs e)
         {
             AddClassRoomDialog addClassDialog = new AddClassRoomDialog();
             addClassDialog.ShowDialog();
-            // If operation successful ------- IMPLEMENT CHECK 
-            string bldg = Resources["Set_ClassRoom_Bldg"].ToString();
-            int roomNum = Int32.Parse(Resources["Set_ClassRoom_Num"].ToString());
-            int capacity = Int32.Parse(Resources["Set_ClassRoom_Seats"].ToString());
-            addClassroom(new ClassRoom(bldg, roomNum, capacity));
+
+            if (Boolean.Parse(Resources["Set_ClassRoom_Success"].ToString()) == true)
+            {
+                string bldg = Resources["Set_ClassRoom_Bldg"].ToString();
+                int roomNum = Int32.Parse(Resources["Set_ClassRoom_Num"].ToString());
+                int capacity = Int32.Parse(Resources["Set_ClassRoom_Seats"].ToString());
+                AddClassroom(new ClassRoom(bldg, roomNum, capacity));
+                Resources["Set_ClassRoom_Success"] = false;
+            }
         }
-        public void removeClassroom(string classID)
+        public void RemoveClassroom(string classID)
         {
 
         }
         // Classes
-        public void addClass(Classes newClass)
+        public void AddClass(Classes newClass)
         {
             classList.Add(newClass);
             if (newClass.Online)
@@ -392,36 +398,35 @@ namespace Schedule_WPF
         {
             AddClassDialog addClassDialog = new AddClassDialog();
             addClassDialog.ShowDialog();
-            // If operation successful ------- IMPLEMENT CHECK 
-            int crn = Int32.Parse(Resources["Set_Class_CRN"].ToString());
-            string dpt = Resources["Set_Class_Dept"].ToString();
-            int number = Int32.Parse(Resources["Set_Class_Number"].ToString());
-            int sect = Int32.Parse(Resources["Set_Class_Section"].ToString());
-            string name = Resources["Set_Class_Name"].ToString();
-            int credits = Int32.Parse(Resources["Set_Class_Credits"].ToString());
-            string prof = Resources["Set_Class_Professor"].ToString();
-            bool online = Boolean.Parse(Resources["Set_Class_Online"].ToString());
-            /*
-             Classes(int crn, string deptName, int classNum, int secNum, string className, int credits,
-                string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online)
-             */
-            addClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, new ClassRoom(), determineProfessor(prof), online));
 
+            if (Boolean.Parse(Resources["Set_Class_Success"].ToString()) == true)
+            {
+                int crn = Int32.Parse(Resources["Set_Class_CRN"].ToString());
+                string dpt = Resources["Set_Class_Dept"].ToString();
+                int number = Int32.Parse(Resources["Set_Class_Number"].ToString());
+                int sect = Int32.Parse(Resources["Set_Class_Section"].ToString());
+                string name = Resources["Set_Class_Name"].ToString();
+                int credits = Int32.Parse(Resources["Set_Class_Credits"].ToString());
+                string prof = Resources["Set_Class_Professor"].ToString();
+                bool online = Boolean.Parse(Resources["Set_Class_Online"].ToString());
+                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, new ClassRoom(), DetermineProfessor(prof), online));
+                Resources["Set_Class_Success"] = false;
+            }
         }
-        public void removeClass(int crn)
+        public void RemoveClass(int crn)
         {
 
         } // !!! make sure to remove from Classlist + GUI + Unassigned
 
         // Utility functions
-        public RGB_Color stringToRGB(string s)
+        public RGB_Color StringToRGB(string s)
         {
             RGB_Color color;
             String[] parts = s.Split('.');
             color = new RGB_Color(Byte.Parse(parts[0]), Byte.Parse(parts[1]), Byte.Parse(parts[2]));
             return color;
         }
-        public Timeslot determineTime(string startTime, string classDay)
+        public Timeslot DetermineTime(string startTime, string classDay)
         {
             string id = startTime.Substring(0, 2);
             if (classDay == "MWF")
@@ -447,7 +452,7 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced time!");
             return new Timeslot();
         }
-        public ClassRoom determineClassroom(string building, int roomNum)
+        public ClassRoom DetermineClassroom(string building, int roomNum)
         {
             string id = building + roomNum;
             for (int i = 0; i < classrooms.Count; i++)
@@ -460,7 +465,7 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced classroom!");
             return new ClassRoom();
         }
-        public Professors determineProfessor(string fullName)
+        public Professors DetermineProfessor(string fullName)
         {
             for (int i = 0; i < professors.Count; i++)
             {
@@ -472,7 +477,7 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced professor!");
             return new Professors();
         }
-        public Classes determineClass(int crn)
+        public Classes DetermineClass(int crn)
         {
             for (int i = 0; i < classList.Count; i++)
             {
@@ -509,8 +514,8 @@ namespace Schedule_WPF
                 string bldg = roomInfo.Substring(0, 3);
                 int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
                 classList[classIndex].ClassDay = days;
-                classList[classIndex].StartTime = determineTime(start, days);
-                classList[classIndex].Classroom = determineClassroom(bldg, room);
+                classList[classIndex].StartTime = DetermineTime(start, days);
+                classList[classIndex].Classroom = DetermineClassroom(bldg, room);
                 // Give the newLabel the class information
                 receiver.Content = sourceLabel.Content;
                 receiver.Background = sourceLabel.Background;
@@ -606,8 +611,8 @@ namespace Schedule_WPF
                     string bldg = roomInfo.Substring(0, 3);
                     int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
                     classList[classIndex].ClassDay = days;
-                    classList[classIndex].StartTime = determineTime(start, days);
-                    classList[classIndex].Classroom = determineClassroom(bldg, room);
+                    classList[classIndex].StartTime = DetermineTime(start, days);
+                    classList[classIndex].Classroom = DetermineClassroom(bldg, room);
                     // Give the Label the class information
                     receiver.Content = classList[classIndex].TextBoxName;
                     receiver.Background = classList[classIndex].Prof.Prof_Color;
@@ -663,7 +668,7 @@ namespace Schedule_WPF
                 {
                     TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                     classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = determineClass(classCRN);
+                    Classes theClass = DetermineClass(classCRN);
                     if (theClass.Online)
                     {
                         string messageBoxText = "Are you sure you want to change this class\nfrom Online to In-Class?\n\n(You can later drag it back to the online class list to revert changes)";
@@ -749,7 +754,7 @@ namespace Schedule_WPF
                 {
                     TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                     int classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = determineClass(classCRN);
+                    Classes theClass = DetermineClass(classCRN);
                     if (!theClass.Online)
                     {
                         string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
@@ -796,12 +801,12 @@ namespace Schedule_WPF
         }
 
         // Professor + Color pairings (Used for persistent memory storage in xml file)
-        public class pairs
+        public class Pairs
         {
-            [XmlArray("colorPairings"), XmlArrayItem(typeof(ProfColors), ElementName = "ProfColors")]
-            public List<ProfColors> colorPairings { get; set; }
+            [XmlArray("ColorPairings"), XmlArrayItem(typeof(ProfColors), ElementName = "ProfColors")]
+            public List<ProfColors> ColorPairings { get; set; }
         } 
-        [XmlRoot("pairs")]
+        [XmlRoot("Pairs")]
         public class ProfColors
         {
             public string ProfName { get; set; }

@@ -9,6 +9,5 @@
         <kz:ClassList x:Key="Classes_List_View"/>
         <kz:EmptyClassList x:Key="Unassigned_Classes_List_View"/>
         <kz:EmptyClassList x:Key="Online_Classes_List_View"/>
-        
     </Application.Resources>
 </Application>

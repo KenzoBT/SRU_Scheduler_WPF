@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="AddProfessorDialog" Height="405" Width="405">
+        Title="AddProfessorDialog" Height="405" Width="405" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize">
     <Grid Background="#dddddd">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
@@ -21,22 +21,35 @@
             <ColumnDefinition Width="30"/>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="30"/>
         </Grid.ColumnDefinitions>
-        <Grid Background="#252525" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid Background="#016648" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <TextBlock VerticalAlignment="Center" FontSize="25" Margin="30,0,0,0" Foreground="#ffffff">Add a Professor</TextBlock>
         </Grid>
         <WrapPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" >
             <TextBlock FontSize="16" VerticalAlignment="Center">First Name :</TextBlock>
-            <TextBox Name="FirstName" Margin="23,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
+            <TextBox Name="FirstName" Margin="13,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
         </WrapPanel>
         <WrapPanel Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" >
             <TextBlock FontSize="16" VerticalAlignment="Center">Last Name :</TextBlock>
-            <TextBox Name="LastName" Margin="23,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
+            <TextBox Name="LastName" Margin="13,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
         </WrapPanel>
         <WrapPanel Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" >
             <TextBlock FontSize="16" VerticalAlignment="Center">SRU ID :</TextBlock>
-            <TextBox Name="ID" Margin="49,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
+            <TextBox Name="ID" Margin="39,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
         </WrapPanel>
-        <Button Grid.Row="6" Grid.Column="1" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
+        <Button Grid.ColumnSpan="4" Grid.Row="6" Grid.Column="0" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
+        <StackPanel Name="FirstName_Required" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="First name required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="LastName_Required" Grid.Row="3" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Last name required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="ID_Required" Grid.Row="4" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="SRU ID required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="ID_Invalid" Grid.Row="4" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid SRU ID! (E.g. A09999999)" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
     </Grid>
 </Window>

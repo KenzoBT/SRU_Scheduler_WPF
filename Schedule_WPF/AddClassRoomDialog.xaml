@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="AddClassRoomDialog" Height="350" Width="405" ResizeMode="NoResize" ShowInTaskbar="False">
+        Title="AddClassRoomDialog" Height="350" Width="405" ResizeMode="NoResize" ShowInTaskbar="False" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality">
     <Grid Background="#dddddd">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
@@ -21,8 +21,9 @@
             <ColumnDefinition Width="30"/>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="30"/>
         </Grid.ColumnDefinitions>
-        <Grid Background="#252525" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid Background="#016648" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <TextBlock VerticalAlignment="Center" FontSize="25" Margin="30,0,0,0" Foreground="#ffffff">Add a classroom</TextBlock>
         </Grid>
         <WrapPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" >
@@ -37,6 +38,21 @@
             <TextBlock FontSize="16" VerticalAlignment="Center">Seat Capacity :</TextBlock>
             <TextBox Name="Seats_Text" Margin="23,0,0,0" Width="160" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
         </WrapPanel>
-        <Button Grid.Row="6" Grid.Column="1" HorizontalAlignment="Center" Width="150" Click="SubmitData"  FontSize="16">Submit</Button>
+        <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center" Width="150" Click="SubmitData"  FontSize="16">Submit</Button>
+        <StackPanel Name="Building_Required" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Building name required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Building_Invalid" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid building name! Please enter only the building code. (E.g. ATS)" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Number_Required" Grid.Row="3" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Room number required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Number_Invalid" Grid.Row="3" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid room number!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Seats_Invalid" Grid.Row="4" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid number of seats!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
     </Grid>
 </Window>

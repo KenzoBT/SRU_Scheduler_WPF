@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="AddClassDialog" Height="450" Width="750">
+        Title="Add a Class" Height="450" Width="750" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" x:Key="SmallTextBox">
             <Setter Property="Width" Value="70"/>
@@ -45,8 +45,8 @@
             <ColumnDefinition Width="30"/>
             <ColumnDefinition Width="50"/>
         </Grid.ColumnDefinitions>
-        <Grid Background="#252525" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50,0,0,0" Foreground="#ffffff">Add a classroom</TextBlock>
+        <Grid Background="#016648" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50,0,0,0" Foreground="#ffffff">Add a class</TextBlock>
         </Grid>
         <TextBlock FontSize="16" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">CRN</TextBlock>
         <TextBox Name="CRN_Text" Grid.Row="2" Grid.Column="2" Style="{StaticResource SmallTextBox}"></TextBox>
@@ -71,5 +71,39 @@
         <TextBlock FontSize="16" Grid.Row="5" Grid.Column="5" VerticalAlignment="Center">Online</TextBlock>
         <CheckBox Name="Online_Box"  FontSize="16" Grid.Row="5" Grid.Column="6" VerticalAlignment="Center"></CheckBox>
         <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="9" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
+        <!-- Validation Notifications -->
+        <StackPanel Name="CRN_Required" Grid.Row="2" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="CRN is required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="CRN_Invalid" Grid.Row="2" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid CRN! (It can only contain numbers)" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Dept_Required" Grid.Row="3" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Department is required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Dept_Invalid" Grid.Row="3" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid Department!\n(Must contain exactly 4 letters. E.g. CPSC)" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Number_Required" Grid.Row="4" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Class number is required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Number_Invalid" Grid.Row="4" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid class number! (Must be 3 digits long)" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Section_Required" Grid.Row="5" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Class section number required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Section_Invalid" Grid.Row="5" Grid.Column="3" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid section number!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Name_Required" Grid.Row="2" Grid.Column="7" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Class name is required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Credits_Required" Grid.Row="3" Grid.Column="7" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Number of credits required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Credits_Invalid" Grid.Row="3" Grid.Column="7" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid number of credits!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
     </Grid>
 </Window>

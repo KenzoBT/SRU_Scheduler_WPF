@@ -7,16 +7,22 @@
         xmlns:local="clr-namespace:Schedule_WPF"
         xmlns:c="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png">
+        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality">
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>
+        <!-- Variables to store info from AddClassRoomDialog -->
+        <sys:Boolean x:Key="Set_ClassRoom_Success">false</sys:Boolean>
         <sys:String x:Key="Set_ClassRoom_Bldg">---</sys:String>
         <sys:Int32 x:Key="Set_ClassRoom_Num">000</sys:Int32>
         <sys:Int32 x:Key="Set_ClassRoom_Seats">000</sys:Int32>
+        <!-- Variables to store info from AddCProfessorDialog -->
+        <sys:Boolean x:Key="Set_Prof_Success">false</sys:Boolean>
         <sys:String x:Key="Set_Prof_FN">---</sys:String>
         <sys:String x:Key="Set_Prof_LN">---</sys:String>
         <sys:String x:Key="Set_Prof_ID">---</sys:String>
+        <!-- Variables to store info from AddClassDialog -->
+        <sys:Boolean x:Key="Set_Class_Success">false</sys:Boolean>
         <sys:String x:Key="Set_Class_Dept">---</sys:String>
         <sys:String x:Key="Set_Class_Name">---</sys:String>
         <sys:String x:Key="Set_Class_Professor">---</sys:String>
@@ -56,7 +62,7 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Panel" Property="Background" Value="#058F27" />
+                                <Setter TargetName="Panel" Property="Background" Value="#016648" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="False">
                                 <Setter TargetName="Panel" Property="Background" Value="#505050" />
@@ -188,9 +194,11 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="15"/>
                                                 <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="15"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="" Height="15" Background="{Binding Prof_Color}"/>
                                             <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding FullName}" MinWidth="150" Margin="5,0,0,0"/>
+                                            <Label Grid.Column="2" Content="." Height="15" Background="{Binding Prof_Color}"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
@@ -209,17 +217,17 @@
                                 <ColumnDefinition Width="4*"/>
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Name="btn_AddClassRoom" ToolTip="Add a Classroom" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddClassRoom_Click">
-                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Button Name="btn_AddClassRoom" ToolTip="Add a Classroom" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Width="40" Height="40" Click="Btn_AddClassRoom_Click">
+                                <Image Source="/images/classroom.png" Height="23" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Button>
-                            <Button Name="btn_AddClass" ToolTip="Add a Class" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddClass_Click">
-                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Button Name="btn_AddClass" ToolTip="Add a Class" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Width="40" Height="40" Click="Btn_AddClass_Click">
+                                <Image Source="/images/class.png" Height="23" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Button>
-                            <Button Name="btn_AddProfessor" ToolTip="Add a Professor" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="35" Height="35" Click="Btn_AddProfessor_Click">
-                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Button Name="btn_AddProfessor" ToolTip="Add a Professor" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="40" Height="40" Click="Btn_AddProfessor_Click">
+                                <Image Source="/images/id.png" Height="24" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Button>
-                            <Button Name="btn_SaveChanges" ToolTip="Save Changes" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Width="35" Height="35">
-                                <Image Source="/images/sru.png" Height="27" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Button Name="btn_SaveChanges" ToolTip="Save Changes" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Width="40" Height="40">
+                                <Image Source="/images/save.png" Height="23" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Button>
                         </Grid>
                     </Grid>
