@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="Add a Class" Height="450" Width="750" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize">
+        Title="Add a Class" Height="450" Width="750" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" x:Key="SmallTextBox">
             <Setter Property="Width" Value="70"/>

@@ -66,7 +66,7 @@ namespace Schedule_WPF
             if (ID.Text == "")
             {
                 ID_Required.Visibility = Visibility.Visible;
-                ID_Invalid.Visibility = Visibility.Visible;
+                ID_Invalid.Visibility = Visibility.Hidden;
                 success = false;
             }
             else

@@ -65,10 +65,14 @@
     <Compile Include="AddProfessorDialog.xaml.cs">
       <DependentUpon>AddProfessorDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FileSelect.xaml.cs">
+      <DependentUpon>FileSelect.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\Classes.cs" />
     <Compile Include="Models\ClassList.cs" />
     <Compile Include="Models\ClassRoom.cs" />
     <Compile Include="Models\EmptyClassList.cs" />
+    <Compile Include="Models\Helper.cs" />
     <Compile Include="Models\ProfessorList.cs" />
     <Compile Include="Models\Professors.cs" />
     <Compile Include="Models\RGB_Color.cs" />
@@ -83,6 +87,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="AddProfessorDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FileSelect.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -173,6 +181,19 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\add.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\sru-words.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\delete.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="images\edit.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

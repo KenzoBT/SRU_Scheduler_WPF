@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="AddProfessorDialog" Height="405" Width="405" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize">
+        Title="AddProfessorDialog" Height="405" Width="405" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <Grid Background="#dddddd">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="AddClassRoomDialog" Height="350" Width="405" ResizeMode="NoResize" ShowInTaskbar="False" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality">
+        Title="AddClassRoomDialog" Height="350" Width="405" ResizeMode="NoResize" ShowInTaskbar="False" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterOwner">
     <Grid Background="#dddddd">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>

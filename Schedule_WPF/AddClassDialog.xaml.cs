@@ -52,6 +52,7 @@ namespace Schedule_WPF
 
                 // Store the information in the appropriate variables inside MainWindow
                 Application.Current.MainWindow.Resources["Set_Class_Success"] = true;
+                MessageBox.Show("Success: " + Application.Current.MainWindow.Resources["Set_Class_Success"].ToString());
                 Application.Current.MainWindow.Resources["Set_Class_CRN"] = crn;
                 Application.Current.MainWindow.Resources["Set_Class_Dept"] = dpt;
                 Application.Current.MainWindow.Resources["Set_Class_Number"] = classNum;

@@ -40,18 +40,18 @@ namespace Schedule_WPF
         public MainWindow()
         {
             InitializeComponent();
+
+            Helper.CloseUniqueWindow<FileSelect>();
+            //MessageBox.Show(Application.Current.Resources["FilePath"].ToString());
+
             // Read from excel to get data
             ReadExcel();
-
             // Assign professor colors 
             AssignProfColors();
-
             // Draw timetables for MWF / TR
             DrawTimeTables();
-
             // Fill Unassigned Classes List
             FillUnassigned();
-
             // Bind professors list to the Professor color key
             BindProfessorKey();
             // Bind classes list to the "Classes" tab dataGrid of the GUI
@@ -64,13 +64,11 @@ namespace Schedule_WPF
         {
 
         }
-
         public void DrawTimeTables() // Draw the GUI grids for MWF - TR (Called by MainWindow)
         {
             TimeTableSetup(MWF, times_MWF);
             TimeTableSetup(TR, times_TR);
         }
-
         public void TimeTableSetup(Grid parentGrid, Timeslot[] times) // Creates a GUI grid dynamically based on timeslots + classrooms (Called by drawTimeTables())
         {
             String parentName = parentGrid.Name; // Used to uniquely identify the timeslots
@@ -153,6 +151,8 @@ namespace Schedule_WPF
                         emptySlot.MinWidth = 75;
                         emptySlot.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         emptySlot.Margin = new Thickness(5);
+                        emptySlot.ContextMenu = null;
+                        //emptySlot.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                         object o = FindName(lbl_name);
                         if (o != null)
                         {
@@ -175,7 +175,6 @@ namespace Schedule_WPF
             // Populate the empty timeslots with our available information
             PopulateTimeTable(timeTable, times);
         }
-
         public void PopulateTimeTable(Grid timeTable, Timeslot[] times) // Populate the GUI grid based on class information (Called by timeTableSetup())
         {
             string days = "";
@@ -194,18 +193,39 @@ namespace Schedule_WPF
                     if (classList[i].StartTime.TimeID != "--" && classList[i].Classroom.Location != "N/A")
                     {
                         string targetBoxID = days + '_' + classList[i].StartTime.TimeID + '_' + classList[i].Classroom.ClassID;
-                        //Label targetBox = Resources[targetBoxID] as Label;
                         Label lbl = (Label)FindName(targetBoxID);
-                        // !!!!! ------ VALIDATION (Already contains class?) -------- !!!!!!! //
-                        lbl.Content = classList[i].TextBoxName;
-                        lbl.Background = classList[i].Prof.Prof_Color;
-                        lbl.Tag = classList[i].CRN;
-                        classList[i].isAssigned = true;
+                        if (lbl.Content.ToString() == "")
+                        {
+                            lbl.Content = classList[i].TextBoxName;
+                            lbl.Background = classList[i].Prof.Prof_Color;
+                            lbl.Tag = classList[i].CRN;
+                            lbl.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                            classList[i].isAssigned = true;
+                        }
+                        else
+                        {
+                            classList[i].isAssigned = false;
+                        }
                     }
                 }
             }
-        } 
-
+        }
+        public void EmptyGrid(Grid timetable)
+        {
+            UIElementCollection items = timetable.Children;
+            for (int i = 0; i < items.Count; i++)
+            {
+                Label slot = items[i] as Label;
+                if (slot != null && slot.Tag != null)
+                {
+                    slot.Content = "";
+                    RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                    slot.Background = white_bg.colorBrush2;
+                    slot.Tag = "";
+                    slot.ContextMenu = null;
+                }
+            }
+        }
         public void FillUnassigned() // Fill unassigned classes list (GUI) & online classes list with classes that have not been put in the GUI grid
         {
             for (int i = 0; i < classList.Count; i++)
@@ -226,7 +246,6 @@ namespace Schedule_WPF
             Online_Classes_Grid.ItemsSource = onlineClasses;
             Unassigned_Classes_Grid.ItemsSource = unassignedClasses;
         }  
-
         public void AssignProfColors() // !!! call it during excel reading // Give professors a color key based on the palette defined above + Save assigned colors to XML file
         {
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
@@ -305,28 +324,33 @@ namespace Schedule_WPF
                 }
             }
         }
-
         public void BindProfessorKey()
         {
             Professor_Key_List.ItemsSource = professors;
         } // Fill professor color key list in the GUI
-
         public void BindClassList()
         {
             Full_Classes_Grid.ItemsSource = classList;
         }
-
         public void BindProfList()
         {
             Full_Professors_Grid.ItemsSource = professors;
         }
-
+        public void RefreshGUI()
+        {
+            Grid timetable_MWF = (Grid)FindName("MWF_");
+            Grid timetable_TR = (Grid)FindName("TR_");
+            EmptyGrid(timetable_MWF);
+            EmptyGrid(timetable_TR);
+            PopulateTimeTable(timetable_MWF, times_MWF);
+            PopulateTimeTable(timetable_TR, times_TR);
+        }
         public void SaveChanges()
         {
 
         } // Writes to excel file
 
-        // ADD / REMOVE functionality (Professors, Classrooms, Classes)
+        // ADD / REMOVE / EDIT functionality (Professors, Classrooms, Classes)
         // Professors
         public void AddProfessor(Professors prof)
         {
@@ -335,20 +359,42 @@ namespace Schedule_WPF
         }
         private void Btn_AddProfessor_Click(object sender, RoutedEventArgs e)
         {
+            Unfocus_Overlay.Visibility = Visibility.Visible;
             AddProfessorDialog addProfDialog = new AddProfessorDialog();
+            addProfDialog.Owner = this;
             addProfDialog.ShowDialog();
-            if (Boolean.Parse(Resources["Set_Prof_Success"].ToString()) == true)
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
+            if (Boolean.Parse(Application.Current.MainWindow.Resources["Set_Prof_Success"].ToString()) == true)
             {
-                string fName = Resources["Set_Prof_FN"].ToString();
-                string lName = Resources["Set_Prof_LN"].ToString();
-                string id = Resources["Set_Prof_ID"].ToString();
+                string fName = Application.Current.MainWindow.Resources["Set_Prof_FN"].ToString();
+                string lName = Application.Current.MainWindow.Resources["Set_Prof_LN"].ToString();
+                string id = Application.Current.MainWindow.Resources["Set_Prof_ID"].ToString();
                 AddProfessor(new Professors(fName, lName, id));
-                Resources["Set_Prof_Success"] = false;
+                Application.Current.MainWindow.Resources["Set_Prof_Success"] = false;
             }
         }
         public void RemoveProfessor(string name)
         {
+            for (int i = 0; i < professors.Count; i++)
+            {
+                if (professors[i].FullName == name)
+                {
+                    professors.RemoveAt(i);
+                }
+            }
+            // update the GUI grid
+        }
+        private void Btn_RemoveProfessor_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Yet to be implemented");
+        }
+        public void EditProfessor(string name)
+        {
 
+        }
+        private void Btn_EditProfessor_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Yet to be implemented");
         }
         // Classrooms
         public void AddClassroom(ClassRoom room)
@@ -365,21 +411,43 @@ namespace Schedule_WPF
         }
         private void Btn_AddClassRoom_Click(object sender, RoutedEventArgs e)
         {
-            AddClassRoomDialog addClassDialog = new AddClassRoomDialog();
-            addClassDialog.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Visible;
+            AddClassRoomDialog addClassRoomDialog = new AddClassRoomDialog();
+            addClassRoomDialog.Owner = this;
+            addClassRoomDialog.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
 
-            if (Boolean.Parse(Resources["Set_ClassRoom_Success"].ToString()) == true)
+            if (Boolean.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Success"].ToString()) == true)
             {
-                string bldg = Resources["Set_ClassRoom_Bldg"].ToString();
-                int roomNum = Int32.Parse(Resources["Set_ClassRoom_Num"].ToString());
-                int capacity = Int32.Parse(Resources["Set_ClassRoom_Seats"].ToString());
+                string bldg = Application.Current.MainWindow.Resources["Set_ClassRoom_Bldg"].ToString();
+                int roomNum = Int32.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Num"].ToString());
+                int capacity = Int32.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Seats"].ToString());
                 AddClassroom(new ClassRoom(bldg, roomNum, capacity));
-                Resources["Set_ClassRoom_Success"] = false;
+                Application.Current.MainWindow.Resources["Set_ClassRoom_Success"] = false;
             }
         }
         public void RemoveClassroom(string classID)
         {
+            for (int i = 0; i < classrooms.Count; i++)
+            {
+                if (classrooms[i].ClassID == classID)
+                {
+                    classrooms.RemoveAt(i);
+                }
+            }
+            // update the GUI grid
+        }
+        private void Btn_RemoveClassroom_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Yet to be implemented");
+        }
+        public void EditClassroom(string classID)
+        {
 
+        }
+        private void Btn_EditClassroom_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Yet to be implemented");
         }
         // Classes
         public void AddClass(Classes newClass)
@@ -396,27 +464,430 @@ namespace Schedule_WPF
         }
         private void Btn_AddClass_Click(object sender, RoutedEventArgs e)
         {
+            Unfocus_Overlay.Visibility = Visibility.Visible;
             AddClassDialog addClassDialog = new AddClassDialog();
+            addClassDialog.Owner = this;
             addClassDialog.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
+            MessageBox.Show("class_success: " + Application.Current.MainWindow.Resources["Set_Class_Success"].ToString());
 
-            if (Boolean.Parse(Resources["Set_Class_Success"].ToString()) == true)
+            if (Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Success"].ToString()) == true)
             {
-                int crn = Int32.Parse(Resources["Set_Class_CRN"].ToString());
-                string dpt = Resources["Set_Class_Dept"].ToString();
-                int number = Int32.Parse(Resources["Set_Class_Number"].ToString());
-                int sect = Int32.Parse(Resources["Set_Class_Section"].ToString());
-                string name = Resources["Set_Class_Name"].ToString();
-                int credits = Int32.Parse(Resources["Set_Class_Credits"].ToString());
-                string prof = Resources["Set_Class_Professor"].ToString();
-                bool online = Boolean.Parse(Resources["Set_Class_Online"].ToString());
+                int crn = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_CRN"].ToString());
+                string dpt = Application.Current.MainWindow.Resources["Set_Class_Dept"].ToString();
+                int number = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Number"].ToString());
+                int sect = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Section"].ToString());
+                string name = Application.Current.MainWindow.Resources["Set_Class_Name"].ToString();
+                int credits = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Credits"].ToString());
+                string prof = Application.Current.MainWindow.Resources["Set_Class_Professor"].ToString();
+                bool online = Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Online"].ToString());
                 AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, new ClassRoom(), DetermineProfessor(prof), online));
-                Resources["Set_Class_Success"] = false;
+                Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
+            }
+            else
+            {
+                MessageBox.Show("Add class failed!");
             }
         }
         public void RemoveClass(int crn)
         {
+            Classes removalTarget;
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].CRN == crn)
+                {
+                    removalTarget = classList[i];
+                    if (removalTarget.Online)
+                    {
+                        for (int n = 0; n < onlineClasses.Count; n++)
+                        {
+                            if (onlineClasses[n].CRN == crn)
+                            {
+                                onlineClasses.RemoveAt(n);
+                                break;
+                            }
+                        }
+                    }
+                    else if (!removalTarget.isAssigned)
+                    {
+                        for (int n = 0; n < unassignedClasses.Count; n++)
+                        {
+                            if (unassignedClasses[n].CRN == crn)
+                            {
+                                unassignedClasses.RemoveAt(n);
+                                break;
+                            }
+                        }
+                    }
+                    classList.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+        private void Btn_RemoveClass_Click(object sender, RoutedEventArgs e)
+        {
+            // find the class
+            int crn = -1;
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        crn = Int32.Parse(source.Tag.ToString());
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock crn_number = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        crn = Int32.Parse(crn_number.Text);
+                    }
+                    RemoveClass(crn);
+                    RefreshGUI();
+                }
+            }
+        }
+        public void EditClass(int crn)
+        {
 
-        } // !!! make sure to remove from Classlist + GUI + Unassigned
+        }
+        private void Btn_EditClass_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Yet to be implemented");
+        }
+
+        // DRAG/DROP functionality
+        private void MouseMoveOnGridRow(object sender, MouseEventArgs e) // Handles DRAG operation on unassigned classes list item
+        {
+            TextBlock cellUnderMouse = sender as TextBlock;
+            if (cellUnderMouse != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                DataGridRow row = DataGridRow.GetRowContainingElement(cellUnderMouse);
+                DragDrop.DoDragDrop(Unassigned_Classes_Grid, row, DragDropEffects.Copy);
+            }
+        }
+        private void HandleDropToCell(Object sender, DragEventArgs e) // !!! Needs validation checks // Handles DROP operation to assigned classes box
+        {
+            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
+            Label receiver = sender as Label;
+            if (receiver.Content.ToString() == "")
+            {
+                if (sourceLabel != null)
+                {
+                    int classIndex = (int)e.Data.GetData(typeof(int));
+                    // add the info to the target Label
+                    string days = receiver.Name.Split('_')[0];
+                    string start = receiver.Name.Split('_')[1];
+                    string roomInfo = receiver.Name.Split('_')[2];
+                    string bldg = roomInfo.Substring(0, 3);
+                    int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
+                    classList[classIndex].ClassDay = days;
+                    classList[classIndex].StartTime = DetermineTime(start, days);
+                    classList[classIndex].Classroom = DetermineClassroom(bldg, room);
+                    // Give the newLabel the class information
+                    receiver.Content = sourceLabel.Content;
+                    receiver.Background = sourceLabel.Background;
+                    receiver.Tag = sourceLabel.Tag;
+                    receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+
+                    // clear the sourceLabel
+                    sourceLabel.Content = "";
+                    RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                    sourceLabel.Background = white_bg.colorBrush2;
+                    sourceLabel.Tag = "";
+                    sourceLabel.ContextMenu = null;
+                }
+                else
+                {
+                    int classCRN = 0;
+                    DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
+                    if (droppedRow == null)
+                    {
+                        MessageBox.Show("dropped row was null");
+                    }
+                    else
+                    {
+                        TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
+                        //MessageBox.Show(crn_number.Text);
+                        classCRN = Int32.Parse(crn_number.Text);
+                    }
+
+                    /// VALIDATION CHECKS GO HERE ///
+                    // check if its online class
+                    bool validOperation = true;
+                    int classIndex = -1;
+                    for (int i = 0; i < classList.Count; i++)
+                    {
+                        if (classList[i].CRN == classCRN)
+                        {
+                            if (classList[i].Online)
+                            {
+                                string messageBoxText = "Are you sure you want to change this class from Online to In-Class?\n\n(You can later drag it back to the online class list to revert changes)";
+                                string caption = "Online class warning";
+                                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                                MessageBoxImage icon = MessageBoxImage.Question;
+                                // Display + process message box results
+                                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                                switch (result)
+                                {
+                                    case MessageBoxResult.Yes:
+                                        break;
+                                    case MessageBoxResult.No:
+                                        validOperation = false;
+                                        break;
+                                    case MessageBoxResult.Cancel:
+                                        validOperation = false;
+                                        break;
+                                }
+                            }
+                            classIndex = i;
+                            break;
+                        }
+                    }
+                    if (validOperation)
+                    {
+                        if (!classList[classIndex].Online)
+                        {
+                            classList[classIndex].isAssigned = true;
+                            // remove record from unassigned classes list
+                            for (int i = 0; i < unassignedClasses.Count; i++)
+                            {
+                                if (unassignedClasses[i].CRN == classCRN)
+                                {
+                                    unassignedClasses.RemoveAt(i);
+                                    classList[classIndex].isAssigned = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            classList[classIndex].Online = false;
+                            // remove record from online classes list
+                            for (int i = 0; i < onlineClasses.Count; i++)
+                            {
+                                if (onlineClasses[i].CRN == classCRN)
+                                {
+                                    onlineClasses.RemoveAt(i);
+                                    classList[classIndex].Online = false;
+                                    break;
+                                }
+                            }
+                        }
+                        // Update class in masterlist = give it a start time + classroom
+                        string days = receiver.Name.Split('_')[0];
+                        string start = receiver.Name.Split('_')[1];
+                        string roomInfo = receiver.Name.Split('_')[2];
+                        string bldg = roomInfo.Substring(0, 3);
+                        int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
+                        classList[classIndex].ClassDay = days;
+                        classList[classIndex].StartTime = DetermineTime(start, days);
+                        classList[classIndex].Classroom = DetermineClassroom(bldg, room);
+                        // Give the Label the class information
+                        receiver.Content = classList[classIndex].TextBoxName;
+                        receiver.Background = classList[classIndex].Prof.Prof_Color;
+                        receiver.Tag = classCRN;
+                        receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                    }
+                }
+            }
+            else
+            {
+                if (sourceLabel != null)
+                {
+                    if (sourceLabel.Content.ToString() != receiver.Content.ToString())
+                    {
+                        MessageBoxButton button = MessageBoxButton.OK;
+                        MessageBoxImage icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show("Timeslot is already taken!", "Invalid action", button, icon);
+                    }
+                }
+                else
+                {
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Exclamation;
+                    MessageBox.Show("Timeslot is already taken!", "Invalid action", button, icon);
+                }
+            }
+        }
+        private void MouseMoveOnAssignedClass(object sender, MouseEventArgs e) // Handles DRAG operation on assigned classes box
+        {
+            Label labelUnderMouse = sender as Label;
+            int classIndex = -1;
+            if ((labelUnderMouse != null) && (e.LeftButton == MouseButtonState.Pressed) && (labelUnderMouse.Tag != null) && (labelUnderMouse.Tag.ToString() != ""))
+            {
+                // find index of class being represented by the label
+                for (int i = 0; i < classList.Count; i++)
+                {
+                    if (classList[i].CRN == Int32.Parse(labelUnderMouse.Tag.ToString()))
+                    {
+                        classIndex = i;
+                        break;
+                    }
+                }
+                // Package the data
+                DataObject data = new DataObject();
+                data.SetData(typeof(int), classIndex);
+                data.SetData(typeof(object), labelUnderMouse);
+                // send dataObject
+                DragDrop.DoDragDrop(labelUnderMouse, data, DragDropEffects.Copy);
+            }
+        }
+        private void HandleDropToList(Object sender, DragEventArgs e) // Handles DROP operation to unassigned classes list 
+        {
+            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
+            if (sourceLabel != null)
+            {
+                int classIndex = (int)e.Data.GetData(typeof(int));
+                // clear the Label
+                sourceLabel.Content = "";
+                RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                sourceLabel.Background = white_bg.colorBrush2;
+                sourceLabel.ContextMenu = null;
+                // add the class to unassigned class list
+                classList[classIndex].Classroom = new ClassRoom();
+                classList[classIndex].ClassDay = "";
+                classList[classIndex].StartTime = new Timeslot();
+                classList[classIndex].isAssigned = false;
+                unassignedClasses.Add(classList[classIndex]);
+            }
+            else
+            {
+                int classCRN = 0;
+                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
+                if (droppedRow != null)
+                {
+                    TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
+                    classCRN = Int32.Parse(crn_number.Text);
+                    Classes theClass = DetermineClass(classCRN);
+                    if (theClass.Online)
+                    {
+                        string messageBoxText = "Are you sure you want to change this class\nfrom Online to In-Class?\n\n(You can later drag it back to the online class list to revert changes)";
+                        string caption = "Online class alteration";
+                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                        MessageBoxImage icon = MessageBoxImage.Question;
+                        // Display + Process message box results
+                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                // Find the class
+                                for (int i = 0; i < classList.Count; i++)
+                                {
+                                    if (classList[i].CRN == classCRN)
+                                    {
+                                        classList[i].Online = false;
+                                        // Add it to Unassigned classes list
+                                        unassignedClasses.Add(classList[i]);
+                                    }
+                                }
+                                // remove record from online classes list
+                                for (int i = 0; i < onlineClasses.Count; i++)
+                                {
+                                    if (onlineClasses[i].CRN == classCRN)
+                                    {
+                                        onlineClasses.RemoveAt(i);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case MessageBoxResult.No:
+                                break;
+                            case MessageBoxResult.Cancel:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        private void HandleDropToOnlineList(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
+        {
+            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
+            if (sourceLabel != null)
+            {
+                string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the timetable to revert changes)";
+                string caption = "Online class alteration";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Question;
+                // Display + Process message box results
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                switch (result)
+                {
+                    case MessageBoxResult.Yes:
+                        // User pressed Yes button
+                        int classIndex = (int)e.Data.GetData(typeof(int));
+                        // clear the Label
+                        sourceLabel.Content = "";
+                        RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                        sourceLabel.Background = white_bg.colorBrush2;
+                        sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                        // add the class to online class list
+                        classList[classIndex].Classroom = new ClassRoom();
+                        classList[classIndex].ClassDay = "";
+                        classList[classIndex].StartTime = new Timeslot();
+                        classList[classIndex].isAssigned = false;
+                        classList[classIndex].Online = true;
+                        onlineClasses.Add(classList[classIndex]);
+                        break;
+                    case MessageBoxResult.No:
+                        break;
+                    case MessageBoxResult.Cancel:
+                        break;
+                }
+            }
+            else
+            {
+                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
+                if (droppedRow != null)
+                {
+                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
+                    int classCRN = Int32.Parse(crn_number.Text);
+                    Classes theClass = DetermineClass(classCRN);
+                    if (!theClass.Online)
+                    {
+                        string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
+                        string caption = "Online class alteration";
+                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                        MessageBoxImage icon = MessageBoxImage.Question;
+                        // Display + Process message box results
+                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                // User pressed Yes button
+                                // Find the class
+                                for (int i = 0; i < classList.Count; i++)
+                                {
+                                    if (classList[i].CRN == classCRN)
+                                    {
+                                        classList[i].Online = true;
+                                        // Add it to Online classes list
+                                        onlineClasses.Add(classList[i]);
+                                    }
+                                }
+                                // remove record from unassigned classes list
+                                for (int i = 0; i < unassignedClasses.Count; i++)
+                                {
+                                    if (unassignedClasses[i].CRN == classCRN)
+                                    {
+                                        unassignedClasses.RemoveAt(i);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case MessageBoxResult.No:
+                                break;
+                            case MessageBoxResult.Cancel:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
 
         // Utility functions
         public RGB_Color StringToRGB(string s)
@@ -489,315 +960,13 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced professor!");
             return new Classes();
         }
-
-        // DRAG/DROP functionality
-        void MouseMoveOnGridRow(object sender, MouseEventArgs e) // Handles DRAG operation on unassigned classes list item
+        private T GetParent<T>(DependencyObject d) where T : class
         {
-            TextBlock cellUnderMouse = sender as TextBlock;
-            if (cellUnderMouse != null && e.LeftButton == MouseButtonState.Pressed)
+            while (d != null && !(d is T))
             {
-                DataGridRow row = DataGridRow.GetRowContainingElement(cellUnderMouse);
-                DragDrop.DoDragDrop(Unassigned_Classes_Grid, row, DragDropEffects.Copy);
+                d = VisualTreeHelper.GetParent(d);
             }
-        }
-        private void HandleDropToCell(Object sender, DragEventArgs e) // !!! Needs validation checks // Handles DROP operation to assigned classes box
-        {
-            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
-            if (sourceLabel != null)
-            {
-                int classIndex = (int)e.Data.GetData(typeof(int));
-                // add the info to the target Label
-                Label receiver = sender as Label;
-                string days = receiver.Name.Split('_')[0];
-                string start = receiver.Name.Split('_')[1];
-                string roomInfo = receiver.Name.Split('_')[2];
-                string bldg = roomInfo.Substring(0, 3);
-                int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
-                classList[classIndex].ClassDay = days;
-                classList[classIndex].StartTime = DetermineTime(start, days);
-                classList[classIndex].Classroom = DetermineClassroom(bldg, room);
-                // Give the newLabel the class information
-                receiver.Content = sourceLabel.Content;
-                receiver.Background = sourceLabel.Background;
-                receiver.Tag = sourceLabel.Tag;
-
-                // clear the sourceLabel
-                sourceLabel.Content = "";
-                RGB_Color white_bg = new RGB_Color(255, 255, 255);
-                sourceLabel.Background = white_bg.colorBrush2;
-            }
-            else
-            {
-                int classCRN = 0;
-                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
-                if (droppedRow == null)
-                {
-                    MessageBox.Show("dropped row was null");
-                }
-                else
-                {
-                    TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    //MessageBox.Show(crn_number.Text);
-                    classCRN = Int32.Parse(crn_number.Text);
-                }
-
-                /// VALIDATION CHECKS GO HERE ///
-                // check if its online class
-                bool validOperation = true;
-                int classIndex = -1;
-                for (int i = 0; i < classList.Count; i++)
-                {
-                    if (classList[i].CRN == classCRN)
-                    {
-                        if (classList[i].Online)
-                        {
-                            string messageBoxText = "Are you sure you want to change this class from Online to In-Class?\n\n(You can later drag it back to the online class list to revert changes)";
-                            string caption = "Online class warning";
-                            MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                            MessageBoxImage icon = MessageBoxImage.Question;
-                            // Display message box
-                            MessageBox.Show(messageBoxText, caption, button, icon);
-                            // Process message box results
-                            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-                            switch (result)
-                            {
-                                case MessageBoxResult.Yes:
-                                    break;
-                                case MessageBoxResult.No:
-                                    validOperation = false;
-                                    break;
-                                case MessageBoxResult.Cancel:
-                                    validOperation = false;
-                                    break;
-                            }
-                        }
-                        classIndex = i;
-                        break;
-                    }
-                }
-                if (validOperation)
-                {
-                    Label receiver = sender as Label;
-                    if (!classList[classIndex].Online)
-                    {
-                        // remove record from unassigned classes list
-                        for (int i = 0; i < unassignedClasses.Count; i++)
-                        {
-                            if (unassignedClasses[i].CRN == classCRN)
-                            {
-                                unassignedClasses.RemoveAt(i);
-                                classList[classIndex].isAssigned = true;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // remove record from online classes list
-                        for (int i = 0; i < onlineClasses.Count; i++)
-                        {
-                            if (onlineClasses[i].CRN == classCRN)
-                            {
-                                onlineClasses.RemoveAt(i);
-                                classList[classIndex].Online = false;
-                                break;
-                            }
-                        }
-                    }
-                    // Update class in masterlist = give it a start time + classroom
-                    string days = receiver.Name.Split('_')[0];
-                    string start = receiver.Name.Split('_')[1];
-                    string roomInfo = receiver.Name.Split('_')[2];
-                    string bldg = roomInfo.Substring(0, 3);
-                    int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
-                    classList[classIndex].ClassDay = days;
-                    classList[classIndex].StartTime = DetermineTime(start, days);
-                    classList[classIndex].Classroom = DetermineClassroom(bldg, room);
-                    // Give the Label the class information
-                    receiver.Content = classList[classIndex].TextBoxName;
-                    receiver.Background = classList[classIndex].Prof.Prof_Color;
-                    receiver.Tag = classCRN;
-                }
-            }
-        }
-        void MouseMoveOnAssignedClass(object sender, MouseEventArgs e) // Handles DRAG operation on assigned classes box
-        {
-            Label labelUnderMouse = sender as Label;
-            int classIndex = -1;
-            if (labelUnderMouse != null && e.LeftButton == MouseButtonState.Pressed)
-            {
-                // find index of class being represented by the label
-                for (int i = 0; i < classList.Count; i++)
-                {
-                    if (classList[i].CRN == Int32.Parse(labelUnderMouse.Tag.ToString()))
-                    {
-                        classIndex = i;
-                        break;
-                    }
-                }
-                // Package the data
-                DataObject data = new DataObject();
-                data.SetData(typeof(int), classIndex);
-                data.SetData(typeof(object), labelUnderMouse);
-                // send dataObject
-                DragDrop.DoDragDrop(labelUnderMouse, data, DragDropEffects.Copy);
-            }
-        }
-        private void HandleDropToList(Object sender, DragEventArgs e) // Handles DROP operation to unassigned classes list 
-        {
-            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
-            if (sourceLabel != null)
-            {
-                int classIndex = (int)e.Data.GetData(typeof(int));
-                // clear the Label
-                sourceLabel.Content = "";
-                RGB_Color white_bg = new RGB_Color(255, 255, 255);
-                sourceLabel.Background = white_bg.colorBrush2;
-                // add the class to unassigned class list
-                classList[classIndex].Classroom = new ClassRoom();
-                classList[classIndex].ClassDay = "";
-                classList[classIndex].StartTime = new Timeslot();
-                classList[classIndex].isAssigned = false;
-                unassignedClasses.Add(classList[classIndex]);
-            }
-            else
-            {
-                int classCRN = 0;
-                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
-                if (droppedRow != null)
-                {
-                    TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
-                    if (theClass.Online)
-                    {
-                        string messageBoxText = "Are you sure you want to change this class\nfrom Online to In-Class?\n\n(You can later drag it back to the online class list to revert changes)";
-                        string caption = "Online class alteration";
-                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                        MessageBoxImage icon = MessageBoxImage.Question;
-                        // Display message box
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        // Process message box results
-                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-                        switch (result)
-                        {
-                            case MessageBoxResult.Yes:
-                                // Find the class
-                                for (int i = 0; i < classList.Count; i++)
-                                {
-                                    if (classList[i].CRN == classCRN)
-                                    {
-                                        classList[i].Online = false;
-                                        // Add it to Unassigned classes list
-                                        unassignedClasses.Add(classList[i]);
-                                    }
-                                }
-                                // remove record from online classes list
-                                for (int i = 0; i < onlineClasses.Count; i++)
-                                {
-                                    if (onlineClasses[i].CRN == classCRN)
-                                    {
-                                        onlineClasses.RemoveAt(i);
-                                        break;
-                                    }
-                                }
-                                break;
-                            case MessageBoxResult.No:
-                                break;
-                            case MessageBoxResult.Cancel:
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-        private void HandleDropToOnlineList(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
-        {
-            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
-            if (sourceLabel != null)
-            {
-                string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the timetable to revert changes)";
-                string caption = "Online class alteration";
-                MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                MessageBoxImage icon = MessageBoxImage.Question;
-                // Display message box
-                MessageBox.Show(messageBoxText, caption, button, icon);
-                // Process message box results
-                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-                switch (result)
-                {
-                    case MessageBoxResult.Yes:
-                        // User pressed Yes button
-                        int classIndex = (int)e.Data.GetData(typeof(int));
-                        // clear the Label
-                        sourceLabel.Content = "";
-                        RGB_Color white_bg = new RGB_Color(255, 255, 255);
-                        sourceLabel.Background = white_bg.colorBrush2;
-                        // add the class to unassigned class list
-                        classList[classIndex].Classroom = new ClassRoom();
-                        classList[classIndex].ClassDay = "";
-                        classList[classIndex].StartTime = new Timeslot();
-                        classList[classIndex].isAssigned = false;
-                        classList[classIndex].Online = true;
-                        onlineClasses.Add(classList[classIndex]);
-                        break;
-                    case MessageBoxResult.No:
-                        break;
-                    case MessageBoxResult.Cancel:
-                        break;
-                }
-            }
-            else
-            {
-                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
-                if (droppedRow != null)
-                {
-                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    int classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
-                    if (!theClass.Online)
-                    {
-                        string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
-                        string caption = "Online class alteration";
-                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                        MessageBoxImage icon = MessageBoxImage.Question;
-                        // Display message box
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        // Process message box results
-                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-                        switch (result)
-                        {
-                            case MessageBoxResult.Yes:
-                                // User pressed Yes button
-                                // Find the class
-                                for (int i = 0; i < classList.Count; i++)
-                                {
-                                    if (classList[i].CRN == classCRN)
-                                    {
-                                        classList[i].Online = true;
-                                        // Add it to Online classes list
-                                        onlineClasses.Add(classList[i]);
-                                    }
-                                }
-                                // remove record from unassigned classes list
-                                for (int i = 0; i < unassignedClasses.Count; i++)
-                                {
-                                    if (unassignedClasses[i].CRN == classCRN)
-                                    {
-                                        unassignedClasses.RemoveAt(i);
-                                        break;
-                                    }
-                                }
-                                
-                                break;
-                            case MessageBoxResult.No:
-                                break;
-                            case MessageBoxResult.Cancel:
-                                break;
-                        }
-                    }
-                }
-            }
+            return d as T;
         }
 
         // Professor + Color pairings (Used for persistent memory storage in xml file)
@@ -813,5 +982,4 @@ namespace Schedule_WPF
             public string Color { get; set; }
         }
     }
-
 }

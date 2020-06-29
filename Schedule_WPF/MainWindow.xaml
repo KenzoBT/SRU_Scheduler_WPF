@@ -7,10 +7,13 @@
         xmlns:local="clr-namespace:Schedule_WPF"
         xmlns:c="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality">
+        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterScreen">
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>
+        
+        <!-- Variables to store data coming in from other windows -->
+        
         <!-- Variables to store info from AddClassRoomDialog -->
         <sys:Boolean x:Key="Set_ClassRoom_Success">false</sys:Boolean>
         <sys:String x:Key="Set_ClassRoom_Bldg">---</sys:String>
@@ -31,6 +34,9 @@
         <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
         <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>
         <sys:Boolean x:Key="Set_Class_Online">false</sys:Boolean>
+        
+        <!-- Custom styles for controls -->
+        
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
             <Setter Property="TextAlignment" Value="Left"/>
             <Setter Property="Margin" Value="5,0,0,5"/>
@@ -48,12 +54,10 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
             <EventSetter Event="MouseMove" Handler="MouseMoveOnGridRow"/>
         </Style>
-        <!-- Custom style for all TabItem controls -->
         <Style TargetType="TabItem">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="75" />
-            <!-- To set changes of style based on triggers we need to edit the template -->
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
@@ -72,11 +76,42 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- Context menu for classes -->
+        <ContextMenu x:Key="ClassContextMenu">
+            <MenuItem Header="Edit Class" Click="Btn_EditClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/edit.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Remove Class" Click="Btn_RemoveClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/delete.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+        <!-- Context menu for professors -->
+        <ContextMenu x:Key="ProfessorContextMenu">
+            <MenuItem Header="Edit Professor" Click="Btn_EditProfessor_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/edit.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Remove Professor" Click="Btn_RemoveProfessor_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/delete.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
     </Window.Resources>
 
     <!-- Grid for the layout of the whole window --> 
     <Grid Background="#272727">
-        <TabControl TabStripPlacement="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid Name="Unfocus_Overlay" Grid.Row="0" Background="Black" Panel.ZIndex="1" Opacity="0.4" Visibility="Hidden">
+        </Grid>
+        <TabControl Grid.Row="0" TabStripPlacement="Top" Panel.ZIndex="0">
             
             <!-- Scheduler Tab -->
             <TabItem Header="Scheduler" Margin="-3">
@@ -142,6 +177,11 @@
                         <Label x:Name="Dandy" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Margin="15,0,15,15">
                             <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList" CanUserAddRows="False">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                    </Style>
+                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
@@ -164,6 +204,11 @@
                         <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Online Classes</Label>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" Margin="15,0,15,15">
                             <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                    </Style>
+                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                     </DataGridTextColumn>
@@ -256,6 +301,11 @@
                     </Viewbox>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
                         <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                </Style>
+                            </DataGrid.RowStyle>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
@@ -310,6 +360,11 @@
                     </Viewbox>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
                         <DataGrid x:Name="Full_Professors_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False">
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="ContextMenu" Value="{StaticResource ProfessorContextMenu}" />
+                                </Style>
+                            </DataGrid.RowStyle>
                             <DataGrid.Columns>
                                 <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
