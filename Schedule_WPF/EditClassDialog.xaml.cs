@@ -16,50 +16,97 @@ using System.Windows.Shapes;
 namespace Schedule_WPF
 {
     /// <summary>
-    /// Interaction logic for AddClassDialog.xaml
+    /// Interaction logic for EditClassDialog.xaml
     /// </summary>
-    public partial class AddClassDialog : Window
+    public partial class EditClassDialog : Window
     {
-        public AddClassDialog()
+        Classes targetClass = null;
+        int originalCRN = -1;
+        bool originalOnline;
+        bool originalAssigned;
+
+        public EditClassDialog(Classes _class)
         {
             InitializeComponent();
-            Prof_Text.ItemsSource = (IEnumerable<Professors>)Application.Current.FindResource("Professor_List_View");
+            targetClass = _class;
+            originalCRN = _class.CRN;
+            originalOnline = _class.Online;
+            originalAssigned = _class.isAssigned;
+            ProfessorList profs = (ProfessorList)Application.Current.FindResource("Professor_List_View");
+            Prof_Text.ItemsSource = profs;
+
+            // Initialize fields with available data from class
+            Classes c1 = _class;
+            CRN_Text.Text = _class.CRN.ToString();
+            Dept_Text.Text = _class.DeptName;
+            ClassNum_Text.Text = _class.ClassNumber.ToString();
+            Section_Text.Text = _class.SectionNumber.ToString();
+            Name_Text.Text = _class.ClassName;
+            Credits_Text.Text = _class.Credits.ToString();
+            int profIndex;
+            for (profIndex = 0; profIndex < profs.Count; profIndex++)
+            {
+                if (profs[profIndex].FullName == _class.Prof.FullName)
+                {
+                    break;
+                }
+            }
+            Prof_Text.SelectedIndex = profIndex;
+            Online_Box.IsChecked = _class.Online;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            // If successfull data entry, communicate data back to MainWindow
-            if (allRequiredFields())
+            if (allRequiredFields() && targetClass != null)
             {
-                // Get information from input fields
-                int crn = Int32.Parse(CRN_Text.Text);
-                string dpt = Dept_Text.Text;
-                int classNum = Int32.Parse(ClassNum_Text.Text);
-                int sectNum = Int32.Parse(Section_Text.Text);
-                string name = Name_Text.Text;
-                int credits = Int32.Parse(Credits_Text.Text);
-                Professors professor = (Professors)Prof_Text.SelectedItem;
-                string profname;
-                if (professor != null)
+                targetClass.CRN = Int32.Parse(CRN_Text.Text.ToString());
+                targetClass.DeptName = Dept_Text.Text;
+                targetClass.ClassNumber = Int32.Parse(ClassNum_Text.Text.ToString());
+                targetClass.SectionNumber = Int32.Parse(Section_Text.Text.ToString());
+                targetClass.ClassName = Name_Text.Text;
+                targetClass.Credits = Int32.Parse(Credits_Text.Text.ToString());
+                targetClass.Prof = (Professors)Prof_Text.SelectedItem;
+                targetClass.Online = (bool)Online_Box.IsChecked;
+                if (targetClass.Online == true && originalOnline == false)
                 {
-                    profname = professor.SRUID;
+                    targetClass.StartTime = new Timeslot();
+                    targetClass.Classroom = new ClassRoom();
+                    targetClass.ClassDay = "";
+                    targetClass.isAssigned = false;
+                    EmptyClassList onlineList = (EmptyClassList)Application.Current.FindResource("Online_Classes_List_View");
+                    onlineList.Add(targetClass);
+                    if (!originalAssigned)
+                    {
+                        int removeIndex = -1;
+                        EmptyClassList unassignedList = (EmptyClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
+                        for (int i = 0; i < unassignedList.Count; i++)
+                        {
+                            if (unassignedList[i].CRN == originalCRN)
+                            {
+                                removeIndex = i;
+                                break;
+                            }
+                        }
+                        unassignedList.RemoveAt(removeIndex);
+                    }
                 }
-                else
+                else if(targetClass.Online == false && originalOnline == true)
                 {
-                    profname = "";
+                    EmptyClassList unassignedList = (EmptyClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
+                    unassignedList.Add(targetClass);
+                    targetClass.isAssigned = false;
+                    int removeIndex = -1;
+                    EmptyClassList onlineList = (EmptyClassList)Application.Current.FindResource("Online_Classes_List_View");
+                    for (int i = 0; i < onlineList.Count; i++)
+                    {
+                        if (onlineList[i].CRN == originalCRN)
+                        {
+                            removeIndex = i;
+                            break;
+                        }
+                    }
+                   onlineList.RemoveAt(removeIndex);
                 }
-                bool online = (bool)Online_Box.IsChecked;
-
-                // Store the information in the appropriate variables inside MainWindow
-                Application.Current.MainWindow.Resources["Set_Class_Success"] = true;
-                Application.Current.MainWindow.Resources["Set_Class_CRN"] = crn;
-                Application.Current.MainWindow.Resources["Set_Class_Dept"] = dpt;
-                Application.Current.MainWindow.Resources["Set_Class_Number"] = classNum;
-                Application.Current.MainWindow.Resources["Set_Class_Section"] = sectNum;
-                Application.Current.MainWindow.Resources["Set_Class_Name"] = name;
-                Application.Current.MainWindow.Resources["Set_Class_Credits"] = credits;
-                Application.Current.MainWindow.Resources["Set_Class_Professor"] = profname;
-                Application.Current.MainWindow.Resources["Set_Class_Online"] = online;
 
                 // Close the window
                 this.Close();
@@ -97,7 +144,7 @@ namespace Schedule_WPF
             }
             else
             {
-                if (Dept_Text.Text.Length > 4)
+                if (Dept_Text.Text.Length != 4)
                 {
                     Dept_Required.Visibility = Visibility.Hidden;
                     Dept_Invalid.Visibility = Visibility.Visible;
@@ -197,6 +244,5 @@ namespace Schedule_WPF
 
             return success;
         }
-
     }
 }

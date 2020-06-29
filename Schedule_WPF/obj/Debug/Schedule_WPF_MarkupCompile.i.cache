@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\App.xaml
-5331384586
+7646565688
 
-23411119222
+25275187309
 14-799888181
-AddClassDialog.xaml;AddClassRoomDialog.xaml;AddProfessorDialog.xaml;FileSelect.xaml;MainWindow.xaml;
+AddClassDialog.xaml;AddClassRoomDialog.xaml;AddProfessorDialog.xaml;EditClassDialog.xaml;FileSelect.xaml;MainWindow.xaml;EditProfessorDialog.xaml;
 
-False
+True
 

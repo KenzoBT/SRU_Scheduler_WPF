@@ -53,7 +53,7 @@ namespace Schedule_WPF
             }
             else
             {
-                if (Building_Text.Text.Contains(" "))
+                if (Building_Text.Text.Contains(" ") || Building_Text.Text.Length > 4)
                 {
                     Building_Required.Visibility = Visibility.Hidden;
                     Building_Invalid.Visibility = Visibility.Visible;

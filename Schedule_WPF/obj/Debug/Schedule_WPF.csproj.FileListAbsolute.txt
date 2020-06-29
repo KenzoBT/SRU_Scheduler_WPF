@@ -23,3 +23,7 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\App.baml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.csprojAssemblyReference.cache
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\FileSelect.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\FileSelect.baml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\EditClassDialog.g.cs
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\EditClassDialog.baml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\EditProfessorDialog.g.cs
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\EditProfessorDialog.baml

@@ -190,7 +190,7 @@ namespace Schedule_WPF
             {
                 if (classList[i].ClassDay == days)
                 {
-                    if (classList[i].StartTime.TimeID != "--" && classList[i].Classroom.Location != "N/A")
+                    if (classList[i].StartTime.TimeID != "--" && classList[i].Classroom.Location != "N/A" && !classList[i].Online)
                     {
                         string targetBoxID = days + '_' + classList[i].StartTime.TimeID + '_' + classList[i].Classroom.ClassID;
                         Label lbl = (Label)FindName(targetBoxID);
@@ -364,7 +364,7 @@ namespace Schedule_WPF
             addProfDialog.Owner = this;
             addProfDialog.ShowDialog();
             Unfocus_Overlay.Visibility = Visibility.Hidden;
-            if (Boolean.Parse(Application.Current.MainWindow.Resources["Set_Prof_Success"].ToString()) == true)
+            if (Application.Current.MainWindow.Resources["Set_Prof_Success"] != null && (bool)Application.Current.MainWindow.Resources["Set_Prof_Success"] == true)
             {
                 string fName = Application.Current.MainWindow.Resources["Set_Prof_FN"].ToString();
                 string lName = Application.Current.MainWindow.Resources["Set_Prof_LN"].ToString();
@@ -373,28 +373,122 @@ namespace Schedule_WPF
                 Application.Current.MainWindow.Resources["Set_Prof_Success"] = false;
             }
         }
-        public void RemoveProfessor(string name)
+        public void RemoveProfessor(string sruID)
         {
             for (int i = 0; i < professors.Count; i++)
             {
-                if (professors[i].FullName == name)
+                if (professors[i].SRUID == sruID)
                 {
                     professors.RemoveAt(i);
+                    break;
+                }
+            }
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].Prof.SRUID == sruID)
+                {
+                    classList[i].Prof = new Professors();
+                }
+            }
+            for (int i = 0; i < unassignedClasses.Count; i++)
+            {
+                if (unassignedClasses[i].Prof.SRUID == sruID)
+                {
+                    unassignedClasses[i].Prof = new Professors();
+                }
+            }
+            for (int i = 0; i < onlineClasses.Count; i++)
+            {
+                if (onlineClasses[i].Prof.SRUID == sruID)
+                {
+                    onlineClasses[i].Prof = new Professors();
                 }
             }
             // update the GUI grid
         }
         private void Btn_RemoveProfessor_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Yet to be implemented");
+            // find the professor
+            string sruID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    ListViewItem source = cm.PlacementTarget as ListViewItem;
+                    if (source != null) // Being called from a Professor Color Key
+                    {
+                        sruID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock prof_ID = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        sruID = prof_ID.Text;
+                    }
+                    RemoveProfessor(sruID);
+                    RefreshGUI();
+                }
+            }
         }
-        public void EditProfessor(string name)
+        public void EditProfessor(string sruID)
         {
+            Unfocus_Overlay.Visibility = Visibility.Visible;
+            Professors prof = DetermineProfessor(sruID);
+            EditProfessorDialog editProfessorDialog = new EditProfessorDialog(prof);
+            editProfessorDialog.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
 
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].Prof.SRUID == sruID)
+                {
+                    classList[i].Prof = prof;
+                }
+            }
+            for (int i = 0; i < unassignedClasses.Count; i++)
+            {
+                if (unassignedClasses[i].Prof.SRUID == sruID)
+                {
+                    unassignedClasses[i].Prof = prof;
+                }
+            }
+            for (int i = 0; i < onlineClasses.Count; i++)
+            {
+                if (onlineClasses[i].Prof.SRUID == sruID)
+                {
+                    onlineClasses[i].Prof = prof;
+                }
+            }
         }
         private void Btn_EditProfessor_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Yet to be implemented");
+            // find the professor
+            string sruID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    ListViewItem source = cm.PlacementTarget as ListViewItem;
+                    if (source != null) // Being called from a Professor Color Key
+                    {
+                        sruID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock prof_ID = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        sruID = prof_ID.Text;
+                    }
+                    EditProfessor(sruID);
+                    RefreshGUI();
+                }
+            }
         }
         // Classrooms
         public void AddClassroom(ClassRoom room)
@@ -416,8 +510,7 @@ namespace Schedule_WPF
             addClassRoomDialog.Owner = this;
             addClassRoomDialog.ShowDialog();
             Unfocus_Overlay.Visibility = Visibility.Hidden;
-
-            if (Boolean.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Success"].ToString()) == true)
+            if (Application.Current.MainWindow.Resources["Set_ClassRoom_Success"] != null && (bool)Application.Current.MainWindow.Resources["Set_ClassRoom_Success"] == true)
             {
                 string bldg = Application.Current.MainWindow.Resources["Set_ClassRoom_Bldg"].ToString();
                 int roomNum = Int32.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Num"].ToString());
@@ -441,6 +534,7 @@ namespace Schedule_WPF
         {
             MessageBox.Show("Yet to be implemented");
         }
+        /*
         public void EditClassroom(string classID)
         {
 
@@ -449,6 +543,7 @@ namespace Schedule_WPF
         {
             MessageBox.Show("Yet to be implemented");
         }
+        */
         // Classes
         public void AddClass(Classes newClass)
         {
@@ -469,9 +564,9 @@ namespace Schedule_WPF
             addClassDialog.Owner = this;
             addClassDialog.ShowDialog();
             Unfocus_Overlay.Visibility = Visibility.Hidden;
-            MessageBox.Show("class_success: " + Application.Current.MainWindow.Resources["Set_Class_Success"].ToString());
+            //MessageBox.Show("class_success: " + Application.Current.MainWindow.Resources["Set_Class_Success"].ToString());
 
-            if (Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Success"].ToString()) == true)
+            if (Application.Current.MainWindow.Resources["Set_Class_Success"] != null && (bool)Application.Current.MainWindow.Resources["Set_Class_Success"] == true)
             {
                 int crn = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_CRN"].ToString());
                 string dpt = Application.Current.MainWindow.Resources["Set_Class_Dept"].ToString();
@@ -483,10 +578,6 @@ namespace Schedule_WPF
                 bool online = Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Online"].ToString());
                 AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, new ClassRoom(), DetermineProfessor(prof), online));
                 Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
-            }
-            else
-            {
-                MessageBox.Show("Add class failed!");
             }
         }
         public void RemoveClass(int crn)
@@ -553,11 +644,38 @@ namespace Schedule_WPF
         }
         public void EditClass(int crn)
         {
-
+            Unfocus_Overlay.Visibility = Visibility.Visible;
+            Classes toEdit = DetermineClass(crn);
+            EditClassDialog editClassDialog = new EditClassDialog(toEdit);
+            editClassDialog.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
         }
         private void Btn_EditClass_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Yet to be implemented");
+            // find the class
+            int crn = -1;
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        crn = Int32.Parse(source.Tag.ToString());
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock crn_number = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        crn = Int32.Parse(crn_number.Text);
+                    }
+                    EditClass(crn);
+                    RefreshGUI();
+                }
+            }
         }
 
         // DRAG/DROP functionality
@@ -936,11 +1054,11 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced classroom!");
             return new ClassRoom();
         }
-        public Professors DetermineProfessor(string fullName)
+        public Professors DetermineProfessor(string sruID)
         {
             for (int i = 0; i < professors.Count; i++)
             {
-                if (professors[i].FullName == fullName)
+                if (professors[i].SRUID == sruID)
                 {
                     return professors[i];
                 }

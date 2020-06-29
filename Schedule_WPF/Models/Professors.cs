@@ -32,8 +32,8 @@ namespace Schedule_WPF.Models
             profRGB = new RGB_Color(255, 255, 255);
         }
 
-        public string FirstName { get { return _FirstName; } set { _FirstName = value; OnPropertyChanged("FirstName"); } }
-        public string LastName { get { return _LastName; } set { _LastName = value; OnPropertyChanged("LastName"); } }
+        public string FirstName { get { return _FirstName; } set { _FirstName = value; OnPropertyChanged("FirstName"); OnPropertyChanged("FullName"); } }
+        public string LastName { get { return _LastName; } set { _LastName = value; OnPropertyChanged("LastName"); OnPropertyChanged("FullName"); } }
         public string SRUID { get { return _SRUID; } set { _SRUID = value; OnPropertyChanged("SRUID"); } }
         public RGB_Color profRGB { get { return _profRGB; } set { _profRGB = value; OnPropertyChanged("profRGB"); } }
         public string FullName { get { return LastName + ", " + FirstName; } }

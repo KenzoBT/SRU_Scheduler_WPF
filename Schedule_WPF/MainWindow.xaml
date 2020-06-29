@@ -34,7 +34,7 @@
         <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
         <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>
         <sys:Boolean x:Key="Set_Class_Online">false</sys:Boolean>
-        
+
         <!-- Custom styles for controls -->
         
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
@@ -239,14 +239,18 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="15"/>
                                                 <ColumnDefinition Width="1*"/>
-                                                <ColumnDefinition Width="15"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Grid.Column="0" Content="" Height="15" Background="{Binding Prof_Color}"/>
-                                            <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding FullName}" MinWidth="150" Margin="5,0,0,0"/>
-                                            <Label Grid.Column="2" Content="." Height="15" Background="{Binding Prof_Color}"/>
+                                            <Label Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding FullName}" Tag="{Binding SRUID}" MinWidth="150" Margin="5,0,0,0"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Tag" Value="{Binding SRUID}"/>
+                                        <Setter Property="ContextMenu" Value="{StaticResource ProfessorContextMenu}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
                             </ListView>
                         </ScrollViewer>
                         <Grid Grid.Row="1" Grid.Column="3">
