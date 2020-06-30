@@ -24,7 +24,7 @@
             <ColumnDefinition Width="30"/>
         </Grid.ColumnDefinitions>
         <Grid Background="#016648" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <TextBlock VerticalAlignment="Center" FontSize="25" Margin="30,0,0,0" Foreground="#ffffff">Add a Professor</TextBlock>
+            <TextBlock VerticalAlignment="Center" FontSize="25" Margin="30,0,0,0" Foreground="#ffffff">Edit a Professor</TextBlock>
         </Grid>
         <WrapPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" >
             <TextBlock FontSize="16" VerticalAlignment="Center">First Name :</TextBlock>

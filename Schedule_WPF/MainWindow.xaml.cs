@@ -50,14 +50,10 @@ namespace Schedule_WPF
             AssignProfColors();
             // Draw timetables for MWF / TR
             DrawTimeTables();
-            // Fill Unassigned Classes List
+            // Fill unassigned / online class lists
             FillUnassigned();
-            // Bind professors list to the Professor color key
-            BindProfessorKey();
-            // Bind classes list to the "Classes" tab dataGrid of the GUI
-            BindClassList();
-            // Bind professors list to the "Professors" tab dataGrid of the GUI
-            BindProfList();
+            // Bind data to corresponding gui controls
+            BindData();
         }
 
         public void ReadExcel() // Read from excel to fill up classList + classrooms + professors (Called by MainWindow)
@@ -196,14 +192,36 @@ namespace Schedule_WPF
                         Label lbl = (Label)FindName(targetBoxID);
                         if (lbl.Content.ToString() == "")
                         {
-                            lbl.Content = classList[i].TextBoxName;
-                            lbl.Background = classList[i].Prof.Prof_Color;
-                            lbl.Tag = classList[i].CRN;
-                            lbl.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
-                            classList[i].isAssigned = true;
+                            if (!DetermineTimeConflict(classList[i], days, classList[i].StartTime.TimeID))
+                            {
+                                lbl.Content = classList[i].TextBoxName;
+                                lbl.Background = classList[i].Prof.Prof_Color;
+                                lbl.Tag = classList[i].CRN;
+                                lbl.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                                lbl.ToolTip = classList[i].ToolTipText;
+                                classList[i].isAssigned = true;
+                            }
+                            else
+                            {
+                                MessageBoxButton button = MessageBoxButton.OK;
+                                MessageBoxImage icon = MessageBoxImage.Exclamation;
+                                MessageBox.Show("Conflict: " + classList[i].DeptName + " " + classList[i].ClassNumber + 
+                                    "\nAt: " + classList[i].ClassDay + " " + classList[i].StartTime.FullTime +
+                                    "\nProfessor is already teaching at that time!\n\nMoving class to unassigned classes list", "Timeslot Conflict", button, icon);
+                                classList[i].Classroom = new ClassRoom();
+                                classList[i].StartTime = new Timeslot();
+                                classList[i].isAssigned = false;
+                            }
                         }
                         else
                         {
+                            MessageBoxButton button = MessageBoxButton.OK;
+                            MessageBoxImage icon = MessageBoxImage.Exclamation;
+                            MessageBox.Show("Conflict: " + classList[i].DeptName + " " + classList[i].ClassNumber +
+                                   "\nAt: " + classList[i].ClassDay + " " + classList[i].StartTime.FullTime +
+                                   "\nTimeslot already taken!\n\nMoving class to unassigned classes list", "Timeslot Conflict", button, icon);
+                            classList[i].Classroom = new ClassRoom();
+                            classList[i].StartTime = new Timeslot();
                             classList[i].isAssigned = false;
                         }
                     }
@@ -221,13 +239,17 @@ namespace Schedule_WPF
                     slot.Content = "";
                     RGB_Color white_bg = new RGB_Color(255, 255, 255);
                     slot.Background = white_bg.colorBrush2;
-                    slot.Tag = "";
+                    slot.Tag = null;
                     slot.ContextMenu = null;
                 }
             }
         }
         public void FillUnassigned() // Fill unassigned classes list (GUI) & online classes list with classes that have not been put in the GUI grid
         {
+            // empty online and unassigned class lists
+            unassignedClasses.Clear();
+            onlineClasses.Clear();
+            // add from classList
             for (int i = 0; i < classList.Count; i++)
             {
                 if (!classList[i].isAssigned)
@@ -243,9 +265,7 @@ namespace Schedule_WPF
                     }
                 }
             }
-            Online_Classes_Grid.ItemsSource = onlineClasses;
-            Unassigned_Classes_Grid.ItemsSource = unassignedClasses;
-        }  
+        }
         public void AssignProfColors() // !!! call it during excel reading // Give professors a color key based on the palette defined above + Save assigned colors to XML file
         {
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
@@ -324,6 +344,18 @@ namespace Schedule_WPF
                 }
             }
         }
+        public void BindData()
+        {
+            BindUnassignedList();
+            BindProfessorKey();
+            BindClassList();
+            BindProfList();
+        }
+        public void BindUnassignedList()
+        {
+            Online_Classes_Grid.ItemsSource = onlineClasses;
+            Unassigned_Classes_Grid.ItemsSource = unassignedClasses;
+        }
         public void BindProfessorKey()
         {
             Professor_Key_List.ItemsSource = professors;
@@ -344,6 +376,7 @@ namespace Schedule_WPF
             EmptyGrid(timetable_TR);
             PopulateTimeTable(timetable_MWF, times_MWF);
             PopulateTimeTable(timetable_TR, times_TR);
+            FillUnassigned();
         }
         public void SaveChanges()
         {
@@ -697,27 +730,41 @@ namespace Schedule_WPF
                 if (sourceLabel != null)
                 {
                     int classIndex = (int)e.Data.GetData(typeof(int));
-                    // add the info to the target Label
+                    // parse target slot info
                     string days = receiver.Name.Split('_')[0];
                     string start = receiver.Name.Split('_')[1];
                     string roomInfo = receiver.Name.Split('_')[2];
                     string bldg = roomInfo.Substring(0, 3);
                     int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
-                    classList[classIndex].ClassDay = days;
-                    classList[classIndex].StartTime = DetermineTime(start, days);
-                    classList[classIndex].Classroom = DetermineClassroom(bldg, room);
-                    // Give the newLabel the class information
-                    receiver.Content = sourceLabel.Content;
-                    receiver.Background = sourceLabel.Background;
-                    receiver.Tag = sourceLabel.Tag;
-                    receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
 
-                    // clear the sourceLabel
-                    sourceLabel.Content = "";
-                    RGB_Color white_bg = new RGB_Color(255, 255, 255);
-                    sourceLabel.Background = white_bg.colorBrush2;
-                    sourceLabel.Tag = "";
-                    sourceLabel.ContextMenu = null;
+                    bool isConflict = DetermineTimeConflict(classList[classIndex], days, start);
+                    if (!isConflict)
+                    {
+                        classList[classIndex].ClassDay = days;
+                        classList[classIndex].StartTime = DetermineTime(start, days);
+                        classList[classIndex].Classroom = DetermineClassroom(bldg, room);
+
+                        // Give the newLabel the class information
+                        receiver.Content = sourceLabel.Content;
+                        receiver.Background = sourceLabel.Background;
+                        receiver.Tag = sourceLabel.Tag;
+                        receiver.ToolTip = sourceLabel.ToolTip;
+                        receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+
+                        // clear the sourceLabel
+                        sourceLabel.Content = "";
+                        RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                        sourceLabel.Background = white_bg.colorBrush2;
+                        sourceLabel.Tag = null;
+                        sourceLabel.ToolTip = null;
+                        sourceLabel.ContextMenu = null;
+                    }
+                    else
+                    {
+                        MessageBoxButton button = MessageBoxButton.OK;
+                        MessageBoxImage icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show("Professor is already teaching at that time!", "Invalid action", button, icon);
+                    }
                 }
                 else
                 {
@@ -768,48 +815,58 @@ namespace Schedule_WPF
                     }
                     if (validOperation)
                     {
-                        if (!classList[classIndex].Online)
-                        {
-                            classList[classIndex].isAssigned = true;
-                            // remove record from unassigned classes list
-                            for (int i = 0; i < unassignedClasses.Count; i++)
-                            {
-                                if (unassignedClasses[i].CRN == classCRN)
-                                {
-                                    unassignedClasses.RemoveAt(i);
-                                    classList[classIndex].isAssigned = true;
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            classList[classIndex].Online = false;
-                            // remove record from online classes list
-                            for (int i = 0; i < onlineClasses.Count; i++)
-                            {
-                                if (onlineClasses[i].CRN == classCRN)
-                                {
-                                    onlineClasses.RemoveAt(i);
-                                    classList[classIndex].Online = false;
-                                    break;
-                                }
-                            }
-                        }
-                        // Update class in masterlist = give it a start time + classroom
                         string days = receiver.Name.Split('_')[0];
                         string start = receiver.Name.Split('_')[1];
                         string roomInfo = receiver.Name.Split('_')[2];
                         string bldg = roomInfo.Substring(0, 3);
                         int room = Int32.Parse(roomInfo.Substring(3, (roomInfo.Length - 3)));
-                        classList[classIndex].ClassDay = days;
-                        classList[classIndex].StartTime = DetermineTime(start, days);
-                        classList[classIndex].Classroom = DetermineClassroom(bldg, room);
-                        // Give the Label the class information
-                        receiver.Content = classList[classIndex].TextBoxName;
-                        receiver.Background = classList[classIndex].Prof.Prof_Color;
-                        receiver.Tag = classCRN;
-                        receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                        if (!DetermineTimeConflict(classList[classIndex], days, start))
+                        {
+                            if (!classList[classIndex].Online)
+                            {
+                                classList[classIndex].isAssigned = true;
+                                // remove record from unassigned classes list
+                                for (int i = 0; i < unassignedClasses.Count; i++)
+                                {
+                                    if (unassignedClasses[i].CRN == classCRN)
+                                    {
+                                        unassignedClasses.RemoveAt(i);
+                                        classList[classIndex].isAssigned = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                classList[classIndex].Online = false;
+                                // remove record from online classes list
+                                for (int i = 0; i < onlineClasses.Count; i++)
+                                {
+                                    if (onlineClasses[i].CRN == classCRN)
+                                    {
+                                        onlineClasses.RemoveAt(i);
+                                        classList[classIndex].Online = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Update class in masterlist = give it a start time + classroom
+                            classList[classIndex].ClassDay = days;
+                            classList[classIndex].StartTime = DetermineTime(start, days);
+                            classList[classIndex].Classroom = DetermineClassroom(bldg, room);
+                            // Give the Label the class information
+                            receiver.Content = classList[classIndex].TextBoxName;
+                            receiver.Background = classList[classIndex].Prof.Prof_Color;
+                            receiver.Tag = classCRN;
+                            receiver.ToolTip = classList[classIndex].ToolTipText;
+                            receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                        }
+                        else
+                        {
+                            MessageBoxButton button = MessageBoxButton.OK;
+                            MessageBoxImage icon = MessageBoxImage.Exclamation;
+                            MessageBox.Show("Professor is already teaching at that time!", "Invalid action", button, icon);
+                        }
                     }
                 }
             }
@@ -1085,6 +1142,48 @@ namespace Schedule_WPF
                 d = VisualTreeHelper.GetParent(d);
             }
             return d as T;
+        }
+        public bool DetermineTimeConflict(Classes _class, string days, string timeID)
+        {
+            bool isConflict = false;
+            string profName = _class.Prof.FullName;
+            string rowID = days + "_" + timeID;
+            //MessageBox.Show("Checking against " + rowID + "\nProf: " + profName);
+            string labelID = "";
+            Label lbl = null;
+            int classCRN = -1;
+            for (int i = 0; i < classrooms.Count; i++)
+            {
+                labelID = rowID + "_" + classrooms[i].ClassID;
+                lbl = (Label)FindName(labelID);
+                if (lbl != null)
+                {
+                    if (lbl.Tag != null)
+                    {
+                        classCRN = Int32.Parse(lbl.Tag.ToString());
+                        for (int n = 0; n < classList.Count; n++)
+                        {
+                            if (classList[n].CRN == classCRN)
+                            {
+                                if (classList[n].Prof.FullName == profName && _class.CRN != classCRN)
+                                {
+                                    isConflict = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Label " + labelID + " wasnt found!");
+                }
+                if (isConflict)
+                {
+                    break;
+                }
+            }
+            return isConflict;
         }
 
         // Professor + Color pairings (Used for persistent memory storage in xml file)

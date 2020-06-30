@@ -19,6 +19,5 @@ namespace Schedule_WPF.Models
             Add(new Classes(16002, "CPSC", 278, 02, "Programming Language & Theory", 3, "", new Timeslot(), 0, new ClassRoom(), new Professors("Deborah", "Whitfield", "A06486"), false));
             Add(new Classes(8501, "CPSC", 300, 01, "Challenges of Computing", 3, "", new Timeslot(), 0, new ClassRoom(), new Professors("Raed", "Seetan", "A01717"), true));
         }
-
     }
 }

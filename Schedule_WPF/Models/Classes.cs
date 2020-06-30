@@ -74,6 +74,7 @@ namespace Schedule_WPF.Models
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
+        public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
