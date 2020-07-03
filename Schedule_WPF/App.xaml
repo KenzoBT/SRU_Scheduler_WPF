@@ -8,8 +8,10 @@
     <Application.Resources>
         <kz:ProfessorList x:Key="Professor_List_View"/>
         <kz:ClassList x:Key="Classes_List_View"/>
-        <kz:EmptyClassList x:Key="Unassigned_Classes_List_View"/>
-        <kz:EmptyClassList x:Key="Online_Classes_List_View"/>
+        <kz:ClassList x:Key="Unassigned_Classes_List_View"/>
+        <kz:ClassList x:Key="Online_Classes_List_View"/>
+        <kz:ClassRoomList x:Key="ClassRoom_List_View"/>
         <sys:String x:Key="FilePath">none</sys:String>
+        <sys:Boolean x:Key="MainLoaded">false</sys:Boolean>
     </Application.Resources>
 </Application>

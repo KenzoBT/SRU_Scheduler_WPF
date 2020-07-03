@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Schedule_WPF.Models
 {
-    public class EmptyClassList : ObservableCollection<Classes>
+    class ClassRoomList : ObservableCollection<ClassRoom>
     {
-        public EmptyClassList() : base()
+        public ClassRoomList() : base()
         {
-            
+
         }
     }
 }

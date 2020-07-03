@@ -1,4 +1,6 @@
 ﻿using Microsoft.Win32;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 
@@ -20,6 +22,8 @@ namespace Schedule_WPF
             openFileDialog.Filter = "Excel File (*.xlsx)|*.xlsx";
             if (openFileDialog.ShowDialog() == true)
             {
+                loadingIcon.Visibility = Visibility.Visible;
+                btn_OpenFile.Visibility = Visibility.Hidden;
                 Application.Current.Resources["FilePath"] = openFileDialog.FileName;
                 MainWindow mainWindow = new MainWindow();
                 mainWindow.ShowDialog();

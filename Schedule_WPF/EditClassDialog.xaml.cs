@@ -73,12 +73,12 @@ namespace Schedule_WPF
                     targetClass.Classroom = new ClassRoom();
                     targetClass.ClassDay = "";
                     targetClass.isAssigned = false;
-                    EmptyClassList onlineList = (EmptyClassList)Application.Current.FindResource("Online_Classes_List_View");
+                    ClassList onlineList = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
                     onlineList.Add(targetClass);
                     if (!originalAssigned)
                     {
                         int removeIndex = -1;
-                        EmptyClassList unassignedList = (EmptyClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
+                        ClassList unassignedList = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
                         for (int i = 0; i < unassignedList.Count; i++)
                         {
                             if (unassignedList[i].CRN == originalCRN)
@@ -92,11 +92,11 @@ namespace Schedule_WPF
                 }
                 else if(targetClass.Online == false && originalOnline == true)
                 {
-                    EmptyClassList unassignedList = (EmptyClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
+                    ClassList unassignedList = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
                     unassignedList.Add(targetClass);
                     targetClass.isAssigned = false;
                     int removeIndex = -1;
-                    EmptyClassList onlineList = (EmptyClassList)Application.Current.FindResource("Online_Classes_List_View");
+                    ClassList onlineList = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
                     for (int i = 0; i < onlineList.Count; i++)
                     {
                         if (onlineList[i].CRN == originalCRN)

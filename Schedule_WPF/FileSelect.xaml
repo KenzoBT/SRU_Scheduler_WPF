@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="SRU Semester Scheduler" Height="450" Width="800" Icon="images\sru.png" ResizeMode="NoResize"  RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterScreen">
     <Window.Resources>
@@ -63,6 +64,7 @@
                 </Grid>
             </WrapPanel>
             <Button Name ="btn_OpenFile" Click="Btn_OpenFile_Click" Grid.Row="1" Height="36" Width="100" VerticalAlignment="Bottom" OverridesDefaultStyle="True" Style="{StaticResource RoundCorner}">Select File ...</Button>
+            <fa:ImageAwesome Name="loadingIcon" Grid.Row="1" Icon="Cog" Spin="True" SpinDuration="4" Height="35" VerticalAlignment="Bottom" Foreground="White" Visibility="Hidden"/>
         </Grid>
     </Grid>
 </Window>

@@ -56,3 +56,6 @@ C:\Users\Kenzo\Downloads\SRU_Scheduler_WPF-master (2)\SRU_Scheduler_WPF-master\S
 C:\Users\Kenzo\Downloads\SRU_Scheduler_WPF-master (2)\SRU_Scheduler_WPF-master\Schedule_WPF\obj\Debug\Schedule_WPF.csproj.CoreCompileInputs.cache
 C:\Users\Kenzo\Downloads\SRU_Scheduler_WPF-master (2)\SRU_Scheduler_WPF-master\Schedule_WPF\obj\Debug\Schedule_WPF.exe
 C:\Users\Kenzo\Downloads\SRU_Scheduler_WPF-master (2)\SRU_Scheduler_WPF-master\Schedule_WPF\obj\Debug\Schedule_WPF.pdb
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\FontAwesome.WPF.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\FontAwesome.WPF.xml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.csproj.CopyComplete

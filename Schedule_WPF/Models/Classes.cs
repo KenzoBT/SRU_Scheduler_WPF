@@ -21,6 +21,7 @@ namespace Schedule_WPF.Models
         private int _CRN;
         private bool _Online;
         private bool _isAssigned;
+        private bool _isAppointment;
         private Professors _Prof;
         private ClassRoom _Classroom;
 
@@ -39,10 +40,11 @@ namespace Schedule_WPF.Models
             Prof = new Professors();
             isAssigned = false;
             Online = false;
+            isAppointment = false;
         }
 
         public Classes(int crn, string deptName, int classNum, int secNum, string className, int credits,
-            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online)
+            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment)
         {
             CRN = crn;
             DeptName = deptName;
@@ -57,6 +59,7 @@ namespace Schedule_WPF.Models
             Prof = professor;
             isAssigned = false;
             Online = online;
+            isAppointment = appointment;
         }
 
         public string DeptName { get { return _DeptName; } set { _DeptName = value; OnPropertyChanged("DeptName"); } }
@@ -70,6 +73,7 @@ namespace Schedule_WPF.Models
         public int CRN { get { return _CRN; } set { _CRN = value; OnPropertyChanged("CRN"); } }
         public bool Online { get { return _Online; } set { _Online = value; OnPropertyChanged("Online"); } }
         public bool isAssigned { get { return _isAssigned; } set { _isAssigned = value; OnPropertyChanged("isAssigned"); } }
+        public bool isAppointment { get { return _isAppointment; } set { _isAppointment = value; OnPropertyChanged("isAppointment"); } }
         public Professors Prof { get { return _Prof; } set { _Prof = value; OnPropertyChanged("Prof"); } }
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }

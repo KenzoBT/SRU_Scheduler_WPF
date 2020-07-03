@@ -17,6 +17,8 @@ using Schedule_WPF.Properties;
 using System.ComponentModel;
 using Schedule_WPF.Models;
 using System.Diagnostics;
+using Excel = Microsoft.Office.Interop.Excel;
+using System.Runtime.InteropServices;
 
 namespace Schedule_WPF
 {
@@ -28,24 +30,22 @@ namespace Schedule_WPF
         ////////////// GLOBAL VARIABLES ////////////////
         Timeslot[] times_MWF = { new Timeslot("08:00", "08:50", "AM"), new Timeslot("09:00", "09:50", "AM"), new Timeslot("10:00", "10:50", "AM"), new Timeslot("11:00", "11:50", "AM"), new Timeslot("12:00", "12:50", "PM"), new Timeslot("01:00", "01:50", "PM"), new Timeslot("02:00", "02:50", "PM"), new Timeslot("03:00", "03:50", "PM"), new Timeslot("04:00", "04:50", "PM"), new Timeslot("05:00", "05:50", "PM"), new Timeslot("06:00", "06:50", "PM") };
         Timeslot[] times_TR = { new Timeslot("08:00", "09:15", "AM"), new Timeslot("09:30", "10:45", "AM"), new Timeslot("11:00", "12:15", "AM"), new Timeslot("12:30", "01:45", "PM"), new Timeslot("02:00", "03:15", "PM"), new Timeslot("03:30", "04:45", "PM"), new Timeslot("05:00", "06:15", "PM") };
-        ObservableCollection<ClassRoom> classrooms = new ObservableCollection<ClassRoom>(new ClassRoom[] { new ClassRoom("ATS", 215, 40), new ClassRoom("ATS", 347, 40), new ClassRoom("ATS", 117, 40), new ClassRoom("ATS", 999, 40) });
+        ClassRoomList classrooms = (ClassRoomList)Application.Current.FindResource("ClassRoom_List_View");
         ProfessorList professors = (ProfessorList)Application.Current.FindResource("Professor_List_View");
         RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
         Pairs colorPairs;
         ClassList classList = (ClassList)Application.Current.FindResource("Classes_List_View");
-        EmptyClassList unassignedClasses = (EmptyClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
-        EmptyClassList onlineClasses = (EmptyClassList)Application.Current.FindResource("Online_Classes_List_View");
+        ClassList unassignedClasses = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
+        ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
 
         ////////////// START OF EXECUTION ////////////////
         public MainWindow()
         {
             InitializeComponent();
-
-            Helper.CloseUniqueWindow<FileSelect>();
-            //MessageBox.Show(Application.Current.Resources["FilePath"].ToString());
+            string filePath = Application.Current.Resources["FilePath"].ToString();
 
             // Read from excel to get data
-            ReadExcel();
+            ReadExcel(filePath);
             // Assign professor colors 
             AssignProfColors();
             // Draw timetables for MWF / TR
@@ -54,11 +54,268 @@ namespace Schedule_WPF
             FillUnassigned();
             // Bind data to corresponding gui controls
             BindData();
+
+            Helper.CloseUniqueWindow<FileSelect>();
         }
 
-        public void ReadExcel() // Read from excel to fill up classList + classrooms + professors (Called by MainWindow)
+        private void ReadExcel(string file)
         {
+            int sheetIndex = 1;
+            Excel.Application App = new Excel.Application();
+            App.Visible = false;
+            Excel.Workbook Workbook = App.Workbooks.Open(@file);
+            Excel.Worksheet Worksheet = Workbook.Sheets[sheetIndex];
+            Excel.Range Range = Worksheet.UsedRange;
+            int rowCount = Range.Rows.Count;
+            int colCount = Range.Columns.Count;
 
+            // Create Professors
+            int sruid_indexer = 0;
+            for (int i = 2; i <= rowCount; i++)
+            {
+                string fullName, lastName, firstName, SRUID;
+                if (Range.Cells[i, 22] != null && Range.Cells[i, 22].Value2 != null)
+                {
+                    if (Range.Cells[i, 22].Value2 != "" && Range.Cells[i, 22].Value2.Contains(","))
+                    {
+                        fullName = Range.Cells[i, 22].Value2.ToString();
+                        bool professorFound = false;
+                        for (int n = 0; n < professors.Count; n++)
+                        {
+                            if (professors[n].FullName == fullName)
+                            {
+                                professorFound = true;
+                                break;
+                            }
+                        }
+                        if (!professorFound)
+                        {
+                            lastName = fullName.Split(',')[0];
+                            firstName = fullName.Split(',')[1].Remove(0, 1);
+                            if (Range.Cells[i, 23] != null && Range.Cells[i, 23].Value2 != null && Range.Cells[i, 23].Value2 != "" && Range.Cells[i, 23].Value2.ToString().Length == 9)
+                            {
+                                SRUID = Range.Cells[i, 23].Value2.ToString();
+                                //MessageBox.Show("Name: " + fullName + "\nID: " + SRUID);
+                            }
+                            else
+                            {
+                                SRUID = "A0" + sruid_indexer;
+                                sruid_indexer++;
+                                //MessageBox.Show("Name: " + fullName + "\nID: " + SRUID);
+                            }
+                            professors.Add(new Professors(firstName, lastName, SRUID));
+                        }
+                    }
+                }
+            }
+
+            // Create Classrooms
+            for (int i = 2; i <= rowCount; i++)
+            {
+                string bldg;
+                int room = -1;
+                int capacity = 0;
+                if (Range.Cells[i, 20] != null && Range.Cells[i, 20].Value2 != null && Range.Cells[i, 20].Value2 != "")
+                {
+                    bldg = Range.Cells[i, 20].Value2.ToString().ToUpper();
+                    if (bldg != "WEB" && !bldg.Contains("APPT"))
+                    {
+                        int parseResult = 0;
+                        if (Range.Cells[i, 21] != null && Range.Cells[i, 21].Value2 != null && int.TryParse(Range.Cells[i, 21].Value2.ToString(), out parseResult))
+                        {
+                            room = parseResult;
+                            // Implement capacity -- setting default to 50
+                            capacity = 50;
+                        }
+                        bool classroomFound = false;
+                        for (int n = 0; n < classrooms.Count; n++)
+                        {
+                            if (classrooms[n].ClassID == (bldg + room))
+                            {
+                                classroomFound = true;
+                                break;
+                            }
+                        }
+                        if (!classroomFound)
+                        {
+                            classrooms.Add(new ClassRoom(bldg, room, capacity));
+                            //MessageBox.Show("Added: " + bldg + " " + room);
+                        }
+                    }
+                }
+            }
+
+            int duplicate_CRN_indexer = -1;
+            List<int> CRN_List = new List<int>();
+
+            // Create Classes
+            for (int i = 2; i <= rowCount; i++)
+            {
+                int CRN;
+                int ClassNum = -1;
+                int Section = -1;
+                int Credits = 0;
+                int SeatsTaken = 0;
+                string Dept = "";
+                string ClassName = "";
+                string ClassDay = "";
+                Professors prof = new Professors();
+                ClassRoom classroom = new ClassRoom();
+                Timeslot time = new Timeslot();
+                bool Online = false;
+                bool Appoint = false;
+
+                // CRN 
+                // Primary Key, if CRN is empty, do not enter record.
+                // If CRN is not a number, assign a unique negative value, tracked by duplicate_CRN_indexer
+                if (Range.Cells[i, 6] != null && Range.Cells[i, 6].Value2 != null)
+                {
+                    int parseResult = -1;
+                    if (int.TryParse(Range.Cells[i, 6].Value2.ToString(), out parseResult))
+                    {
+                        CRN = parseResult;
+                        bool duplicate_CRN = false;
+                        for (int n = 0; n < CRN_List.Count; n++)
+                        {
+                            if (CRN_List[n] == CRN)
+                            {
+                                duplicate_CRN = true;
+                                break;
+                            }
+                        }
+                        if (!duplicate_CRN)
+                        {
+                            CRN_List.Add(CRN);
+                        }
+                        else
+                        {
+                            CRN = duplicate_CRN_indexer;
+                            duplicate_CRN_indexer--;
+                        }
+                    }
+                    else
+                    {
+                        CRN = duplicate_CRN_indexer;
+                        duplicate_CRN_indexer--;
+                    }
+                    // DEPT
+                    if (Range.Cells[i, 3] != null && Range.Cells[i, 3].Value2 != null && Range.Cells[i, 3].Value2 != "")
+                    {
+                        Dept = Range.Cells[i, 3].Value2.ToString().ToUpper();
+                    }
+                    // CLASS NUM
+                    if (Range.Cells[i, 4] != null && Range.Cells[i, 4].Value2 != null)
+                    {
+                        if (int.TryParse(Range.Cells[i, 4].Value2.ToString(), out parseResult))
+                        {
+                            ClassNum = parseResult;
+                        }
+                    }
+                    // CLASS NAME
+                    if (Range.Cells[i, 7] != null && Range.Cells[i, 7].Value2 != null && Range.Cells[i, 7].Value2 != "")
+                    {
+                        ClassName = Range.Cells[i, 7].Value2.ToString();
+                    }
+                    // SECTION
+                    if (Range.Cells[i, 5] != null && Range.Cells[i, 5].Value2 != null)
+                    {
+                        if (int.TryParse(Range.Cells[i, 5].Value2.ToString(), out parseResult))
+                        {
+                            Section = parseResult;
+                        }
+                    }
+                    // CREDITS
+                    if (Range.Cells[i, 9] != null && Range.Cells[i, 9].Value2 != null)
+                    {
+                        Credits = (int)(Range.Cells[i, 9].Value2);
+                    }
+                    // SEATS TAKEN
+                    if (Range.Cells[i, 13] != null && Range.Cells[i, 13].Value2 != null)
+                    {
+                        SeatsTaken = (int)(Range.Cells[i, 13].Value2);
+                    }
+                    // DEPT
+                    if (Range.Cells[i, 16] != null && Range.Cells[i, 16].Value2 != null && Range.Cells[i, 16].Value2 != "")
+                    {
+                        ClassDay = Range.Cells[i, 16].Value2.ToString().ToUpper();
+                    }
+                    // Determine Professor
+                    if (Range.Cells[i, 22] != null && Range.Cells[i, 22].Value2 != null && Range.Cells[i, 22].Value2 != "")
+                    {
+                        string profName = Range.Cells[i, 22].Value2.ToString();
+                        for (int n = 0; n < professors.Count; n++)
+                        {
+                            if (professors[n].FullName == profName)
+                            {
+                                prof = professors[n];
+                                break;
+                            }
+                        }
+                    }
+                    // Determine ClassRoom
+                    if (Range.Cells[i, 20] != null && Range.Cells[i, 20].Value2 != null && Range.Cells[i, 20].Value2 != "")
+                    {
+                        string bldg = Range.Cells[i, 20].Value2.ToString().ToUpper();
+                        if (bldg != "WEB" && !bldg.Contains("APPT"))
+                        {
+                            int room = -1;
+                            if (Range.Cells[i, 21] != null && Range.Cells[i, 21].Value2 != null)
+                            {
+                                if (int.TryParse(Range.Cells[i, 21].Value2.ToString(), out parseResult))
+                                {
+                                    room = parseResult;
+                                }
+                            }
+                            string classID = bldg + room;
+                            for (int n = 0; n < classrooms.Count; n++)
+                            {
+                                if (classrooms[n].ClassID == classID)
+                                {
+                                    classroom = classrooms[n];
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (bldg == "WEB")
+                            {
+                                Online = true;
+                            }
+                            else if (bldg.Contains("APPT"))
+                            {
+                                Appoint = true;
+                            }
+                        }
+                    }
+                    // Determine TimeSlot
+                    if (Range.Cells[i, 17] != null && Range.Cells[i, 17].Value2 != null && Range.Cells[i, 17].Value2 != "")
+                    {
+                        string rawTime = Range.Cells[i, 17].Value2.ToString();
+                        string timePart = formatTime(rawTime.Split(' ')[0]);
+                        time = DetermineTime(timePart, ClassDay);
+                    }
+
+                    classList.Add(new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint));
+                }
+            }
+
+
+            //cleanup
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            //release com objects to fully kill excel process from running in the background
+            Marshal.ReleaseComObject(Range);
+            Marshal.ReleaseComObject(Worksheet);
+
+            //close and release
+            Workbook.Close();
+            Marshal.ReleaseComObject(Workbook);
+
+            //quit and release
+            App.Quit();
+            Marshal.ReleaseComObject(App);
         }
         public void DrawTimeTables() // Draw the GUI grids for MWF - TR (Called by MainWindow)
         {
@@ -271,11 +528,12 @@ namespace Schedule_WPF
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorConfigurations.xml";
+            string filename = "ColorConfigurations6.xml";
             string fullPath = System.IO.Path.Combine(tempPath, filename);
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(fullPath))
             {
+                Settings.Default.Reset();
                 colorPairs = new Pairs();
                 colorPairs.ColorPairings = new List<ProfColors>();
                 
@@ -312,11 +570,13 @@ namespace Schedule_WPF
                     if (paletteIndex < colorPalette.Length)
                     {
                         professors[i].profRGB = colorPalette[paletteIndex];
+                        //MessageBox.Show("Assigned: " + colorPalette[paletteIndex].colorString + "\nProfessor: " + professors[i].FullName);
                         paletteIndex++;
                         Settings.Default.ColorIndex = paletteIndex;
                     }
                     else
                     {
+                        //MessageBox.Show("Random Color");
                         Random rand = new Random();
                         professors[i].profRGB = new RGB_Color((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
                     }
@@ -609,7 +869,7 @@ namespace Schedule_WPF
                 int credits = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Credits"].ToString());
                 string prof = Application.Current.MainWindow.Resources["Set_Class_Professor"].ToString();
                 bool online = Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Online"].ToString());
-                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, new ClassRoom(), DetermineProfessor(prof), online));
+                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, new ClassRoom(), DetermineProfessor(prof), online, false));
                 Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
             }
         }
@@ -1145,45 +1405,77 @@ namespace Schedule_WPF
         }
         public bool DetermineTimeConflict(Classes _class, string days, string timeID)
         {
-            bool isConflict = false;
-            string profName = _class.Prof.FullName;
-            string rowID = days + "_" + timeID;
-            //MessageBox.Show("Checking against " + rowID + "\nProf: " + profName);
-            string labelID = "";
-            Label lbl = null;
-            int classCRN = -1;
-            for (int i = 0; i < classrooms.Count; i++)
+            if (_class.Prof.FirstName == "None")
             {
-                labelID = rowID + "_" + classrooms[i].ClassID;
-                lbl = (Label)FindName(labelID);
-                if (lbl != null)
+                return false;
+            }
+            else
+            {
+                bool isConflict = false;
+                string profName = _class.Prof.FullName;
+                string rowID = days + "_" + timeID;
+                //MessageBox.Show("Checking against " + rowID + "\nProf: " + profName);
+                string labelID = "";
+                Label lbl = null;
+                int classCRN = -1;
+                for (int i = 0; i < classrooms.Count; i++)
                 {
-                    if (lbl.Tag != null)
+                    labelID = rowID + "_" + classrooms[i].ClassID;
+                    lbl = (Label)FindName(labelID);
+                    if (lbl != null)
                     {
-                        classCRN = Int32.Parse(lbl.Tag.ToString());
-                        for (int n = 0; n < classList.Count; n++)
+                        if (lbl.Tag != null)
                         {
-                            if (classList[n].CRN == classCRN)
+                            classCRN = Int32.Parse(lbl.Tag.ToString());
+                            for (int n = 0; n < classList.Count; n++)
                             {
-                                if (classList[n].Prof.FullName == profName && _class.CRN != classCRN)
+                                if (classList[n].CRN == classCRN)
                                 {
-                                    isConflict = true;
-                                    break;
+                                    if (classList[n].Prof.FullName == profName && _class.CRN != classCRN)
+                                    {
+                                        isConflict = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
+                    else
+                    {
+                        MessageBox.Show("Label " + labelID + " wasnt found!");
+                    }
+                    if (isConflict)
+                    {
+                        break;
+                    }
                 }
-                else
-                {
-                    MessageBox.Show("Label " + labelID + " wasnt found!");
-                }
-                if (isConflict)
-                {
-                    break;
-                }
+                return isConflict;
             }
-            return isConflict;
+        }
+        public string formatTime(string time)
+        {
+            string formattedTime = "";
+            if (time.Contains(":"))
+            {
+                string left = time.Split(':')[0];
+                string right = time.Split(':')[1];
+                if (left.Length == 1)
+                {
+                    left = "0" + left;
+                }
+                formattedTime = left + ":" + right;
+            }
+            else
+            {
+                if (time.Length == 3)
+                {
+                    time = "0" + time;
+                }
+                string left = time.Substring(0, 2);
+                string right = time.Substring(2, 2);
+                formattedTime = left + ":" + right;
+            }
+            return formattedTime;
         }
 
         // Professor + Color pairings (Used for persistent memory storage in xml file)
