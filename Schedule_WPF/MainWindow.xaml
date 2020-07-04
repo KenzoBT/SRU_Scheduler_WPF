@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:Schedule_WPF"
         xmlns:c="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterScreen">
+        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterScreen" Closing="MainWindow_Closing">
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>

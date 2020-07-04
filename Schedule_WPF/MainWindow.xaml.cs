@@ -55,7 +55,8 @@ namespace Schedule_WPF
             // Bind data to corresponding gui controls
             BindData();
 
-            Helper.CloseUniqueWindow<FileSelect>();
+            //MessageBox.Show("Here!");
+            MainLoaded.setLoaded();
         }
 
         private void ReadExcel(string file)
@@ -528,7 +529,7 @@ namespace Schedule_WPF
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorConfigurations6.xml";
+            string filename = "ColorConfigurations7.xml";
             string fullPath = System.IO.Path.Combine(tempPath, filename);
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(fullPath))
@@ -827,16 +828,7 @@ namespace Schedule_WPF
         {
             MessageBox.Show("Yet to be implemented");
         }
-        /*
-        public void EditClassroom(string classID)
-        {
 
-        }
-        private void Btn_EditClassroom_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Yet to be implemented");
-        }
-        */
         // Classes
         public void AddClass(Classes newClass)
         {
@@ -1489,6 +1481,11 @@ namespace Schedule_WPF
         {
             public string ProfName { get; set; }
             public string Color { get; set; }
+        }
+
+        void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            MainLoaded.setClosed();
         }
     }
 }

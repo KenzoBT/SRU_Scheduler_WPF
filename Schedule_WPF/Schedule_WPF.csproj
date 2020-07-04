@@ -86,6 +86,7 @@
     </Compile>
     <Compile Include="Models\ClassRoomList.cs" />
     <Compile Include="Models\Helper.cs" />
+    <Compile Include="Models\MainLoaded.cs" />
     <Compile Include="Models\ProfessorList.cs" />
     <Compile Include="Models\Professors.cs" />
     <Compile Include="Models\RGB_Color.cs" />
