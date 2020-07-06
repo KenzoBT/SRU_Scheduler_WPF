@@ -57,7 +57,25 @@ namespace Schedule_WPF
                 }
             }
             Prof_Text.SelectedIndex = profIndex;
-            Online_Box.IsChecked = _class.Online;
+            if (_class.Online)
+            {
+                Online_Box.IsChecked = true;
+            }
+            else if (_class.isAppointment)
+            {
+                if (_class.Classroom.Location == "APPT")
+                {
+                    Appointment_Box.IsChecked = true;
+                }
+                else
+                {
+                    Appointment2_Box.IsChecked = true;
+                }
+            }
+            else
+            {
+                InClass_Box.IsChecked = true;
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -78,6 +96,8 @@ namespace Schedule_WPF
                 Application.Current.MainWindow.Resources["Set_Class_Credits"] = Int32.Parse(Credits_Text.Text.ToString());
                 Application.Current.MainWindow.Resources["Set_Class_Professor"] = ((Professors)Prof_Text.SelectedItem).SRUID;
                 Application.Current.MainWindow.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
+                Application.Current.MainWindow.Resources["Set_Class_Appointment"] = (bool)Appointment_Box.IsChecked;
+                Application.Current.MainWindow.Resources["Set_Class_Appointment2"] = (bool)Appointment2_Box.IsChecked;
 
                 // Close the window
                 this.Close();

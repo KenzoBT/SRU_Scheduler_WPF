@@ -48,7 +48,6 @@ namespace Schedule_WPF
                 {
                     profname = "";
                 }
-                bool online = (bool)Online_Box.IsChecked;
 
                 // Store the information in the appropriate variables inside MainWindow
                 Application.Current.MainWindow.Resources["Set_Class_Success"] = true;
@@ -59,7 +58,9 @@ namespace Schedule_WPF
                 Application.Current.MainWindow.Resources["Set_Class_Name"] = name;
                 Application.Current.MainWindow.Resources["Set_Class_Credits"] = credits;
                 Application.Current.MainWindow.Resources["Set_Class_Professor"] = profname;
-                Application.Current.MainWindow.Resources["Set_Class_Online"] = online;
+                Application.Current.MainWindow.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
+                Application.Current.MainWindow.Resources["Set_Class_Appointment"] = (bool)Appointment_Box.IsChecked;
+                Application.Current.MainWindow.Resources["Set_Class_Appointment2"] = (bool)Appointment2_Box.IsChecked;
 
                 // Close the window
                 this.Close();

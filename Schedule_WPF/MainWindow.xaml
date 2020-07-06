@@ -34,10 +34,11 @@
         <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
         <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>
         <sys:Boolean x:Key="Set_Class_Online">false</sys:Boolean>
+        <sys:Boolean x:Key="Set_Class_Appointment">false</sys:Boolean>
+        <sys:Boolean x:Key="Set_Class_Appointment2">false</sys:Boolean>
         <sys:Boolean x:Key="Edit_Class_Check">false</sys:Boolean>
 
         <!-- Custom styles for controls -->
-        
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
             <Setter Property="TextAlignment" Value="Left"/>
             <Setter Property="Margin" Value="5,0,0,5"/>

@@ -68,8 +68,13 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock FontSize="16" Grid.Row="5" Grid.Column="5" VerticalAlignment="Center">Online</TextBlock>
-        <CheckBox Name="Online_Box"  FontSize="16" Grid.Row="5" Grid.Column="6" VerticalAlignment="Center"></CheckBox>
+        <TextBlock FontSize="16" Grid.Row="5" Grid.Column="5" VerticalAlignment="Center">Type</TextBlock>
+        <StackPanel Grid.Row="5" Grid.Column="6">
+            <RadioButton IsChecked="True" Name="InClass_Box">In-Class</RadioButton>
+            <RadioButton Name="Online_Box">WEB</RadioButton>
+            <RadioButton Name="Appointment_Box">APPT</RadioButton>
+            <RadioButton Name="Appointment2_Box">APPT2</RadioButton>
+        </StackPanel>
         <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="9" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
         <!-- Validation Notifications -->
         <StackPanel Name="CRN_Required" Grid.Row="2" Grid.Column="3" Height="20" Visibility="Hidden">
