@@ -19,6 +19,7 @@ using Schedule_WPF.Models;
 using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
+using System.Windows.Threading;
 
 namespace Schedule_WPF
 {
@@ -37,6 +38,8 @@ namespace Schedule_WPF
         ClassList classList = (ClassList)Application.Current.FindResource("Classes_List_View");
         ClassList unassignedClasses = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
         ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
+        ClassList appointmentClasses = (ClassList)Application.Current.FindResource("Appointment_Classes_List_View");
+        ClassList appointment2Classes = (ClassList)Application.Current.FindResource("Appointment2_Classes_List_View");
 
         ////////////// START OF EXECUTION ////////////////
         public MainWindow()
@@ -281,10 +284,19 @@ namespace Schedule_WPF
                         {
                             if (bldg == "WEB")
                             {
+                                classroom = new ClassRoom("WEB");
                                 Online = true;
                             }
                             else if (bldg.Contains("APPT"))
                             {
+                                if (bldg == "APPT")
+                                {
+                                    classroom = new ClassRoom("APPT");
+                                }
+                                else if (bldg == "APPT2")
+                                {
+                                    classroom = new ClassRoom("APPT2");
+                                }
                                 Appoint = true;
                             }
                         }
@@ -507,6 +519,8 @@ namespace Schedule_WPF
             // empty online and unassigned class lists
             unassignedClasses.Clear();
             onlineClasses.Clear();
+            appointmentClasses.Clear();
+            appointment2Classes.Clear();
             // add from classList
             for (int i = 0; i < classList.Count; i++)
             {
@@ -515,6 +529,21 @@ namespace Schedule_WPF
                     if (classList[i].Online)
                     {
                         onlineClasses.Add(classList[i]);
+                    }
+                    else if (classList[i].isAppointment)
+                    {
+                        if (classList[i].Classroom.Location == "APPT")
+                        {
+                            appointmentClasses.Add(classList[i]);
+                        }
+                        else if (classList[i].Classroom.Location == "APPT2")
+                        {
+                            appointment2Classes.Add(classList[i]);
+                        }
+                        else
+                        {
+                            MessageBox.Show("DEBUG - ERROR: Couldnt assign appointed class to either APPT or APPT2");
+                        }
                     }
                     else
                     {
@@ -616,6 +645,8 @@ namespace Schedule_WPF
         {
             Online_Classes_Grid.ItemsSource = onlineClasses;
             Unassigned_Classes_Grid.ItemsSource = unassignedClasses;
+            Appointment_Classes_Grid.ItemsSource = appointmentClasses;
+            Appointment2_Classes_Grid.ItemsSource = appointment2Classes;
         }
         public void BindProfessorKey()
         {
@@ -873,6 +904,7 @@ namespace Schedule_WPF
                 if (classList[i].CRN == crn)
                 {
                     removalTarget = classList[i];
+                    /*
                     if (removalTarget.Online)
                     {
                         for (int n = 0; n < onlineClasses.Count; n++)
@@ -895,6 +927,7 @@ namespace Schedule_WPF
                             }
                         }
                     }
+                    */
                     classList.RemoveAt(i);
                     break;
                 }
@@ -933,6 +966,60 @@ namespace Schedule_WPF
             Classes toEdit = DetermineClass(crn);
             EditClassDialog editClassDialog = new EditClassDialog(toEdit);
             editClassDialog.ShowDialog();
+
+            if ((bool)Application.Current.MainWindow.Resources["Set_Class_Success"])
+            {
+                bool conflict = false;
+                bool check_conflicts = (bool)Application.Current.MainWindow.Resources["Edit_Class_Check"];
+                if (check_conflicts)
+                {
+                    Classes temp = toEdit.DeepCopy();
+                    Professors temp_Prof = DetermineProfessor((string)Application.Current.MainWindow.Resources["Set_Class_Professor"]);
+                    temp.Prof = temp_Prof;
+                    conflict = DetermineTimeConflict(temp, temp.ClassDay, temp.StartTime.TimeID);
+                    // flag down
+                    Application.Current.MainWindow.Resources["Edit_Class_Check"] = false;
+                }
+                if (!conflict)
+                {
+                    bool originalOnline = toEdit.Online;
+                    bool originalAssigned = toEdit.isAssigned;
+                    int originalCRN = toEdit.CRN;
+                    string originalBldg = toEdit.Classroom.Location;
+
+                    toEdit.CRN = (int)Application.Current.MainWindow.Resources["Set_Class_CRN"];
+                    toEdit.DeptName = (string)Application.Current.MainWindow.Resources["Set_Class_Dept"];
+                    toEdit.ClassNumber = (int)Application.Current.MainWindow.Resources["Set_Class_Number"];
+                    toEdit.SectionNumber = (int)Application.Current.MainWindow.Resources["Set_Class_Section"];
+                    toEdit.ClassName = (string)Application.Current.MainWindow.Resources["Set_Class_Name"];
+                    toEdit.Credits = (int)Application.Current.MainWindow.Resources["Set_Class_Credits"];
+                    toEdit.Prof = DetermineProfessor((string)Application.Current.MainWindow.Resources["Set_Class_Professor"]);
+                    toEdit.Online = (bool)Application.Current.MainWindow.Resources["Set_Class_Online"];
+
+                    if (toEdit.Online == true && originalOnline == false) // now online
+                    {
+                        toEdit.StartTime = new Timeslot();
+                        toEdit.Classroom = new ClassRoom("WEB");
+                        toEdit.ClassDay = "";
+                        toEdit.isAssigned = false;
+                        toEdit.isAppointment = false;
+                    }
+                    else if (toEdit.Online == false && originalOnline == true) // now no longer online
+                    {
+                        toEdit.StartTime = new Timeslot();
+                        toEdit.Classroom = new ClassRoom();
+                        toEdit.ClassDay = "";
+                        toEdit.isAssigned = false;
+                    }
+                    Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
+                }
+                else
+                {
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Exclamation;
+                    MessageBox.Show("Professor is already teaching at that time!\n\nReverting Changes...", "Invalid Edit", button, icon);
+                }
+            }
             Unfocus_Overlay.Visibility = Visibility.Hidden;
         }
         private void Btn_EditClass_Click(object sender, RoutedEventArgs e)
@@ -1061,6 +1148,26 @@ namespace Schedule_WPF
                                         break;
                                 }
                             }
+                            else if (classList[i].isAppointment)
+                            {
+                                string messageBoxText = "Are you sure you want to change this class from Appointment format to In-Class?\n\n(You can later drag it back to the appropriate APPT list to revert changes)";
+                                string caption = "Appointment class warning";
+                                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                                MessageBoxImage icon = MessageBoxImage.Question;
+                                // Display + process message box results
+                                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                                switch (result)
+                                {
+                                    case MessageBoxResult.Yes:
+                                        break;
+                                    case MessageBoxResult.No:
+                                        validOperation = false;
+                                        break;
+                                    case MessageBoxResult.Cancel:
+                                        validOperation = false;
+                                        break;
+                                }
+                            }
                             classIndex = i;
                             break;
                         }
@@ -1076,19 +1183,53 @@ namespace Schedule_WPF
                         {
                             if (!classList[classIndex].Online)
                             {
-                                classList[classIndex].isAssigned = true;
-                                // remove record from unassigned classes list
-                                for (int i = 0; i < unassignedClasses.Count; i++)
+                                if (classList[classIndex].Classroom.Location.Contains("APPT")) // its by appointment
                                 {
-                                    if (unassignedClasses[i].CRN == classCRN)
+                                    if (classList[classIndex].Classroom.Location == "APPT")
                                     {
-                                        unassignedClasses.RemoveAt(i);
                                         classList[classIndex].isAssigned = true;
-                                        break;
+                                        classList[classIndex].isAppointment = false;
+                                        for (int i = 0; i < appointmentClasses.Count; i++)
+                                        {
+                                            if (appointmentClasses[i].CRN == classCRN)
+                                            {
+                                                appointmentClasses.RemoveAt(i);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else if (classList[classIndex].Classroom.Location == "APPT2")
+                                    {
+                                        classList[classIndex].isAssigned = true;
+                                        classList[classIndex].isAppointment = false;
+                                        for (int i = 0; i < appointment2Classes.Count; i++)
+                                        {
+                                            if (appointment2Classes[i].CRN == classCRN)
+                                            {
+                                                appointment2Classes.RemoveAt(i);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Couldnt remove appointed class from respective list");
+                                    }
+                                }
+                                else // its unassigned
+                                {
+                                    classList[classIndex].isAssigned = true;
+                                    for (int i = 0; i < unassignedClasses.Count; i++)
+                                    {
+                                        if (unassignedClasses[i].CRN == classCRN)
+                                        {
+                                            unassignedClasses.RemoveAt(i);
+                                            break;
+                                        }
                                     }
                                 }
                             }
-                            else
+                            else // its online
                             {
                                 classList[classIndex].Online = false;
                                 // remove record from online classes list
@@ -1097,7 +1238,6 @@ namespace Schedule_WPF
                                     if (onlineClasses[i].CRN == classCRN)
                                     {
                                         onlineClasses.RemoveAt(i);
-                                        classList[classIndex].Online = false;
                                         break;
                                     }
                                 }
@@ -1236,7 +1376,7 @@ namespace Schedule_WPF
             Label sourceLabel = (Label)e.Data.GetData(typeof(object));
             if (sourceLabel != null)
             {
-                string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the timetable to revert changes)";
+                string messageBoxText = "Are you sure you want to change this\nIn-Class course to Online format?\n\n(You can later drag it back to the timetable to revert changes)";
                 string caption = "Online class alteration";
                 MessageBoxButton button = MessageBoxButton.YesNoCancel;
                 MessageBoxImage icon = MessageBoxImage.Question;
@@ -1253,7 +1393,7 @@ namespace Schedule_WPF
                         sourceLabel.Background = white_bg.colorBrush2;
                         sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                         // add the class to online class list
-                        classList[classIndex].Classroom = new ClassRoom();
+                        classList[classIndex].Classroom = new ClassRoom("WEB");
                         classList[classIndex].ClassDay = "";
                         classList[classIndex].StartTime = new Timeslot();
                         classList[classIndex].isAssigned = false;
@@ -1266,7 +1406,7 @@ namespace Schedule_WPF
                         break;
                 }
             }
-            else
+            else // Comes from unassigned list
             {
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
@@ -1276,7 +1416,7 @@ namespace Schedule_WPF
                     Classes theClass = DetermineClass(classCRN);
                     if (!theClass.Online)
                     {
-                        string messageBoxText = "Are you sure you want to change this\nIn-Class class to Online format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
+                        string messageBoxText = "Are you sure you want to change this\nCourse to Online format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
                         string caption = "Online class alteration";
                         MessageBoxButton button = MessageBoxButton.YesNoCancel;
                         MessageBoxImage icon = MessageBoxImage.Question;
@@ -1292,8 +1432,181 @@ namespace Schedule_WPF
                                     if (classList[i].CRN == classCRN)
                                     {
                                         classList[i].Online = true;
+                                        classList[i].Classroom = new ClassRoom("WEB");
                                         // Add it to Online classes list
                                         onlineClasses.Add(classList[i]);
+                                    }
+                                }
+                                // remove record from unassigned classes list
+                                for (int i = 0; i < unassignedClasses.Count; i++)
+                                {
+                                    if (unassignedClasses[i].CRN == classCRN)
+                                    {
+                                        unassignedClasses.RemoveAt(i);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case MessageBoxResult.No:
+                                break;
+                            case MessageBoxResult.Cancel:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        private void HandleDropToAppointmentList(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
+        {
+            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
+            if (sourceLabel != null)
+            {
+                string messageBoxText = "Are you sure you want to change this\nIn-Class course to 'By Appointment' format?\n\n(You can later drag it back to the timetable to revert changes)";
+                string caption = "By Appointment class alteration";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Question;
+                // Display + Process message box results
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                switch (result)
+                {
+                    case MessageBoxResult.Yes:
+                        // User pressed Yes button
+                        int classIndex = (int)e.Data.GetData(typeof(int));
+                        // clear the Label
+                        sourceLabel.Content = "";
+                        RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                        sourceLabel.Background = white_bg.colorBrush2;
+                        sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                        // add the class to online class list
+                        classList[classIndex].Classroom = new ClassRoom("APPT");
+                        classList[classIndex].ClassDay = "";
+                        classList[classIndex].StartTime = new Timeslot();
+                        classList[classIndex].isAssigned = false;
+                        classList[classIndex].Online = false;
+                        classList[classIndex].isAppointment = true;
+                        appointmentClasses.Add(classList[classIndex]);
+                        break;
+                    case MessageBoxResult.No:
+                        break;
+                    case MessageBoxResult.Cancel:
+                        break;
+                }
+            }
+            else // Its from unassigned list
+            {
+                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
+                if (droppedRow != null)
+                {
+                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
+                    int classCRN = Int32.Parse(crn_number.Text);
+                    Classes theClass = DetermineClass(classCRN);
+                    if (!theClass.isAppointment)
+                    {
+                        string messageBoxText = "Are you sure you want to change this\nCourse to 'By Appointment' format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
+                        string caption = "By Appointment class alteration";
+                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                        MessageBoxImage icon = MessageBoxImage.Question;
+                        // Display + Process message box results
+                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                // User pressed Yes button
+                                // Find the class
+                                for (int i = 0; i < classList.Count; i++)
+                                {
+                                    if (classList[i].CRN == classCRN)
+                                    {
+                                        classList[i].isAppointment = true;
+                                        classList[i].Classroom = new ClassRoom("APPT");
+                                        // Add it to Online classes list
+                                        appointmentClasses.Add(classList[i]);
+                                    }
+                                }
+                                // remove record from unassigned classes list
+                                for (int i = 0; i < unassignedClasses.Count; i++)
+                                {
+                                    if (unassignedClasses[i].CRN == classCRN)
+                                    {
+                                        unassignedClasses.RemoveAt(i);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case MessageBoxResult.No:
+                                break;
+                            case MessageBoxResult.Cancel:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        private void HandleDropToAppointment2List(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
+        {
+            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
+            if (sourceLabel != null)
+            {
+                string messageBoxText = "Are you sure you want to change this\nIn-Class course to 'By Appointment' format?\n\n(You can later drag it back to the timetable to revert changes)";
+                string caption = "By Appointment class alteration";
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                MessageBoxImage icon = MessageBoxImage.Question;
+                // Display + Process message box results
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                switch (result)
+                {
+                    case MessageBoxResult.Yes:
+                        // User pressed Yes button
+                        int classIndex = (int)e.Data.GetData(typeof(int));
+                        // clear the Label
+                        sourceLabel.Content = "";
+                        RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                        sourceLabel.Background = white_bg.colorBrush2;
+                        sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                        // add the class to online class list
+                        classList[classIndex].Classroom = new ClassRoom("APPT2");
+                        classList[classIndex].ClassDay = "";
+                        classList[classIndex].StartTime = new Timeslot();
+                        classList[classIndex].isAssigned = false;
+                        classList[classIndex].Online = false;
+                        classList[classIndex].isAppointment = true;
+                        appointment2Classes.Add(classList[classIndex]);
+                        break;
+                    case MessageBoxResult.No:
+                        break;
+                    case MessageBoxResult.Cancel:
+                        break;
+                }
+            }
+            else // Its from unassigned list
+            {
+                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
+                if (droppedRow != null)
+                {
+                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
+                    int classCRN = Int32.Parse(crn_number.Text);
+                    Classes theClass = DetermineClass(classCRN);
+                    if (!theClass.isAppointment)
+                    {
+                        string messageBoxText = "Are you sure you want to change this\nCourse to 'By Appointment' format?\n\n(You can later drag it back to the unassigned class list to revert changes)";
+                        string caption = "By Appointment class alteration";
+                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                        MessageBoxImage icon = MessageBoxImage.Question;
+                        // Display + Process message box results
+                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                // User pressed Yes button
+                                // Find the class
+                                for (int i = 0; i < classList.Count; i++)
+                                {
+                                    if (classList[i].CRN == classCRN)
+                                    {
+                                        classList[i].isAppointment = true;
+                                        classList[i].Classroom = new ClassRoom("APPT2");
+                                        // Add it to Online classes list
+                                        appointment2Classes.Add(classList[i]);
                                     }
                                 }
                                 // remove record from unassigned classes list

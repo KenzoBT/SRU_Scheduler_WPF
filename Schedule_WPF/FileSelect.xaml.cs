@@ -30,11 +30,15 @@ namespace Schedule_WPF
                 btn_OpenFile.Visibility = Visibility.Hidden;
                 Application.Current.Resources["FilePath"] = openFileDialog.FileName;
 
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.ShowDialog();
+
+                /*
                 Thread newWindowThread = new Thread(new ThreadStart(ThreadStartingPoint));
                 newWindowThread.SetApartmentState(ApartmentState.STA);
                 newWindowThread.IsBackground = true;
                 newWindowThread.Start();
-
+                
                 worker_MainLoaded.DoWork += worker_checkMainLoaded;
                 worker_MainLoaded.RunWorkerCompleted += worker_MainFinishedLoading;
                 worker_MainLoaded.RunWorkerAsync();
@@ -42,6 +46,7 @@ namespace Schedule_WPF
                 worker_MainClosed.DoWork += worker_checkMainClosed;
                 worker_MainClosed.RunWorkerCompleted += worker_MainFinishedClosing;
                 worker_MainClosed.RunWorkerAsync();
+                */
             }
         }
 

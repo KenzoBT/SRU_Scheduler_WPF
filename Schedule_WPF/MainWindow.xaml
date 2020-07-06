@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:Schedule_WPF"
         xmlns:c="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="SRU Term Scheduler" Height="900" Width="1300" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterScreen" Closing="MainWindow_Closing">
+        Title="SRU Term Scheduler" Height="900" Width="1400" Icon="images/sru.png" RenderOptions.BitmapScalingMode="HighQuality" WindowStartupLocation="CenterScreen" Closing="MainWindow_Closing">
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>
@@ -34,6 +34,7 @@
         <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
         <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>
         <sys:Boolean x:Key="Set_Class_Online">false</sys:Boolean>
+        <sys:Boolean x:Key="Edit_Class_Check">false</sys:Boolean>
 
         <!-- Custom styles for controls -->
         
@@ -54,10 +55,32 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
             <EventSetter Event="MouseMove" Handler="MouseMoveOnGridRow"/>
         </Style>
-        <Style TargetType="TabItem">
+        <Style TargetType="{x:Type TabItem}" x:Key="LargeTab">
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Height" Value="32" />
             <Setter Property="MinWidth" Value="75" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid Name="Panel">
+                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Panel" Property="Background" Value="#016648" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter TargetName="Panel" Property="Background" Value="#505050" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type TabItem}" x:Key="SmallTab">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="MinWidth" Value="50" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
@@ -114,7 +137,7 @@
         <TabControl Grid.Row="0" TabStripPlacement="Top" Panel.ZIndex="0">
             
             <!-- Scheduler Tab -->
-            <TabItem Header="Scheduler" Margin="-3">
+            <TabItem Header="Scheduler" Margin="-3" Style="{StaticResource LargeTab}">
 
                 <!-- Grid for the layout of "Schedule" Tab -->
                 <Grid Margin="-3" Name="ScheduleTabGrid">
@@ -174,7 +197,7 @@
                             <ColumnDefinition Width="0.4*"/>
                         </Grid.ColumnDefinitions>
                         <!-- Unassigned Classes Grid -->
-                        <Label x:Name="Dandy" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
+                        <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Margin="15,0,15,15">
                             <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList" CanUserAddRows="False">
                                 <DataGrid.RowStyle>
@@ -201,34 +224,90 @@
                             </DataGrid>
                         </ScrollViewer>
                         <!-- Online Classes List -->
-                        <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">Online Classes</Label>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" Margin="15,0,15,15">
-                            <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False">
-                                <DataGrid.RowStyle>
-                                    <Style TargetType="DataGridRow">
-                                        <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
-                                    </Style>
-                                </DataGrid.RowStyle>
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
-                                    </DataGridTextColumn>
-                                    <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online" IsReadOnly="True">
-                                    </DataGridCheckBoxColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </ScrollViewer>
+                        <TabControl Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" TabStripPlacement="Top" Margin="0,8,0,15">
+                            <TabItem Header="WEB" Margin="-3" Style="{StaticResource SmallTab}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3">
+                                    <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False">
+                                        <DataGrid.RowStyle>
+                                            <Style TargetType="DataGridRow">
+                                                <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                            </Style>
+                                        </DataGrid.RowStyle>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </TabItem>
+                            <TabItem Header="APPT" Margin="-3" Style="{StaticResource SmallTab}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3">
+                                    <DataGrid x:Name="Appointment_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToAppointmentList" CanUserAddRows="False">
+                                        <DataGrid.RowStyle>
+                                            <Style TargetType="DataGridRow">
+                                                <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                            </Style>
+                                        </DataGrid.RowStyle>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </TabItem>
+                            <TabItem Header="APPT2" Margin="-3" Style="{StaticResource SmallTab}">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3">
+                                    <DataGrid x:Name="Appointment2_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToAppointment2List" CanUserAddRows="False">
+                                        <DataGrid.RowStyle>
+                                            <Style TargetType="DataGridRow">
+                                                <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                            </Style>
+                                        </DataGrid.RowStyle>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Binding="{Binding CRN}" Header="CRN" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding DeptName}" Header="Dept." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassNumber}" Header="Class #" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding SectionNumber}" Header="Sect." ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassName}" Header="Class Name" ElementStyle="{StaticResource TruncateOverflow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </ScrollViewer>
+                            </TabItem>
+                        </TabControl>
+                        
                         <!-- Professor Color Key -->
                         <Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">Professor Key</Label>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="2" Margin="15,0,15,15">
@@ -285,7 +364,7 @@
             </TabItem>
 
             <!-- ClassList Tab -->
-            <TabItem Header="Class List">
+            <TabItem Header="Class List" Style="{StaticResource LargeTab}">
                 <Grid Margin="-3" Background="#DDDDDD">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -325,8 +404,6 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
-                                <DataGridCheckBoxColumn Binding="{Binding Online}" Header="Online" IsReadOnly="True">
-                                </DataGridCheckBoxColumn>
                                 <DataGridTextColumn Binding="{Binding ClassDay}" Header="Days" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Binding="{Binding StartTime.FullTime}" Header="Time" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
@@ -344,7 +421,7 @@
             </TabItem>
 
             <!-- Professors Info Tab -->
-            <TabItem Header="Professors">
+            <TabItem Header="Professors" Style="{StaticResource LargeTab}">
                 <Grid Margin="-3" Background="#DDDDDD">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>

@@ -24,16 +24,21 @@ namespace Schedule_WPF
         int originalCRN = -1;
         bool originalOnline;
         bool originalAssigned;
+        Professors oldProfessor;
 
         public EditClassDialog(Classes _class)
         {
             InitializeComponent();
+            Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
+            Application.Current.MainWindow.Resources["Edit_Class_Check"] = false;
             targetClass = _class;
             originalCRN = _class.CRN;
             originalOnline = _class.Online;
             originalAssigned = _class.isAssigned;
             ProfessorList profs = (ProfessorList)Application.Current.FindResource("Professor_List_View");
             Prof_Text.ItemsSource = profs;
+
+            oldProfessor = _class.Prof;
 
             // Initialize fields with available data from class
             Classes c1 = _class;
@@ -59,54 +64,20 @@ namespace Schedule_WPF
         {
             if (allRequiredFields() && targetClass != null)
             {
-                targetClass.CRN = Int32.Parse(CRN_Text.Text.ToString());
-                targetClass.DeptName = Dept_Text.Text;
-                targetClass.ClassNumber = Int32.Parse(ClassNum_Text.Text.ToString());
-                targetClass.SectionNumber = Int32.Parse(Section_Text.Text.ToString());
-                targetClass.ClassName = Name_Text.Text;
-                targetClass.Credits = Int32.Parse(Credits_Text.Text.ToString());
-                targetClass.Prof = (Professors)Prof_Text.SelectedItem;
-                targetClass.Online = (bool)Online_Box.IsChecked;
-                if (targetClass.Online == true && originalOnline == false)
+                if (oldProfessor.FullName != ((Professors)Prof_Text.SelectedItem).FullName && !((bool)Online_Box.IsChecked) && targetClass.isAssigned)
                 {
-                    targetClass.StartTime = new Timeslot();
-                    targetClass.Classroom = new ClassRoom();
-                    targetClass.ClassDay = "";
-                    targetClass.isAssigned = false;
-                    ClassList onlineList = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
-                    onlineList.Add(targetClass);
-                    if (!originalAssigned)
-                    {
-                        int removeIndex = -1;
-                        ClassList unassignedList = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
-                        for (int i = 0; i < unassignedList.Count; i++)
-                        {
-                            if (unassignedList[i].CRN == originalCRN)
-                            {
-                                removeIndex = i;
-                                break;
-                            }
-                        }
-                        unassignedList.RemoveAt(removeIndex);
-                    }
+                    //MessageBox.Show("Here!"); // just flag it to main
+                    Application.Current.MainWindow.Resources["Edit_Class_Check"] = true;
                 }
-                else if(targetClass.Online == false && originalOnline == true)
-                {
-                    ClassList unassignedList = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
-                    unassignedList.Add(targetClass);
-                    targetClass.isAssigned = false;
-                    int removeIndex = -1;
-                    ClassList onlineList = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
-                    for (int i = 0; i < onlineList.Count; i++)
-                    {
-                        if (onlineList[i].CRN == originalCRN)
-                        {
-                            removeIndex = i;
-                            break;
-                        }
-                    }
-                   onlineList.RemoveAt(removeIndex);
-                }
+                Application.Current.MainWindow.Resources["Set_Class_Success"] = true;
+                Application.Current.MainWindow.Resources["Set_Class_CRN"] = Int32.Parse(CRN_Text.Text.ToString());
+                Application.Current.MainWindow.Resources["Set_Class_Dept"] = Dept_Text.Text;
+                Application.Current.MainWindow.Resources["Set_Class_Number"] = Int32.Parse(ClassNum_Text.Text.ToString());
+                Application.Current.MainWindow.Resources["Set_Class_Section"] = Int32.Parse(Section_Text.Text.ToString());
+                Application.Current.MainWindow.Resources["Set_Class_Name"] = Name_Text.Text;
+                Application.Current.MainWindow.Resources["Set_Class_Credits"] = Int32.Parse(Credits_Text.Text.ToString());
+                Application.Current.MainWindow.Resources["Set_Class_Professor"] = ((Professors)Prof_Text.SelectedItem).SRUID;
+                Application.Current.MainWindow.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
 
                 // Close the window
                 this.Close();

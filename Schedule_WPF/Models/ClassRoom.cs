@@ -20,6 +20,13 @@ namespace Schedule_WPF.Models
             Location = "N/A";
         }
 
+        public ClassRoom(string offCampus_ID)
+        {
+            RoomNum = 000;
+            AvailableSeats = 0;
+            Location = offCampus_ID;
+        }
+
         public ClassRoom(string bldg, int num, int seatCapacity)
         {
             RoomNum = num;
