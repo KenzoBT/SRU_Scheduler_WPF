@@ -20,6 +20,8 @@ using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
+using Microsoft.Win32;
+using ClosedXML.Excel;
 
 namespace Schedule_WPF
 {
@@ -40,6 +42,9 @@ namespace Schedule_WPF
         ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
         ClassList appointmentClasses = (ClassList)Application.Current.FindResource("Appointment_Classes_List_View");
         ClassList appointment2Classes = (ClassList)Application.Current.FindResource("Appointment2_Classes_List_View");
+        List<string> excelHeaders = new List<string>();
+        List<Type> excelTypes = new List<Type>();
+        string term, session;
 
         ////////////// START OF EXECUTION ////////////////
         public MainWindow()
@@ -58,11 +63,13 @@ namespace Schedule_WPF
             // Bind data to corresponding gui controls
             BindData();
 
-            //MessageBox.Show("Here!");
+            /*   
             MainLoaded.setLoaded();
+            */
+            Helper.CloseUniqueWindow<FileSelect>();
         }
 
-        private void ReadExcel(string file)
+        public void ReadExcel(string file)
         {
             int sheetIndex = 1;
             Excel.Application App = new Excel.Application();
@@ -72,6 +79,25 @@ namespace Schedule_WPF
             Excel.Range Range = Worksheet.UsedRange;
             int rowCount = Range.Rows.Count;
             int colCount = Range.Columns.Count;
+
+            // Populate excel headers array + type array
+            for (int i = 1; i <= colCount; i++)
+            {
+                string cellValue = Range.Cells[1, i].Value2.ToString();
+                for (int n = 0; n < excelHeaders.Count; n++)
+                {
+                    if (excelHeaders[n].ToUpper() == cellValue.ToUpper())
+                    {
+                        cellValue = cellValue + "(2)";
+                        break;
+                    }
+                }
+                excelHeaders.Add(cellValue);
+            }
+            // copy Term
+            term = Range.Cells[2, 1].Value2.ToString();
+            // copy Session
+            session = "1";
 
             // Create Professors
             int sruid_indexer = 0;
@@ -128,8 +154,10 @@ namespace Schedule_WPF
                         if (Range.Cells[i, 21] != null && Range.Cells[i, 21].Value2 != null && int.TryParse(Range.Cells[i, 21].Value2.ToString(), out parseResult))
                         {
                             room = parseResult;
-                            // Implement capacity -- setting default to 50
-                            capacity = 50;
+                            if (Range.Cells[i, 19] != null && Range.Cells[i, 19].Value2 != null && int.TryParse(Range.Cells[i, 19].Value2.ToString(), out parseResult))
+                            {
+                                capacity = parseResult;
+                            }
                         }
                         bool classroomFound = false;
                         for (int n = 0; n < classrooms.Count; n++)
@@ -184,6 +212,7 @@ namespace Schedule_WPF
                             if (CRN_List[n] == CRN)
                             {
                                 duplicate_CRN = true;
+                                //MessageBox.Show("Found a duplicate CRN!\n\nReplacing with: " + duplicate_CRN_indexer);
                                 break;
                             }
                         }
@@ -199,6 +228,7 @@ namespace Schedule_WPF
                     }
                     else
                     {
+                        //MessageBox.Show("Invalid CRN!\n\nReplacing with: " + duplicate_CRN_indexer);
                         CRN = duplicate_CRN_indexer;
                         duplicate_CRN_indexer--;
                     }
@@ -238,7 +268,7 @@ namespace Schedule_WPF
                     {
                         SeatsTaken = (int)(Range.Cells[i, 13].Value2);
                     }
-                    // DEPT
+                    // CLASSDAY
                     if (Range.Cells[i, 16] != null && Range.Cells[i, 16].Value2 != null && Range.Cells[i, 16].Value2 != "")
                     {
                         ClassDay = Range.Cells[i, 16].Value2.ToString().ToUpper();
@@ -284,18 +314,18 @@ namespace Schedule_WPF
                         {
                             if (bldg == "WEB")
                             {
-                                classroom = new ClassRoom("WEB");
+                                classroom = new ClassRoom("WEB", 999);
                                 Online = true;
                             }
                             else if (bldg.Contains("APPT"))
                             {
                                 if (bldg == "APPT")
                                 {
-                                    classroom = new ClassRoom("APPT");
+                                    classroom = new ClassRoom("APPT", 0);
                                 }
                                 else if (bldg == "APPT2")
                                 {
-                                    classroom = new ClassRoom("APPT2");
+                                    classroom = new ClassRoom("APPT2", 0);
                                 }
                                 Appoint = true;
                             }
@@ -670,10 +700,32 @@ namespace Schedule_WPF
             PopulateTimeTable(timetable_TR, times_TR);
             FillUnassigned();
         }
-        public void SaveChanges()
+        public void SaveChanges() // Writes to excel file
         {
+            string fileDir = getFileDirectory(Application.Current.Resources["FilePath"].ToString());
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.InitialDirectory = fileDir;
+            saveFileDialog.Filter = "Excel File (*.xlsx)|*.xlsx";
+            saveFileDialog.Title = "Save Excel File";
+            saveFileDialog.ShowDialog();
 
-        } // Writes to excel file
+            if (saveFileDialog.FileName != "")
+            {
+                string fileName = saveFileDialog.FileName;
+                XLWorkbook wb = new XLWorkbook();
+                DataTable dt = getDataTableFromClasses();
+                var ws = wb.Worksheets.Add(dt);
+                ws.Column(7).AdjustToContents();
+                ws.Column(22).AdjustToContents();
+                ws.Column(23).AdjustToContents();
+
+                wb.SaveAs(fileName);
+            }
+        }
+        public void Btn_SaveChanges_Click(object sender, RoutedEventArgs e)
+        {
+            SaveChanges();
+        }
 
         // ADD / REMOVE / EDIT functionality (Professors, Classrooms, Classes)
         // Professors
@@ -915,16 +967,16 @@ namespace Schedule_WPF
                     appointment = true;
                     if (appt)
                     {
-                        CRoom = new ClassRoom("APPT");
+                        CRoom = new ClassRoom("APPT", 0);
                     }
                     else
                     {
-                        CRoom = new ClassRoom("APPT2");
+                        CRoom = new ClassRoom("APPT2", 0);
                     }
                 }
                 else if (online)
                 {
-                    CRoom = new ClassRoom("WEB");
+                    CRoom = new ClassRoom("WEB", 999);
                 }
                 else
                 {
@@ -1045,7 +1097,7 @@ namespace Schedule_WPF
                     if (toEdit.Online)
                     {
                         toEdit.StartTime = new Timeslot();
-                        toEdit.Classroom = new ClassRoom("WEB");
+                        toEdit.Classroom = new ClassRoom("WEB", 999);
                         toEdit.ClassDay = "";
                         toEdit.isAssigned = false;
                         toEdit.isAppointment = false;
@@ -1058,11 +1110,11 @@ namespace Schedule_WPF
                         toEdit.Online = false;
                         if (appt)
                         {
-                            toEdit.Classroom = new ClassRoom("APPT");
+                            toEdit.Classroom = new ClassRoom("APPT", 0);
                         }
                         else
                         {
-                            toEdit.Classroom = new ClassRoom("APPT2");
+                            toEdit.Classroom = new ClassRoom("APPT2", 0);
                         }
                     }
                     /*
@@ -1425,7 +1477,7 @@ namespace Schedule_WPF
                         sourceLabel.Background = white_bg.colorBrush2;
                         sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                         // add the class to online class list
-                        classList[classIndex].Classroom = new ClassRoom("WEB");
+                        classList[classIndex].Classroom = new ClassRoom("WEB", 999);
                         classList[classIndex].ClassDay = "";
                         classList[classIndex].StartTime = new Timeslot();
                         classList[classIndex].isAssigned = false;
@@ -1463,7 +1515,7 @@ namespace Schedule_WPF
                                     if (classList[i].CRN == classCRN)
                                     {
                                         classList[i].Online = true;
-                                        classList[i].Classroom = new ClassRoom("WEB");
+                                        classList[i].Classroom = new ClassRoom("WEB", 999);
                                     }
                                 }
                                 break;
@@ -1499,7 +1551,7 @@ namespace Schedule_WPF
                         sourceLabel.Background = white_bg.colorBrush2;
                         sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                         // add the class to online class list
-                        classList[classIndex].Classroom = new ClassRoom("APPT");
+                        classList[classIndex].Classroom = new ClassRoom("APPT", 0);
                         classList[classIndex].ClassDay = "";
                         classList[classIndex].StartTime = new Timeslot();
                         classList[classIndex].isAssigned = false;
@@ -1538,7 +1590,7 @@ namespace Schedule_WPF
                                     if (classList[i].CRN == classCRN)
                                     {
                                         classList[i].isAppointment = true;
-                                        classList[i].Classroom = new ClassRoom("APPT");
+                                        classList[i].Classroom = new ClassRoom("APPT", 0);
                                     }
                                 }
                                 break;
@@ -1574,7 +1626,7 @@ namespace Schedule_WPF
                         sourceLabel.Background = white_bg.colorBrush2;
                         sourceLabel.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                         // add the class to online class list
-                        classList[classIndex].Classroom = new ClassRoom("APPT2");
+                        classList[classIndex].Classroom = new ClassRoom("APPT2", 0);
                         classList[classIndex].ClassDay = "";
                         classList[classIndex].StartTime = new Timeslot();
                         classList[classIndex].isAssigned = false;
@@ -1613,7 +1665,7 @@ namespace Schedule_WPF
                                     if (classList[i].CRN == classCRN)
                                     {
                                         classList[i].isAppointment = true;
-                                        classList[i].Classroom = new ClassRoom("APPT2");
+                                        classList[i].Classroom = new ClassRoom("APPT2", 0);
                                     }
                                 }
                                 break;
@@ -1781,6 +1833,56 @@ namespace Schedule_WPF
             }
             return formattedTime;
         }
+        public string getFileDirectory(string filePath)
+        {
+            string directory = "";
+            for (int i = (filePath.Length - 1); i >= 0; i--)
+            {
+                if (filePath[i] == '\\')
+                {
+                    directory = filePath.Substring(0, (i + 1));
+                    break;
+                }
+            }
+            //MessageBox.Show("Directory: " + directory);
+            return directory;
+        }
+        public DataTable getDataTableFromClasses()
+        {
+            //Creating DataTable  
+            DataTable dt = new DataTable();
+            //Setiing Table Name  
+            dt.TableName = "Sheet 1";
+            // Determine Types
+            for (int i = 0; i < excelHeaders.Count; i++)
+            {
+                Type colType = typeof(string);
+                if (i == 0 || i == 1 || i == 3 || i == 4 || i == 5 || i == 8 || i == 12 || i == 18 || i == 20)
+                {
+                    colType = typeof(int);
+                }
+                excelTypes.Add(colType);
+            }
+            //Add Columns
+            for (int i = 0; i < excelHeaders.Count; i++)
+            {
+                dt.Columns.Add(excelHeaders[i], excelTypes[i]);
+            }
+            //Add Rows in DataTable  
+            for (int i = 0; i < classList.Count; i++)
+            {
+                string start = classList[i].StartTime.Start;
+                string end = classList[i].StartTime.End;
+                if (start == "-- ")
+                {
+                    start = "";
+                    end = "";
+                }
+                dt.Rows.Add(term, session, classList[i].DeptName, classList[i].ClassNumber, classList[i].SectionNumber, classList[i].CRN, classList[i].ClassName, "", classList[i].Credits, "", "", "", classList[i].SeatsTaken, "", "", classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats, classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID, "", "", "", "", "", "", "", "", "", "");
+            }
+            dt.AcceptChanges();
+            return dt;
+        }
 
         // Professor + Color pairings (Used for persistent memory storage in xml file)
         public class Pairs
@@ -1799,5 +1901,6 @@ namespace Schedule_WPF
         {
             MainLoaded.setClosed();
         }
+
     }
 }

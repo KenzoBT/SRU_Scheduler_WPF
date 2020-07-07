@@ -183,7 +183,7 @@ namespace Schedule_WPF
             }
             else
             {
-                if (tmp > 0 && tmp < 10)
+                if (tmp > 0 && tmp < 15)
                 {
                     Credits_Invalid.Visibility = Visibility.Hidden;
                     Credits_Required.Visibility = Visibility.Hidden;

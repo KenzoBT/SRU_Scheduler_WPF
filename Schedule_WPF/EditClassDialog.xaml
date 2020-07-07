@@ -49,7 +49,7 @@
             <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50,0,0,0" Foreground="#ffffff">Edit a class</TextBlock>
         </Grid>
         <TextBlock FontSize="16" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">CRN</TextBlock>
-        <TextBox Name="CRN_Text" Grid.Row="2" Grid.Column="2" Style="{StaticResource SmallTextBox}"></TextBox>
+        <TextBox Name="CRN_Text" Grid.Row="2" Grid.Column="2" Style="{StaticResource SmallTextBox}" IsEnabled="False"></TextBox>
         <TextBlock FontSize="16" Grid.Row="3" Grid.Column="1" VerticalAlignment="Center">Department</TextBlock>
         <TextBox Name="Dept_Text" Grid.Row="3" Grid.Column="2" Style="{StaticResource SmallTextBox}"></TextBox>
         <TextBlock FontSize="16" Grid.Row="4" Grid.Column="1" VerticalAlignment="Center">Class Number</TextBlock>

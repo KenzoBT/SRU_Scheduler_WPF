@@ -59,3 +59,12 @@ C:\Users\Kenzo\Downloads\SRU_Scheduler_WPF-master (2)\SRU_Scheduler_WPF-master\S
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\FontAwesome.WPF.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\FontAwesome.WPF.xml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.csproj.CopyComplete
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ClosedXML.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\DocumentFormat.OpenXml.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ExcelNumberFormat.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\System.IO.FileSystem.Primitives.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\System.IO.Packaging.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ClosedXML.pdb
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ClosedXML.xml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\DocumentFormat.OpenXml.xml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ExcelNumberFormat.xml

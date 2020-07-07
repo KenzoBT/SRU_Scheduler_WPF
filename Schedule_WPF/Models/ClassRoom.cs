@@ -15,15 +15,15 @@ namespace Schedule_WPF.Models
 
         public ClassRoom()
         {
-            RoomNum = 000;
+            RoomNum = 0;
             AvailableSeats = 0;
             Location = "N/A";
         }
 
-        public ClassRoom(string offCampus_ID)
+        public ClassRoom(string offCampus_ID, int seatCapacity)
         {
-            RoomNum = 000;
-            AvailableSeats = 0;
+            RoomNum = 0;
+            AvailableSeats = seatCapacity;
             Location = offCampus_ID;
         }
 

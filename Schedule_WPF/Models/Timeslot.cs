@@ -32,6 +32,8 @@ namespace Schedule_WPF.Models
         public string Meridian { get { return _Meridian; } set { _Meridian = value; OnPropertyChanged("Meridian"); } }
         public string TimeID { get { return Time.Substring(0, 2); } }
         public string FullTime { get { return Time + " - " + EndTime; } }
+        public string Start { get { return Time + " " + Meridian; } }
+        public string End { get { return EndTime + " " + Meridian; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

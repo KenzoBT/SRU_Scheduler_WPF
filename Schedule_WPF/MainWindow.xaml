@@ -355,7 +355,7 @@
                             <Button Name="btn_AddProfessor" ToolTip="Add a Professor" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="40" Height="40" Click="Btn_AddProfessor_Click">
                                 <Image Source="/images/id.png" Height="24" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Button>
-                            <Button Name="btn_SaveChanges" ToolTip="Save Changes" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Width="40" Height="40">
+                            <Button Name="btn_SaveChanges" ToolTip="Save Changes" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Width="40" Height="40" Click="Btn_SaveChanges_Click">
                                 <Image Source="/images/save.png" Height="23" Width="27" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Button>
                         </Grid>
