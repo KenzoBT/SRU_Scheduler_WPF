@@ -50,17 +50,17 @@ namespace Schedule_WPF
                 }
 
                 // Store the information in the appropriate variables inside MainWindow
-                Application.Current.MainWindow.Resources["Set_Class_Success"] = true;
-                Application.Current.MainWindow.Resources["Set_Class_CRN"] = crn;
-                Application.Current.MainWindow.Resources["Set_Class_Dept"] = dpt;
-                Application.Current.MainWindow.Resources["Set_Class_Number"] = classNum;
-                Application.Current.MainWindow.Resources["Set_Class_Section"] = sectNum;
-                Application.Current.MainWindow.Resources["Set_Class_Name"] = name;
-                Application.Current.MainWindow.Resources["Set_Class_Credits"] = credits;
-                Application.Current.MainWindow.Resources["Set_Class_Professor"] = profname;
-                Application.Current.MainWindow.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
-                Application.Current.MainWindow.Resources["Set_Class_Appointment"] = (bool)Appointment_Box.IsChecked;
-                Application.Current.MainWindow.Resources["Set_Class_Appointment2"] = (bool)Appointment2_Box.IsChecked;
+                Application.Current.Resources["Set_Class_Success"] = true;
+                Application.Current.Resources["Set_Class_CRN"] = crn;
+                Application.Current.Resources["Set_Class_Dept"] = dpt;
+                Application.Current.Resources["Set_Class_Number"] = classNum;
+                Application.Current.Resources["Set_Class_Section"] = sectNum;
+                Application.Current.Resources["Set_Class_Name"] = name;
+                Application.Current.Resources["Set_Class_Credits"] = credits;
+                Application.Current.Resources["Set_Class_Professor"] = profname;
+                Application.Current.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
+                Application.Current.Resources["Set_Class_Appointment"] = (bool)Appointment_Box.IsChecked;
+                Application.Current.Resources["Set_Class_Appointment2"] = (bool)Appointment2_Box.IsChecked;
 
                 // Close the window
                 this.Close();

@@ -42,7 +42,7 @@ namespace Schedule_WPF.Models
                 targetProfessor.FirstName = FirstName.Text;
                 targetProfessor.LastName = LastName.Text;
                 targetProfessor.SRUID = ID.Text;
-                this.Close();
+                Close();
             }
         }
 

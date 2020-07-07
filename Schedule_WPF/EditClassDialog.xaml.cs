@@ -29,8 +29,8 @@ namespace Schedule_WPF
         public EditClassDialog(Classes _class)
         {
             InitializeComponent();
-            Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
-            Application.Current.MainWindow.Resources["Edit_Class_Check"] = false;
+            Application.Current.Resources["Set_Class_Success"] = false;
+            Application.Current.Resources["Edit_Class_Check"] = false;
             targetClass = _class;
             originalCRN = _class.CRN;
             originalOnline = _class.Online;
@@ -85,19 +85,19 @@ namespace Schedule_WPF
                 if (oldProfessor.FullName != ((Professors)Prof_Text.SelectedItem).FullName && !((bool)Online_Box.IsChecked) && targetClass.isAssigned)
                 {
                     //MessageBox.Show("Here!"); // just flag it to main
-                    Application.Current.MainWindow.Resources["Edit_Class_Check"] = true;
+                    Application.Current.Resources["Edit_Class_Check"] = true;
                 }
-                Application.Current.MainWindow.Resources["Set_Class_Success"] = true;
-                Application.Current.MainWindow.Resources["Set_Class_CRN"] = Int32.Parse(CRN_Text.Text.ToString());
-                Application.Current.MainWindow.Resources["Set_Class_Dept"] = Dept_Text.Text;
-                Application.Current.MainWindow.Resources["Set_Class_Number"] = Int32.Parse(ClassNum_Text.Text.ToString());
-                Application.Current.MainWindow.Resources["Set_Class_Section"] = Int32.Parse(Section_Text.Text.ToString());
-                Application.Current.MainWindow.Resources["Set_Class_Name"] = Name_Text.Text;
-                Application.Current.MainWindow.Resources["Set_Class_Credits"] = Int32.Parse(Credits_Text.Text.ToString());
-                Application.Current.MainWindow.Resources["Set_Class_Professor"] = ((Professors)Prof_Text.SelectedItem).SRUID;
-                Application.Current.MainWindow.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
-                Application.Current.MainWindow.Resources["Set_Class_Appointment"] = (bool)Appointment_Box.IsChecked;
-                Application.Current.MainWindow.Resources["Set_Class_Appointment2"] = (bool)Appointment2_Box.IsChecked;
+                Application.Current.Resources["Set_Class_Success"] = true;
+                Application.Current.Resources["Set_Class_CRN"] = Int32.Parse(CRN_Text.Text.ToString());
+                Application.Current.Resources["Set_Class_Dept"] = Dept_Text.Text;
+                Application.Current.Resources["Set_Class_Number"] = Int32.Parse(ClassNum_Text.Text.ToString());
+                Application.Current.Resources["Set_Class_Section"] = Int32.Parse(Section_Text.Text.ToString());
+                Application.Current.Resources["Set_Class_Name"] = Name_Text.Text;
+                Application.Current.Resources["Set_Class_Credits"] = Int32.Parse(Credits_Text.Text.ToString());
+                Application.Current.Resources["Set_Class_Professor"] = ((Professors)Prof_Text.SelectedItem).SRUID;
+                Application.Current.Resources["Set_Class_Online"] = (bool)Online_Box.IsChecked;
+                Application.Current.Resources["Set_Class_Appointment"] = (bool)Appointment_Box.IsChecked;
+                Application.Current.Resources["Set_Class_Appointment2"] = (bool)Appointment2_Box.IsChecked;
 
                 // Close the window
                 this.Close();

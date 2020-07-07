@@ -31,10 +31,12 @@ namespace Schedule_WPF
                 string first = FirstName.Text;
                 string last = LastName.Text;
                 string id = ID.Text;
-                Application.Current.MainWindow.Resources["Set_Prof_FN"] = first;
-                Application.Current.MainWindow.Resources["Set_Prof_LN"] = last;
-                Application.Current.MainWindow.Resources["Set_Prof_ID"] = id;
-                Application.Current.MainWindow.Resources["Set_Prof_Success"] = true;
+
+                Application.Current.Resources["Set_Prof_FN"] = first;
+                Application.Current.Resources["Set_Prof_LN"] = last;
+                Application.Current.Resources["Set_Prof_ID"] = id;
+                Application.Current.Resources["Set_Prof_Success"] = true;
+                
                 this.Close();
             }
         }

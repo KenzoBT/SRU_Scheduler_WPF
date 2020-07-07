@@ -588,7 +588,7 @@ namespace Schedule_WPF
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorConfigurations7.xml";
+            string filename = "ColorConfigurations8.xml";
             string fullPath = System.IO.Path.Combine(tempPath, filename);
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(fullPath))
@@ -736,18 +736,21 @@ namespace Schedule_WPF
         }
         private void Btn_AddProfessor_Click(object sender, RoutedEventArgs e)
         {
+            //MessageBox.Show(Application.Current.Resources["setProf"].ToString());
+
             Unfocus_Overlay.Visibility = Visibility.Visible;
             AddProfessorDialog addProfDialog = new AddProfessorDialog();
             addProfDialog.Owner = this;
             addProfDialog.ShowDialog();
             Unfocus_Overlay.Visibility = Visibility.Hidden;
-            if (Application.Current.MainWindow.Resources["Set_Prof_Success"] != null && (bool)Application.Current.MainWindow.Resources["Set_Prof_Success"] == true)
+
+            if ((bool)Application.Current.Resources["Set_Prof_Success"])
             {
-                string fName = Application.Current.MainWindow.Resources["Set_Prof_FN"].ToString();
-                string lName = Application.Current.MainWindow.Resources["Set_Prof_LN"].ToString();
-                string id = Application.Current.MainWindow.Resources["Set_Prof_ID"].ToString();
+                string fName = (string)Application.Current.Resources["Set_Prof_FN"];
+                string lName = (string)Application.Current.Resources["Set_Prof_LN"];
+                string id = (string)Application.Current.Resources["Set_Prof_ID"];
                 AddProfessor(new Professors(fName, lName, id));
-                Application.Current.MainWindow.Resources["Set_Prof_Success"] = false;
+                Application.Current.Resources["Set_Prof_Success"] = false;
             }
         }
         public void RemoveProfessor(string sruID)
@@ -887,13 +890,13 @@ namespace Schedule_WPF
             addClassRoomDialog.Owner = this;
             addClassRoomDialog.ShowDialog();
             Unfocus_Overlay.Visibility = Visibility.Hidden;
-            if (Application.Current.MainWindow.Resources["Set_ClassRoom_Success"] != null && (bool)Application.Current.MainWindow.Resources["Set_ClassRoom_Success"] == true)
+            if (Application.Current.Resources["Set_ClassRoom_Success"] != null && (bool)Application.Current.Resources["Set_ClassRoom_Success"] == true)
             {
-                string bldg = Application.Current.MainWindow.Resources["Set_ClassRoom_Bldg"].ToString();
-                int roomNum = Int32.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Num"].ToString());
-                int capacity = Int32.Parse(Application.Current.MainWindow.Resources["Set_ClassRoom_Seats"].ToString());
+                string bldg = Application.Current.Resources["Set_ClassRoom_Bldg"].ToString();
+                int roomNum = Int32.Parse(Application.Current.Resources["Set_ClassRoom_Num"].ToString());
+                int capacity = Int32.Parse(Application.Current.Resources["Set_ClassRoom_Seats"].ToString());
                 AddClassroom(new ClassRoom(bldg, roomNum, capacity));
-                Application.Current.MainWindow.Resources["Set_ClassRoom_Success"] = false;
+                Application.Current.Resources["Set_ClassRoom_Success"] = false;
             }
         }
         public void RemoveClassroom(string classID)
@@ -911,7 +914,6 @@ namespace Schedule_WPF
         {
             MessageBox.Show("Yet to be implemented");
         }
-
         // Classes
         public void AddClass(Classes newClass)
         {
@@ -948,18 +950,18 @@ namespace Schedule_WPF
             Unfocus_Overlay.Visibility = Visibility.Hidden;
             //MessageBox.Show("class_success: " + Application.Current.MainWindow.Resources["Set_Class_Success"].ToString());
 
-            if (Application.Current.MainWindow.Resources["Set_Class_Success"] != null && (bool)Application.Current.MainWindow.Resources["Set_Class_Success"] == true)
+            if (Application.Current.Resources["Set_Class_Success"] != null && (bool)Application.Current.Resources["Set_Class_Success"] == true)
             {
-                int crn = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_CRN"].ToString());
-                string dpt = Application.Current.MainWindow.Resources["Set_Class_Dept"].ToString();
-                int number = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Number"].ToString());
-                int sect = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Section"].ToString());
-                string name = Application.Current.MainWindow.Resources["Set_Class_Name"].ToString();
-                int credits = Int32.Parse(Application.Current.MainWindow.Resources["Set_Class_Credits"].ToString());
-                string prof = Application.Current.MainWindow.Resources["Set_Class_Professor"].ToString();
-                bool online = Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Online"].ToString());
-                bool appt = Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Appointment"].ToString());
-                bool appt2 = Boolean.Parse(Application.Current.MainWindow.Resources["Set_Class_Appointment2"].ToString());
+                int crn = Int32.Parse(Application.Current.Resources["Set_Class_CRN"].ToString());
+                string dpt = Application.Current.Resources["Set_Class_Dept"].ToString();
+                int number = Int32.Parse(Application.Current.Resources["Set_Class_Number"].ToString());
+                int sect = Int32.Parse(Application.Current.Resources["Set_Class_Section"].ToString());
+                string name = Application.Current.Resources["Set_Class_Name"].ToString();
+                int credits = Int32.Parse(Application.Current.Resources["Set_Class_Credits"].ToString());
+                string prof = Application.Current.Resources["Set_Class_Professor"].ToString();
+                bool online = Boolean.Parse(Application.Current.Resources["Set_Class_Online"].ToString());
+                bool appt = Boolean.Parse(Application.Current.Resources["Set_Class_Appointment"].ToString());
+                bool appt2 = Boolean.Parse(Application.Current.Resources["Set_Class_Appointment2"].ToString());
                 bool appointment = false;
                 ClassRoom CRoom = null;
                 if (appt || appt2)
@@ -983,7 +985,7 @@ namespace Schedule_WPF
                     CRoom = new ClassRoom();
                 }
                 AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment));
-                Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
+                Application.Current.Resources["Set_Class_Success"] = false;
             }
         }
         public void RemoveClass(int crn)
@@ -994,30 +996,6 @@ namespace Schedule_WPF
                 if (classList[i].CRN == crn)
                 {
                     removalTarget = classList[i];
-                    /*
-                    if (removalTarget.Online)
-                    {
-                        for (int n = 0; n < onlineClasses.Count; n++)
-                        {
-                            if (onlineClasses[n].CRN == crn)
-                            {
-                                onlineClasses.RemoveAt(n);
-                                break;
-                            }
-                        }
-                    }
-                    else if (!removalTarget.isAssigned)
-                    {
-                        for (int n = 0; n < unassignedClasses.Count; n++)
-                        {
-                            if (unassignedClasses[n].CRN == crn)
-                            {
-                                unassignedClasses.RemoveAt(n);
-                                break;
-                            }
-                        }
-                    }
-                    */
                     classList.RemoveAt(i);
                     break;
                 }
@@ -1057,18 +1035,18 @@ namespace Schedule_WPF
             EditClassDialog editClassDialog = new EditClassDialog(toEdit);
             editClassDialog.ShowDialog();
 
-            if ((bool)Application.Current.MainWindow.Resources["Set_Class_Success"])
+            if ((bool)Application.Current.Resources["Set_Class_Success"])
             {
                 bool conflict = false;
-                bool check_conflicts = (bool)Application.Current.MainWindow.Resources["Edit_Class_Check"];
+                bool check_conflicts = (bool)Application.Current.Resources["Edit_Class_Check"];
                 if (check_conflicts)
                 {
                     Classes temp = toEdit.DeepCopy();
-                    Professors temp_Prof = DetermineProfessor((string)Application.Current.MainWindow.Resources["Set_Class_Professor"]);
+                    Professors temp_Prof = DetermineProfessor((string)Application.Current.Resources["Set_Class_Professor"]);
                     temp.Prof = temp_Prof;
                     conflict = DetermineTimeConflict(temp, temp.ClassDay, temp.StartTime.TimeID);
                     // flag down
-                    Application.Current.MainWindow.Resources["Edit_Class_Check"] = false;
+                    Application.Current.Resources["Edit_Class_Check"] = false;
                 }
                 if (!conflict)
                 {
@@ -1077,17 +1055,17 @@ namespace Schedule_WPF
                     int originalCRN = toEdit.CRN;
                     string originalBldg = toEdit.Classroom.Location;
 
-                    toEdit.CRN = (int)Application.Current.MainWindow.Resources["Set_Class_CRN"];
-                    toEdit.DeptName = (string)Application.Current.MainWindow.Resources["Set_Class_Dept"];
-                    toEdit.ClassNumber = (int)Application.Current.MainWindow.Resources["Set_Class_Number"];
-                    toEdit.SectionNumber = (int)Application.Current.MainWindow.Resources["Set_Class_Section"];
-                    toEdit.ClassName = (string)Application.Current.MainWindow.Resources["Set_Class_Name"];
-                    toEdit.Credits = (int)Application.Current.MainWindow.Resources["Set_Class_Credits"];
-                    toEdit.Prof = DetermineProfessor((string)Application.Current.MainWindow.Resources["Set_Class_Professor"]);
-                    toEdit.Online = (bool)Application.Current.MainWindow.Resources["Set_Class_Online"];
+                    toEdit.CRN = (int)Application.Current.Resources["Set_Class_CRN"];
+                    toEdit.DeptName = (string)Application.Current.Resources["Set_Class_Dept"];
+                    toEdit.ClassNumber = (int)Application.Current.Resources["Set_Class_Number"];
+                    toEdit.SectionNumber = (int)Application.Current.Resources["Set_Class_Section"];
+                    toEdit.ClassName = (string)Application.Current.Resources["Set_Class_Name"];
+                    toEdit.Credits = (int)Application.Current.Resources["Set_Class_Credits"];
+                    toEdit.Prof = DetermineProfessor((string)Application.Current.Resources["Set_Class_Professor"]);
+                    toEdit.Online = (bool)Application.Current.Resources["Set_Class_Online"];
                     bool appointment = false;
-                    bool appt = (bool)Application.Current.MainWindow.Resources["Set_Class_Appointment"];
-                    bool appt2 = (bool)Application.Current.MainWindow.Resources["Set_Class_Appointment2"];
+                    bool appt = (bool)Application.Current.Resources["Set_Class_Appointment"];
+                    bool appt2 = (bool)Application.Current.Resources["Set_Class_Appointment2"];
                     if (appt || appt2)
                     {
                         appointment = true;
@@ -1134,7 +1112,7 @@ namespace Schedule_WPF
                         toEdit.isAssigned = false;
                     }
                     */
-                    Application.Current.MainWindow.Resources["Set_Class_Success"] = false;
+                    Application.Current.Resources["Set_Class_Success"] = false;
                 }
                 else
                 {

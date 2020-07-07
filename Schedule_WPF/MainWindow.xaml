@@ -11,32 +11,6 @@
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>
-        
-        <!-- Variables to store data coming in from other windows -->
-        
-        <!-- Variables to store info from AddClassRoomDialog -->
-        <sys:Boolean x:Key="Set_ClassRoom_Success">false</sys:Boolean>
-        <sys:String x:Key="Set_ClassRoom_Bldg">---</sys:String>
-        <sys:Int32 x:Key="Set_ClassRoom_Num">000</sys:Int32>
-        <sys:Int32 x:Key="Set_ClassRoom_Seats">000</sys:Int32>
-        <!-- Variables to store info from AddCProfessorDialog -->
-        <sys:Boolean x:Key="Set_Prof_Success">false</sys:Boolean>
-        <sys:String x:Key="Set_Prof_FN">---</sys:String>
-        <sys:String x:Key="Set_Prof_LN">---</sys:String>
-        <sys:String x:Key="Set_Prof_ID">---</sys:String>
-        <!-- Variables to store info from AddClassDialog -->
-        <sys:Boolean x:Key="Set_Class_Success">false</sys:Boolean>
-        <sys:String x:Key="Set_Class_Dept">---</sys:String>
-        <sys:String x:Key="Set_Class_Name">---</sys:String>
-        <sys:String x:Key="Set_Class_Professor">---</sys:String>
-        <sys:Int32 x:Key="Set_Class_CRN">000</sys:Int32>
-        <sys:Int32 x:Key="Set_Class_Number">000</sys:Int32>
-        <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
-        <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>
-        <sys:Boolean x:Key="Set_Class_Online">false</sys:Boolean>
-        <sys:Boolean x:Key="Set_Class_Appointment">false</sys:Boolean>
-        <sys:Boolean x:Key="Set_Class_Appointment2">false</sys:Boolean>
-        <sys:Boolean x:Key="Edit_Class_Check">false</sys:Boolean>
 
         <!-- Custom styles for controls -->
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
