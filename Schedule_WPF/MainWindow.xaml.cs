@@ -87,7 +87,6 @@ namespace Schedule_WPF
                             break;
                         }
                     }
-                    MessageBox.Show(cellValue);
                     excelHeaders.Add(cellValue);
                 }
 
