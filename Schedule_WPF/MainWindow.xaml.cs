@@ -66,7 +66,7 @@ namespace Schedule_WPF
             {
                 // Select Worksheet
                 var worksheet = excelWorkbook.Worksheet(1);
-                int columns = worksheet.ColumnCount();
+                int columns = 33;
                 var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
 
                 // Get Term & Session // Temporary fix -- Should be data members of class objects
@@ -87,6 +87,7 @@ namespace Schedule_WPF
                             break;
                         }
                     }
+                    MessageBox.Show(cellValue);
                     excelHeaders.Add(cellValue);
                 }
 
