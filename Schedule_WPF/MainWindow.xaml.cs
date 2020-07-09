@@ -1,27 +1,18 @@
 ﻿using System;
 using System.Data;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml.Serialization;
 using Schedule_WPF.Properties;
 using System.ComponentModel;
 using Schedule_WPF.Models;
-using System.Diagnostics;
-using Excel = Microsoft.Office.Interop.Excel;
-using System.Runtime.InteropServices;
-using System.Windows.Threading;
 using Microsoft.Win32;
 using ClosedXML.Excel;
+using System.Linq;
 
 namespace Schedule_WPF
 {
@@ -71,294 +62,276 @@ namespace Schedule_WPF
 
         public void ReadExcel(string file)
         {
-            int sheetIndex = 1;
-            Excel.Application App = new Excel.Application();
-            App.Visible = false;
-            Excel.Workbook Workbook = App.Workbooks.Open(@file);
-            Excel.Worksheet Worksheet = Workbook.Sheets[sheetIndex];
-            Excel.Range Range = Worksheet.UsedRange;
-            int rowCount = Range.Rows.Count;
-            int colCount = Range.Columns.Count;
-
-            // Populate excel headers array + type array
-            for (int i = 1; i <= colCount; i++)
+            using (var excelWorkbook = new XLWorkbook(file))
             {
-                string cellValue = Range.Cells[1, i].Value2.ToString();
-                for (int n = 0; n < excelHeaders.Count; n++)
-                {
-                    if (excelHeaders[n].ToUpper() == cellValue.ToUpper())
-                    {
-                        cellValue = cellValue + "(2)";
-                        break;
-                    }
-                }
-                excelHeaders.Add(cellValue);
-            }
-            // copy Term
-            term = Range.Cells[2, 1].Value2.ToString();
-            // copy Session
-            session = "1";
+                // Select Worksheet
+                var worksheet = excelWorkbook.Worksheet(1);
+                int columns = worksheet.ColumnCount();
+                var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
 
-            // Create Professors
-            int sruid_indexer = 0;
-            for (int i = 2; i <= rowCount; i++)
-            {
-                string fullName, lastName, firstName, SRUID;
-                if (Range.Cells[i, 22] != null && Range.Cells[i, 22].Value2 != null)
+                // Get Term & Session // Temporary fix -- Should be data members of class objects
+                session = "1";
+                term = worksheet.Row(2).Cell(1).GetValue<string>();
+
+                // Populate excel headers array
+                var headerRow = worksheet.Row(1);
+                string cellValue = "";
+                for (int i = 0; i < columns; i++)
                 {
-                    if (Range.Cells[i, 22].Value2 != "" && Range.Cells[i, 22].Value2.Contains(","))
+                    cellValue = headerRow.Cell(i + 1).GetValue<string>();
+                    for (int n = 0; n < excelHeaders.Count; n++)
                     {
-                        fullName = Range.Cells[i, 22].Value2.ToString();
-                        bool professorFound = false;
-                        for (int n = 0; n < professors.Count; n++)
+                        if (excelHeaders[n].ToUpper() == cellValue.ToUpper()) // if there is a duplicate column name
                         {
-                            if (professors[n].FullName == fullName)
+                            cellValue = cellValue + "(2)";
+                            break;
+                        }
+                    }
+                    excelHeaders.Add(cellValue);
+                }
+
+                // Create Professors
+                int sruid_indexer = 0;
+                bool professorFound;
+                foreach (var row in rows)
+                {
+                    string fullName, lastName, firstName, SRUID;
+                    if (!row.Cell(22).IsEmpty())
+                    {
+                        fullName = row.Cell(22).GetValue<string>();
+                        if (fullName != "" && fullName.Contains(","))
+                        {
+                            professorFound = false;
+                            for (int n = 0; n < professors.Count; n++)
                             {
-                                professorFound = true;
-                                break;
+                                if (professors[n].FullName == fullName)
+                                {
+                                    professorFound = true;
+                                    break;
+                                }
+                            }
+                            if (!professorFound)
+                            {
+                                lastName = fullName.Split(',')[0];
+                                firstName = fullName.Split(',')[1].Remove(0, 1);
+                                if (!row.Cell(23).IsEmpty() && row.Cell(23).GetValue<string>().Length == 9)
+                                {
+                                    SRUID = row.Cell(23).GetValue<string>();
+                                }
+                                else
+                                {
+                                    SRUID = "A0" + sruid_indexer;
+                                    sruid_indexer++;
+                                }
+                                professors.Add(new Professors(firstName, lastName, SRUID));
                             }
                         }
-                        if (!professorFound)
+                    }
+                }
+
+                // Create Classrooms
+                int parseResult, room, capacity;
+                bool classroomFound;
+                string bldg;
+                foreach (var row in rows)
+                {
+                    room = -1;
+                    capacity = 0;
+                    if (!row.Cell(20).IsEmpty())
+                    {
+                        bldg = row.Cell(20).GetValue<string>().ToUpper();
+                        if (bldg != "WEB" && !bldg.Contains("APPT"))
                         {
-                            lastName = fullName.Split(',')[0];
-                            firstName = fullName.Split(',')[1].Remove(0, 1);
-                            if (Range.Cells[i, 23] != null && Range.Cells[i, 23].Value2 != null && Range.Cells[i, 23].Value2 != "" && Range.Cells[i, 23].Value2.ToString().Length == 9)
+                            if (!row.Cell(21).IsEmpty() && int.TryParse(row.Cell(21).GetValue<string>(), out parseResult))
                             {
-                                SRUID = Range.Cells[i, 23].Value2.ToString();
-                                //MessageBox.Show("Name: " + fullName + "\nID: " + SRUID);
+                                room = parseResult;
+                                if (!row.Cell(19).IsEmpty() && int.TryParse(row.Cell(19).GetValue<string>(), out parseResult))
+                                {
+                                    capacity = parseResult;
+                                }
+                            }
+                            classroomFound = false;
+                            for (int n = 0; n < classrooms.Count; n++)
+                            {
+                                if (classrooms[n].ClassID == (bldg + room))
+                                {
+                                    classroomFound = true;
+                                    break;
+                                }
+                            }
+                            if (!classroomFound)
+                            {
+                                classrooms.Add(new ClassRoom(bldg, room, capacity));
+                            }
+                        }
+                    }
+                }
+
+                // Create Classes
+                int CRN, ClassNum, Section, Credits, SeatsTaken;
+                int duplicate_CRN_indexer = -1;
+                string Dept, ClassName, ClassDay, classID, profName;
+                bool Online, Appoint;
+                List<int> CRN_List = new List<int>();
+                foreach (var row in rows)
+                {
+                    ClassNum = -1;
+                    Section = -1;
+                    Credits = 0;
+                    SeatsTaken = 0;
+                    Dept = "";
+                    ClassName = "";
+                    ClassDay = "";
+                    Professors prof = new Professors();
+                    ClassRoom classroom = new ClassRoom();
+                    Timeslot time = new Timeslot();
+                    Online = false;
+                    Appoint = false;
+
+                    // CRN 
+                    // Primary Key, if CRN is empty, do not enter record.
+                    // If CRN is not a number, assign a unique negative value, tracked by duplicate_CRN_indexer
+                    if (!row.Cell(6).IsEmpty())
+                    {
+                        parseResult = -1;
+                        if (int.TryParse(row.Cell(6).GetValue<string>(), out parseResult))
+                        {
+                            CRN = parseResult;
+                            bool duplicate_CRN = false;
+                            for (int n = 0; n < CRN_List.Count; n++)
+                            {
+                                if (CRN_List[n] == CRN)
+                                {
+                                    duplicate_CRN = true;
+                                    break;
+                                }
+                            }
+                            if (!duplicate_CRN)
+                            {
+                                CRN_List.Add(CRN);
                             }
                             else
                             {
-                                SRUID = "A0" + sruid_indexer;
-                                sruid_indexer++;
-                                //MessageBox.Show("Name: " + fullName + "\nID: " + SRUID);
+                                CRN = duplicate_CRN_indexer;
+                                duplicate_CRN_indexer--;
                             }
-                            professors.Add(new Professors(firstName, lastName, SRUID));
-                        }
-                    }
-                }
-            }
-
-            // Create Classrooms
-            for (int i = 2; i <= rowCount; i++)
-            {
-                string bldg;
-                int room = -1;
-                int capacity = 0;
-                if (Range.Cells[i, 20] != null && Range.Cells[i, 20].Value2 != null && Range.Cells[i, 20].Value2 != "")
-                {
-                    bldg = Range.Cells[i, 20].Value2.ToString().ToUpper();
-                    if (bldg != "WEB" && !bldg.Contains("APPT"))
-                    {
-                        int parseResult = 0;
-                        if (Range.Cells[i, 21] != null && Range.Cells[i, 21].Value2 != null && int.TryParse(Range.Cells[i, 21].Value2.ToString(), out parseResult))
-                        {
-                            room = parseResult;
-                            if (Range.Cells[i, 19] != null && Range.Cells[i, 19].Value2 != null && int.TryParse(Range.Cells[i, 19].Value2.ToString(), out parseResult))
-                            {
-                                capacity = parseResult;
-                            }
-                        }
-                        bool classroomFound = false;
-                        for (int n = 0; n < classrooms.Count; n++)
-                        {
-                            if (classrooms[n].ClassID == (bldg + room))
-                            {
-                                classroomFound = true;
-                                break;
-                            }
-                        }
-                        if (!classroomFound)
-                        {
-                            classrooms.Add(new ClassRoom(bldg, room, capacity));
-                            //MessageBox.Show("Added: " + bldg + " " + room);
-                        }
-                    }
-                }
-            }
-
-            int duplicate_CRN_indexer = -1;
-            List<int> CRN_List = new List<int>();
-
-            // Create Classes
-            for (int i = 2; i <= rowCount; i++)
-            {
-                int CRN;
-                int ClassNum = -1;
-                int Section = -1;
-                int Credits = 0;
-                int SeatsTaken = 0;
-                string Dept = "";
-                string ClassName = "";
-                string ClassDay = "";
-                Professors prof = new Professors();
-                ClassRoom classroom = new ClassRoom();
-                Timeslot time = new Timeslot();
-                bool Online = false;
-                bool Appoint = false;
-
-                // CRN 
-                // Primary Key, if CRN is empty, do not enter record.
-                // If CRN is not a number, assign a unique negative value, tracked by duplicate_CRN_indexer
-                if (Range.Cells[i, 6] != null && Range.Cells[i, 6].Value2 != null)
-                {
-                    int parseResult = -1;
-                    if (int.TryParse(Range.Cells[i, 6].Value2.ToString(), out parseResult))
-                    {
-                        CRN = parseResult;
-                        bool duplicate_CRN = false;
-                        for (int n = 0; n < CRN_List.Count; n++)
-                        {
-                            if (CRN_List[n] == CRN)
-                            {
-                                duplicate_CRN = true;
-                                //MessageBox.Show("Found a duplicate CRN!\n\nReplacing with: " + duplicate_CRN_indexer);
-                                break;
-                            }
-                        }
-                        if (!duplicate_CRN)
-                        {
-                            CRN_List.Add(CRN);
                         }
                         else
                         {
                             CRN = duplicate_CRN_indexer;
                             duplicate_CRN_indexer--;
                         }
-                    }
-                    else
-                    {
-                        //MessageBox.Show("Invalid CRN!\n\nReplacing with: " + duplicate_CRN_indexer);
-                        CRN = duplicate_CRN_indexer;
-                        duplicate_CRN_indexer--;
-                    }
-                    // DEPT
-                    if (Range.Cells[i, 3] != null && Range.Cells[i, 3].Value2 != null && Range.Cells[i, 3].Value2 != "")
-                    {
-                        Dept = Range.Cells[i, 3].Value2.ToString().ToUpper();
-                    }
-                    // CLASS NUM
-                    if (Range.Cells[i, 4] != null && Range.Cells[i, 4].Value2 != null)
-                    {
-                        if (int.TryParse(Range.Cells[i, 4].Value2.ToString(), out parseResult))
+                        // DEPT
+                        if (!row.Cell(3).IsEmpty())
                         {
-                            ClassNum = parseResult;
+                            Dept = row.Cell(3).GetValue<string>().ToUpper();
                         }
-                    }
-                    // CLASS NAME
-                    if (Range.Cells[i, 7] != null && Range.Cells[i, 7].Value2 != null && Range.Cells[i, 7].Value2 != "")
-                    {
-                        ClassName = Range.Cells[i, 7].Value2.ToString();
-                    }
-                    // SECTION
-                    if (Range.Cells[i, 5] != null && Range.Cells[i, 5].Value2 != null)
-                    {
-                        if (int.TryParse(Range.Cells[i, 5].Value2.ToString(), out parseResult))
+                        // CLASS NUM
+                        if (!row.Cell(3).IsEmpty())
                         {
-                            Section = parseResult;
-                        }
-                    }
-                    // CREDITS
-                    if (Range.Cells[i, 9] != null && Range.Cells[i, 9].Value2 != null)
-                    {
-                        Credits = (int)(Range.Cells[i, 9].Value2);
-                    }
-                    // SEATS TAKEN
-                    if (Range.Cells[i, 13] != null && Range.Cells[i, 13].Value2 != null)
-                    {
-                        SeatsTaken = (int)(Range.Cells[i, 13].Value2);
-                    }
-                    // CLASSDAY
-                    if (Range.Cells[i, 16] != null && Range.Cells[i, 16].Value2 != null && Range.Cells[i, 16].Value2 != "")
-                    {
-                        ClassDay = Range.Cells[i, 16].Value2.ToString().ToUpper();
-                    }
-                    // Determine Professor
-                    if (Range.Cells[i, 22] != null && Range.Cells[i, 22].Value2 != null && Range.Cells[i, 22].Value2 != "")
-                    {
-                        string profName = Range.Cells[i, 22].Value2.ToString();
-                        for (int n = 0; n < professors.Count; n++)
-                        {
-                            if (professors[n].FullName == profName)
+                            if (int.TryParse(row.Cell(4).GetValue<string>(), out parseResult))
                             {
-                                prof = professors[n];
-                                break;
+                                ClassNum = parseResult;
                             }
                         }
-                    }
-                    // Determine ClassRoom
-                    if (Range.Cells[i, 20] != null && Range.Cells[i, 20].Value2 != null && Range.Cells[i, 20].Value2 != "")
-                    {
-                        string bldg = Range.Cells[i, 20].Value2.ToString().ToUpper();
-                        if (bldg != "WEB" && !bldg.Contains("APPT"))
+                        // CLASS NAME
+                        if (!row.Cell(7).IsEmpty())
                         {
-                            int room = -1;
-                            if (Range.Cells[i, 21] != null && Range.Cells[i, 21].Value2 != null)
+                            ClassName = row.Cell(7).GetValue<string>();
+                        }
+                        // SECTION
+                        if (!row.Cell(5).IsEmpty())
+                        {
+                            if (int.TryParse(row.Cell(5).GetValue<string>(), out parseResult))
                             {
-                                if (int.TryParse(Range.Cells[i, 21].Value2.ToString(), out parseResult))
-                                {
-                                    room = parseResult;
-                                }
+                                Section = parseResult;
                             }
-                            string classID = bldg + room;
-                            for (int n = 0; n < classrooms.Count; n++)
+                        }
+                        // CREDITS
+                        if (!row.Cell(9).IsEmpty())
+                        {
+                            Credits = row.Cell(9).GetValue<int>();
+                        }
+                        // SEATS TAKEN
+                        if (!row.Cell(13).IsEmpty())
+                        {
+                            SeatsTaken = row.Cell(13).GetValue<int>();
+                        }
+                        // CLASSDAY
+                        if (!row.Cell(16).IsEmpty())
+                        {
+                            ClassDay = row.Cell(16).GetValue<string>().ToUpper();
+                        }
+                        // Determine Professor
+                        if (!row.Cell(22).IsEmpty())
+                        {
+                            profName = row.Cell(22).GetValue<string>();
+                            for (int n = 0; n < professors.Count; n++)
                             {
-                                if (classrooms[n].ClassID == classID)
+                                if (professors[n].FullName == profName)
                                 {
-                                    classroom = classrooms[n];
+                                    prof = professors[n];
                                     break;
                                 }
                             }
                         }
-                        else
+                        // Determine ClassRoom
+                        if (!row.Cell(20).IsEmpty())
                         {
-                            if (bldg == "WEB")
+                            bldg = row.Cell(20).GetValue<string>().ToUpper();
+                            if (bldg != "WEB" && !bldg.Contains("APPT"))
                             {
-                                classroom = new ClassRoom("WEB", 999);
-                                Online = true;
+                                room = -1;
+                                if (!row.Cell(21).IsEmpty())
+                                {
+                                    if (int.TryParse(row.Cell(21).GetValue<string>(), out parseResult))
+                                    {
+                                        room = parseResult;
+                                    }
+                                }
+                                classID = bldg + room;
+                                for (int n = 0; n < classrooms.Count; n++)
+                                {
+                                    if (classrooms[n].ClassID == classID)
+                                    {
+                                        classroom = classrooms[n];
+                                        break;
+                                    }
+                                }
                             }
-                            else if (bldg.Contains("APPT"))
+                            else
                             {
-                                if (bldg == "APPT")
+                                if (bldg == "WEB")
                                 {
-                                    classroom = new ClassRoom("APPT", 0);
+                                    classroom = new ClassRoom("WEB", 999);
+                                    Online = true;
                                 }
-                                else if (bldg == "APPT2")
+                                else if (bldg.Contains("APPT"))
                                 {
-                                    classroom = new ClassRoom("APPT2", 0);
+                                    if (bldg == "APPT")
+                                    {
+                                        classroom = new ClassRoom("APPT", 0);
+                                    }
+                                    else if (bldg == "APPT2")
+                                    {
+                                        classroom = new ClassRoom("APPT2", 0);
+                                    }
+                                    Appoint = true;
                                 }
-                                Appoint = true;
                             }
                         }
-                    }
-                    // Determine TimeSlot
-                    if (Range.Cells[i, 17] != null && Range.Cells[i, 17].Value2 != null && Range.Cells[i, 17].Value2 != "")
-                    {
-                        string rawTime = Range.Cells[i, 17].Value2.ToString();
-                        string timePart = formatTime(rawTime.Split(' ')[0]);
-                        time = DetermineTime(timePart, ClassDay);
-                    }
+                        // Determine TimeSlot
+                        if (!row.Cell(17).IsEmpty())
+                        {
+                            string rawTime = row.Cell(17).GetValue<string>();
+                            string timePart = formatTime(rawTime.Split(' ')[0]);
+                            time = DetermineTime(timePart, ClassDay);
+                        }
 
-                    classList.Add(new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint));
+                        classList.Add(new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint));
+                    }
                 }
             }
-
-
-            //cleanup
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            //release com objects to fully kill excel process from running in the background
-            Marshal.ReleaseComObject(Range);
-            Marshal.ReleaseComObject(Worksheet);
-
-            //close and release
-            Workbook.Close();
-            Marshal.ReleaseComObject(Workbook);
-
-            //quit and release
-            App.Quit();
-            Marshal.ReleaseComObject(App);
         }
         public void DrawTimeTables() // Draw the GUI grids for MWF - TR (Called by MainWindow)
         {
