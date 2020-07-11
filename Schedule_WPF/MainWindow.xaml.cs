@@ -13,6 +13,8 @@ using Schedule_WPF.Models;
 using Microsoft.Win32;
 using ClosedXML.Excel;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Schedule_WPF
 {
@@ -22,12 +24,11 @@ namespace Schedule_WPF
     public partial class MainWindow : Window
     {
         ////////////// GLOBAL VARIABLES ////////////////
+        
         Timeslot[] times_MWF = { new Timeslot("08:00", "08:50", "AM"), new Timeslot("09:00", "09:50", "AM"), new Timeslot("10:00", "10:50", "AM"), new Timeslot("11:00", "11:50", "AM"), new Timeslot("12:00", "12:50", "PM"), new Timeslot("01:00", "01:50", "PM"), new Timeslot("02:00", "02:50", "PM"), new Timeslot("03:00", "03:50", "PM"), new Timeslot("04:00", "04:50", "PM"), new Timeslot("05:00", "05:50", "PM"), new Timeslot("06:00", "06:50", "PM") };
         Timeslot[] times_TR = { new Timeslot("08:00", "09:15", "AM"), new Timeslot("09:30", "10:45", "AM"), new Timeslot("11:00", "12:15", "AM"), new Timeslot("12:30", "01:45", "PM"), new Timeslot("02:00", "03:15", "PM"), new Timeslot("03:30", "04:45", "PM"), new Timeslot("05:00", "06:15", "PM") };
         ClassRoomList classrooms = (ClassRoomList)Application.Current.FindResource("ClassRoom_List_View");
         ProfessorList professors = (ProfessorList)Application.Current.FindResource("Professor_List_View");
-        RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
-        Pairs colorPairs;
         ClassList classList = (ClassList)Application.Current.FindResource("Classes_List_View");
         ClassList unassignedClasses = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
         ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
@@ -35,32 +36,29 @@ namespace Schedule_WPF
         ClassList appointment2Classes = (ClassList)Application.Current.FindResource("Appointment2_Classes_List_View");
         List<string> excelHeaders = new List<string>();
         List<Type> excelTypes = new List<Type>();
-        string term, session;
+        List<ClassesHash> hashedClasses = new List<ClassesHash>();
+        string term, session, filePath, latestHashDigest;
+        RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
+        Pairs colorPairs;
 
         ////////////// START OF EXECUTION ////////////////
+        
         public MainWindow()
         {
             InitializeComponent();
-            string filePath = Application.Current.Resources["FilePath"].ToString();
-
-            // Read from excel to get data
+            filePath = Application.Current.Resources["FilePath"].ToString(); // make local copy of path to excel file (initialized by FileSelect window)
             ReadExcel(filePath);
-            // Assign professor colors 
             AssignProfColors();
-            // Draw timetables for MWF / TR
             DrawTimeTables();
-            // Fill unassigned / online class lists
-            FillUnassigned();
-            // Bind data to corresponding gui controls
+            FillDerivedLists();
             BindData();
-
-            /*   
-            MainLoaded.setLoaded();
-            */
-            Helper.CloseUniqueWindow<FileSelect>();
+            latestHashDigest = ComputeSha256Hash(classList.Serialize()); // initialize hash digest of classlist (used to see if changes have been made before closing application)
+            Helper.CloseUniqueWindow<FileSelect>(); // Close File Select window
         }
 
-        public void ReadExcel(string file)
+        ////////////// FUNCTIONS ////////////////
+        
+        public void ReadExcel(string file) // Read excel file, create classes objects and append them to classList 
         {
             using (var excelWorkbook = new XLWorkbook(file))
             {
@@ -327,18 +325,22 @@ namespace Schedule_WPF
                             string timePart = formatTime(rawTime.Split(' ')[0]);
                             time = DetermineTime(timePart, ClassDay);
                         }
-
-                        classList.Add(new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint));
+                        // Create class and add to classlist
+                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint);
+                        classList.Add(tmpClass);
+                        // Compute hash digest and save CRN/Hash pair in list
+                        latestHashDigest = ComputeSha256Hash(tmpClass.Serialize());
+                        hashedClasses.Add(new ClassesHash(CRN, latestHashDigest));
                     }
                 }
             }
         }
-        public void DrawTimeTables() // Draw the GUI grids for MWF - TR (Called by MainWindow)
+        public void DrawTimeTables() // Calls TimeTableSetup() for MWF and TR 
         {
             TimeTableSetup(MWF, times_MWF);
             TimeTableSetup(TR, times_TR);
         }
-        public void TimeTableSetup(Grid parentGrid, Timeslot[] times) // Creates a GUI grid dynamically based on timeslots + classrooms (Called by drawTimeTables())
+        public void TimeTableSetup(Grid parentGrid, Timeslot[] times) // Creates an empty GUI grid based on timeslots + classrooms, then calls PopulateTimeTable() 
         {
             String parentName = parentGrid.Name; // Used to uniquely identify the timeslots
             Grid timeTable = new Grid();
@@ -444,7 +446,7 @@ namespace Schedule_WPF
             // Populate the empty timeslots with our available information
             PopulateTimeTable(timeTable, times);
         }
-        public void PopulateTimeTable(Grid timeTable, Timeslot[] times) // Populate the GUI grid based on class information (Called by timeTableSetup())
+        public void PopulateTimeTable(Grid timeTable, Timeslot[] times) // Populate a GUI grid based on classList 
         {
             string days = "";
             if (times.Length == times_MWF.Length)
@@ -501,7 +503,7 @@ namespace Schedule_WPF
                 }
             }
         }
-        public void EmptyGrid(Grid timetable)
+        public void EmptyGrid(Grid timetable)  // Empties all entries of a GUI grid 
         {
             UIElementCollection items = timetable.Children;
             for (int i = 0; i < items.Count; i++)
@@ -517,7 +519,7 @@ namespace Schedule_WPF
                 }
             }
         }
-        public void FillUnassigned() // Fill unassigned classes list (GUI) & online classes list with classes that have not been put in the GUI grid
+        public void FillDerivedLists() // Fill Unassigned/Online/APPT/APPT2 lists. (They are subsets of classList) 
         {
             // empty online and unassigned class lists
             unassignedClasses.Clear();
@@ -556,7 +558,7 @@ namespace Schedule_WPF
                 }
             }
         }
-        public void AssignProfColors() // !!! call it during excel reading // Give professors a color key based on the palette defined above + Save assigned colors to XML file
+        public void AssignProfColors() // Give professors a color key based on the palette defined above + Save assigned colors to XML file 
         {
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
@@ -637,33 +639,17 @@ namespace Schedule_WPF
                 }
             }
         }
-        public void BindData()
+        public void BindData() // Bind class/professor lists to GUI data tables 
         {
-            BindUnassignedList();
-            BindProfessorKey();
-            BindClassList();
-            BindProfList();
+            Online_Classes_Grid.ItemsSource = onlineClasses; // Online classes GUI list
+            Unassigned_Classes_Grid.ItemsSource = unassignedClasses; // Unassigned classes GUI list
+            Appointment_Classes_Grid.ItemsSource = appointmentClasses; // APPT classes GUI list
+            Appointment2_Classes_Grid.ItemsSource = appointment2Classes; // APPT2 classes GUI list
+            Professor_Key_List.ItemsSource = professors; // Professor Key GUI list
+            Full_Classes_Grid.ItemsSource = classList;  // Classes GUI list (Classes tab)
+            Full_Professors_Grid.ItemsSource = professors; // Professors GUI list (Professors tab)
         }
-        public void BindUnassignedList()
-        {
-            Online_Classes_Grid.ItemsSource = onlineClasses;
-            Unassigned_Classes_Grid.ItemsSource = unassignedClasses;
-            Appointment_Classes_Grid.ItemsSource = appointmentClasses;
-            Appointment2_Classes_Grid.ItemsSource = appointment2Classes;
-        }
-        public void BindProfessorKey()
-        {
-            Professor_Key_List.ItemsSource = professors;
-        } // Fill professor color key list in the GUI
-        public void BindClassList()
-        {
-            Full_Classes_Grid.ItemsSource = classList;
-        }
-        public void BindProfList()
-        {
-            Full_Professors_Grid.ItemsSource = professors;
-        }
-        public void RefreshGUI()
+        public void RefreshGUI() // Empty GUI timetables, repopulate them and refresh derived lists 
         {
             Grid timetable_MWF = (Grid)FindName("MWF_");
             Grid timetable_TR = (Grid)FindName("TR_");
@@ -671,9 +657,9 @@ namespace Schedule_WPF
             EmptyGrid(timetable_TR);
             PopulateTimeTable(timetable_MWF, times_MWF);
             PopulateTimeTable(timetable_TR, times_TR);
-            FillUnassigned();
+            FillDerivedLists();
         }
-        public void SaveChanges() // Writes to excel file
+        public void SaveChanges() // Writes classList to an excel file 
         {
             string fileDir = getFileDirectory(Application.Current.Resources["FilePath"].ToString());
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -695,9 +681,31 @@ namespace Schedule_WPF
                 wb.SaveAs(fileName);
             }
         }
-        public void Btn_SaveChanges_Click(object sender, RoutedEventArgs e)
+        public void Btn_SaveChanges_Click(object sender, RoutedEventArgs e) // Save changes button handler. Calls SaveChanges() 
         {
             SaveChanges();
+            latestHashDigest = ComputeSha256Hash(classList.Serialize());
+        }
+        public void MainWindow_Closing(object sender, CancelEventArgs e) // Window close button handler. Prevents closing if user has unsaved changes 
+        {
+            string newDigest = ComputeSha256Hash(classList.Serialize());
+            if (newDigest != latestHashDigest)
+            {
+                string messageBoxText = "You have unsaved changes!\nAre you sure you want to exit without saving?";
+                string caption = "Unsaved changes";
+                MessageBoxButton button = MessageBoxButton.YesNo;
+                MessageBoxImage icon = MessageBoxImage.Question;
+                // Display + Process message box results
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                switch (result)
+                {
+                    case MessageBoxResult.Yes:
+                        break;
+                    case MessageBoxResult.No:
+                        e.Cancel = true;
+                        break;
+                }
+            }
         }
 
         // ADD / REMOVE / EDIT functionality (Professors, Classrooms, Classes)
@@ -1125,7 +1133,7 @@ namespace Schedule_WPF
         }
 
         // DRAG/DROP functionality
-        private void MouseMoveOnGridRow(object sender, MouseEventArgs e) // Handles DRAG operation on unassigned classes list item
+        private void MouseMoveOnGridRow(object sender, MouseEventArgs e) // Handles DRAG operation on class list items 
         {
             TextBlock cellUnderMouse = sender as TextBlock;
             if (cellUnderMouse != null && e.LeftButton == MouseButtonState.Pressed)
@@ -1134,7 +1142,101 @@ namespace Schedule_WPF
                 DragDrop.DoDragDrop(Unassigned_Classes_Grid, row, DragDropEffects.Copy);
             }
         }
-        private void HandleDropToCell(Object sender, DragEventArgs e) // !!! Needs validation checks // Handles DROP operation to assigned classes box
+        private void MouseMoveOnAssignedClass(object sender, MouseEventArgs e) // Handles DRAG operation on GUI classes box 
+        {
+            Label labelUnderMouse = sender as Label;
+            int classIndex = -1;
+            if ((labelUnderMouse != null) && (e.LeftButton == MouseButtonState.Pressed) && (labelUnderMouse.Tag != null) && (labelUnderMouse.Tag.ToString() != ""))
+            {
+                // find index of class being represented by the label
+                for (int i = 0; i < classList.Count; i++)
+                {
+                    if (classList[i].CRN == Int32.Parse(labelUnderMouse.Tag.ToString()))
+                    {
+                        classIndex = i;
+                        break;
+                    }
+                }
+                // Package the data
+                DataObject data = new DataObject();
+                data.SetData(typeof(int), classIndex);
+                data.SetData(typeof(object), labelUnderMouse);
+                // send dataObject
+                DragDrop.DoDragDrop(labelUnderMouse, data, DragDropEffects.Copy);
+            }
+        }
+        private void HandleDropToList(Object sender, DragEventArgs e) // Handles DROP operation to unassigned classes list 
+        {
+            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
+            if (sourceLabel != null)
+            {
+                int classIndex = (int)e.Data.GetData(typeof(int));
+                // clear the Label
+                sourceLabel.Content = "";
+                RGB_Color white_bg = new RGB_Color(255, 255, 255);
+                sourceLabel.Background = white_bg.colorBrush2;
+                sourceLabel.ContextMenu = null;
+                // add the class to unassigned class list
+                classList[classIndex].Classroom = new ClassRoom();
+                classList[classIndex].ClassDay = "";
+                classList[classIndex].StartTime = new Timeslot();
+                classList[classIndex].isAssigned = false;
+            }
+            else
+            {
+                int classCRN = 0;
+                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
+                if (droppedRow != null)
+                {
+                    TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
+                    classCRN = Int32.Parse(crn_number.Text);
+                    Classes theClass = DetermineClass(classCRN);
+                    string classType = "";
+
+                    if (theClass.Online)
+                    {
+                        classType = "Online";
+                    }
+                    else if (theClass.isAppointment)
+                    {
+                        classType = "Appointment";
+                    }
+                    string messageBoxText = "Are you sure you want to change this class\nfrom " + classType + " to In-Class?";
+                    string caption = classType + " class alteration";
+                    MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                    MessageBoxImage icon = MessageBoxImage.Question;
+                    // Display + Process message box results
+                    MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                    switch (result)
+                    {
+                        case MessageBoxResult.Yes:
+                            // Find the class
+                            for (int i = 0; i < classList.Count; i++)
+                            {
+                                if (classList[i].CRN == classCRN)
+                                {
+                                    if (classType == "Online")
+                                    {
+                                        classList[i].Online = false;
+                                    }
+                                    else if (classType == "Appointment")
+                                    {
+                                        classList[i].isAppointment = false;
+                                    }
+                                    classList[i].Classroom = new ClassRoom();
+                                }
+                            }
+                            break;
+                        case MessageBoxResult.No:
+                            break;
+                        case MessageBoxResult.Cancel:
+                            break;
+                    }
+                }
+            }
+            RefreshGUI();
+        }
+        private void HandleDropToCell(Object sender, DragEventArgs e) // Handles DROP operation to GUI classes box 
         {
             Label sourceLabel = (Label)e.Data.GetData(typeof(object));
             Label receiver = sender as Label;
@@ -1312,100 +1414,6 @@ namespace Schedule_WPF
                 }
             }
         }
-        private void MouseMoveOnAssignedClass(object sender, MouseEventArgs e) // Handles DRAG operation on assigned classes box
-        {
-            Label labelUnderMouse = sender as Label;
-            int classIndex = -1;
-            if ((labelUnderMouse != null) && (e.LeftButton == MouseButtonState.Pressed) && (labelUnderMouse.Tag != null) && (labelUnderMouse.Tag.ToString() != ""))
-            {
-                // find index of class being represented by the label
-                for (int i = 0; i < classList.Count; i++)
-                {
-                    if (classList[i].CRN == Int32.Parse(labelUnderMouse.Tag.ToString()))
-                    {
-                        classIndex = i;
-                        break;
-                    }
-                }
-                // Package the data
-                DataObject data = new DataObject();
-                data.SetData(typeof(int), classIndex);
-                data.SetData(typeof(object), labelUnderMouse);
-                // send dataObject
-                DragDrop.DoDragDrop(labelUnderMouse, data, DragDropEffects.Copy);
-            }
-        }
-        private void HandleDropToList(Object sender, DragEventArgs e) // Handles DROP operation to unassigned classes list 
-        {
-            Label sourceLabel = (Label)e.Data.GetData(typeof(object));
-            if (sourceLabel != null)
-            {
-                int classIndex = (int)e.Data.GetData(typeof(int));
-                // clear the Label
-                sourceLabel.Content = "";
-                RGB_Color white_bg = new RGB_Color(255, 255, 255);
-                sourceLabel.Background = white_bg.colorBrush2;
-                sourceLabel.ContextMenu = null;
-                // add the class to unassigned class list
-                classList[classIndex].Classroom = new ClassRoom();
-                classList[classIndex].ClassDay = "";
-                classList[classIndex].StartTime = new Timeslot();
-                classList[classIndex].isAssigned = false;
-            }
-            else
-            {
-                int classCRN = 0;
-                DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
-                if (droppedRow != null)
-                {
-                    TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
-                    string classType = "";
-
-                    if (theClass.Online)
-                    {
-                        classType = "Online";
-                    }
-                    else if (theClass.isAppointment)
-                    {
-                        classType = "Appointment";
-                    }
-                    string messageBoxText = "Are you sure you want to change this class\nfrom " + classType + " to In-Class?";
-                    string caption = classType + " class alteration";
-                    MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                    MessageBoxImage icon = MessageBoxImage.Question;
-                    // Display + Process message box results
-                    MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-                    switch (result)
-                    {
-                        case MessageBoxResult.Yes:
-                            // Find the class
-                            for (int i = 0; i < classList.Count; i++)
-                            {
-                                if (classList[i].CRN == classCRN)
-                                {
-                                    if (classType == "Online")
-                                    {
-                                        classList[i].Online = false;
-                                    }
-                                    else if (classType == "Appointment")
-                                    {
-                                        classList[i].isAppointment = false;
-                                    }
-                                    classList[i].Classroom = new ClassRoom();
-                                }
-                            }
-                            break;
-                        case MessageBoxResult.No:
-                            break;
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-            }
-            RefreshGUI();
-        }
         private void HandleDropToOnlineList(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
         {
             Label sourceLabel = (Label)e.Data.GetData(typeof(object));
@@ -1480,7 +1488,7 @@ namespace Schedule_WPF
             }
             RefreshGUI();
         }
-        private void HandleDropToAppointmentList(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
+        private void HandleDropToAppointmentList(Object sender, DragEventArgs e) // Handles DROP operation to appointment classes list 
         {
             Label sourceLabel = (Label)e.Data.GetData(typeof(object));
             if (sourceLabel != null)
@@ -1555,7 +1563,7 @@ namespace Schedule_WPF
             }
             RefreshGUI();
         }
-        private void HandleDropToAppointment2List(Object sender, DragEventArgs e) // Handles DROP operation to online classes list 
+        private void HandleDropToAppointment2List(Object sender, DragEventArgs e) // Handles DROP operation to appointment2 classes list 
         {
             Label sourceLabel = (Label)e.Data.GetData(typeof(object));
             if (sourceLabel != null)
@@ -1632,14 +1640,14 @@ namespace Schedule_WPF
         }
 
         // Utility functions
-        public RGB_Color StringToRGB(string s)
+        public RGB_Color StringToRGB(string s) // Converts rgb string to a RGB_Color object 
         {
             RGB_Color color;
             String[] parts = s.Split('.');
             color = new RGB_Color(Byte.Parse(parts[0]), Byte.Parse(parts[1]), Byte.Parse(parts[2]));
             return color;
         }
-        public Timeslot DetermineTime(string startTime, string classDay)
+        public Timeslot DetermineTime(string startTime, string classDay) // Finds corresponding Timeslot object based on start time and class day 
         {
             string id = startTime.Substring(0, 2);
             if (classDay == "MWF")
@@ -1665,7 +1673,7 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced time!");
             return new Timeslot();
         }
-        public ClassRoom DetermineClassroom(string building, int roomNum)
+        public ClassRoom DetermineClassroom(string building, int roomNum) // Finds corresponding ClassRoom object based on building name and room number 
         {
             string id = building + roomNum;
             for (int i = 0; i < classrooms.Count; i++)
@@ -1678,7 +1686,7 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced classroom!");
             return new ClassRoom();
         }
-        public Professors DetermineProfessor(string sruID)
+        public Professors DetermineProfessor(string sruID) // Finds corresponding Professor object based on SRUID 
         {
             for (int i = 0; i < professors.Count; i++)
             {
@@ -1690,7 +1698,7 @@ namespace Schedule_WPF
             MessageBox.Show("DEBUG: Couldnt find the referenced professor!");
             return new Professors();
         }
-        public Classes DetermineClass(int crn)
+        public Classes DetermineClass(int crn) // Finds corresponding Class object based on CRN 
         {
             for (int i = 0; i < classList.Count; i++)
             {
@@ -1709,8 +1717,8 @@ namespace Schedule_WPF
                 d = VisualTreeHelper.GetParent(d);
             }
             return d as T;
-        }
-        public bool DetermineTimeConflict(Classes _class, string days, string timeID)
+        } // Finds the closest <T> type parent of the passed XAML element
+        public bool DetermineTimeConflict(Classes _class, string days, string timeID) // Determines if professor is already teaching at that time before he/she is asssigned to a timeslot 
         {
             if (_class.Prof.FirstName == "None")
             {
@@ -1759,7 +1767,7 @@ namespace Schedule_WPF
                 return isConflict;
             }
         }
-        public string formatTime(string time)
+        public string formatTime(string time) // Standardizes time format being read from excel file to prevent errors when creating the classes 
         {
             string formattedTime = "";
             if (time.Contains(":"))
@@ -1784,7 +1792,7 @@ namespace Schedule_WPF
             }
             return formattedTime;
         }
-        public string getFileDirectory(string filePath)
+        public string getFileDirectory(string filePath) // Extracts directory string from full filepath string 
         {
             string directory = "";
             for (int i = (filePath.Length - 1); i >= 0; i--)
@@ -1798,7 +1806,7 @@ namespace Schedule_WPF
             //MessageBox.Show("Directory: " + directory);
             return directory;
         }
-        public DataTable getDataTableFromClasses()
+        public DataTable getDataTableFromClasses() // Creates a datatable based on classList 
         {
             //Creating DataTable  
             DataTable dt = new DataTable();
@@ -1834,6 +1842,23 @@ namespace Schedule_WPF
             dt.AcceptChanges();
             return dt;
         }
+        public string ComputeSha256Hash(byte[] rawData) // Compute the SHA256 hash digest of the passed byte buffer. Then convert it to string format. 
+        {
+            // Create a SHA256   
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                // ComputeHash - returns byte array  
+                byte[] bytes = sha256Hash.ComputeHash(rawData);
+
+                // Convert byte array to a string   
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
 
         // Professor + Color pairings (Used for persistent memory storage in xml file)
         public class Pairs
@@ -1847,11 +1872,5 @@ namespace Schedule_WPF
             public string ProfName { get; set; }
             public string Color { get; set; }
         }
-
-        void MainWindow_Closing(object sender, CancelEventArgs e)
-        {
-            MainLoaded.setClosed();
-        }
-
     }
 }

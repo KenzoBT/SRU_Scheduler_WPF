@@ -116,6 +116,7 @@
       <DependentUpon>FileSelect.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Classes.cs" />
+    <Compile Include="Models\ClassesHash.cs" />
     <Compile Include="Models\ClassList.cs" />
     <Compile Include="Models\ClassRoom.cs" />
     <Compile Include="EditProfessorDialog.xaml.cs">

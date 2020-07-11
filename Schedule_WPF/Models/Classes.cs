@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -66,6 +67,18 @@ namespace Schedule_WPF.Models
         {
             Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment);
             return deepcopy;
+        }
+
+        public byte[] Serialize()
+        {
+            using (MemoryStream m = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(m))
+                {
+                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + Prof.FullName + Classroom.ClassID);
+                }
+                return m.ToArray();
+            }
         }
 
         public string DeptName { get { return _DeptName; } set { _DeptName = value; OnPropertyChanged("DeptName"); } }
