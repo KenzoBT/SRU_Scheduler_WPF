@@ -25,6 +25,7 @@
         <sys:String x:Key="Set_Prof_FN">---</sys:String>
         <sys:String x:Key="Set_Prof_LN">---</sys:String>
         <sys:String x:Key="Set_Prof_ID">---</sys:String>
+        <sys:String x:Key="Set_Prof_Color">---</sys:String>
         <!-- Variables to store info from AddClassDialog -->
         <sys:Boolean x:Key="Set_Class_Success">false</sys:Boolean>
         <sys:String x:Key="Set_Class_Dept">---</sys:String>

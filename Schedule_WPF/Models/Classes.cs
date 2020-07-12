@@ -75,7 +75,7 @@ namespace Schedule_WPF.Models
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + Prof.FullName + Classroom.ClassID);
+                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + Prof.FullName + Classroom.ClassID + Prof.Prof_Color.ToString());
                 }
                 return m.ToArray();
             }

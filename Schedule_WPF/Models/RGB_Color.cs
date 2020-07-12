@@ -26,6 +26,13 @@ namespace Schedule_WPF.Models
             G = g;
             B = b;
         }
+        public RGB_Color(string hex) // takes in aRGB hex
+        {
+            hex = hex.Substring(3);
+            R = hexToByte(hex.Substring(0, 2));
+            G = hexToByte(hex.Substring(2, 2));
+            B = hexToByte(hex.Substring(4, 2));
+        }
 
         public byte R { get { return _R; } set { _R = value; OnPropertyChanged("R"); } }
         public byte G { get { return _G; } set { _G = value; OnPropertyChanged("G"); } }
@@ -33,6 +40,13 @@ namespace Schedule_WPF.Models
         public string colorString { get { return ("" + R + "." + G + "." + B); } }
         public Color colorBrush { get { return Color.FromRgb(R, G, B); } }
         public Brush colorBrush2 { get { return new SolidColorBrush(Color.FromRgb(R, G, B)); } }
+
+        private byte hexToByte(string hex)
+        {
+            int intValue = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+            byte Byte = (byte)intValue;
+            return Byte;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -43,5 +57,6 @@ namespace Schedule_WPF.Models
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
     }
 }

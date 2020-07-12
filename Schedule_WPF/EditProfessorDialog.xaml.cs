@@ -32,6 +32,7 @@ namespace Schedule_WPF.Models
                 FirstName.Text = targetProfessor.FirstName;
                 LastName.Text = targetProfessor.LastName;
                 ID.Text = targetProfessor.SRUID;
+                colorPicker.SelectedColor = targetProfessor.profRGB.colorBrush;
             }
         }
 
@@ -42,6 +43,7 @@ namespace Schedule_WPF.Models
                 targetProfessor.FirstName = FirstName.Text;
                 targetProfessor.LastName = LastName.Text;
                 targetProfessor.SRUID = ID.Text;
+                targetProfessor.profRGB = new RGB_Color(colorPicker.SelectedColor.ToString());
                 Close();
             }
         }

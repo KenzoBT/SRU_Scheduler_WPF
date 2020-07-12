@@ -4,12 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="AddProfessorDialog" Height="405" Width="405" Icon="images/add.png" RenderOptions.BitmapScalingMode="HighQuality" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
-    <Grid Background="#dddddd">
+    <Grid Background="#dddddd" Height="Auto">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="0.3*"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
@@ -38,7 +40,11 @@
             <TextBlock FontSize="16" VerticalAlignment="Center">SRU ID :</TextBlock>
             <TextBox Name="ID" Margin="39,0,0,0" Width="200" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
         </WrapPanel>
-        <Button Grid.ColumnSpan="4" Grid.Row="6" Grid.Column="0" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
+        <WrapPanel Grid.Row="5" Grid.Column="1" VerticalAlignment="Center" >
+            <TextBlock FontSize="16" VerticalAlignment="Center">Color :</TextBlock>
+            <xctk:ColorPicker Name="colorPicker" Height="30" Width="200" Margin="50,0,0,0" ShowAvailableColors="False"/>
+        </WrapPanel>
+        <Button Grid.ColumnSpan="4" Grid.Row="7" Grid.Column="0" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
         <StackPanel Name="FirstName_Required" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
             <Image Source="images/warning_2.png" Height="20" ToolTip="First name required!" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>

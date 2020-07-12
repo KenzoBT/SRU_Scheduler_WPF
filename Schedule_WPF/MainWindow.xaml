@@ -173,8 +173,8 @@
                         </Grid.ColumnDefinitions>
                         <!-- Unassigned Classes Grid -->
                         <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">Unassigned Classes</Label>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Margin="15,0,15,15">
-                            <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList" CanUserAddRows="False">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Margin="15,0,15,15" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                            <DataGrid x:Name="Unassigned_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToList" CanUserAddRows="False" CanUserDeleteRows="False">
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
                                         <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
@@ -201,8 +201,8 @@
                         <!-- Online Classes List -->
                         <TabControl Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" TabStripPlacement="Top" Margin="0,8,0,15">
                             <TabItem Header="WEB" Margin="-3" Style="{StaticResource SmallTab}">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3">
-                                    <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"  Margin="-3" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                                    <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False" CanUserDeleteRows="False">
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
                                                 <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
@@ -228,8 +228,8 @@
                                 </ScrollViewer>
                             </TabItem>
                             <TabItem Header="APPT" Margin="-3" Style="{StaticResource SmallTab}">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3">
-                                    <DataGrid x:Name="Appointment_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToAppointmentList" CanUserAddRows="False">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                                    <DataGrid x:Name="Appointment_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToAppointmentList" CanUserAddRows="False" CanUserDeleteRows="False">
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
                                                 <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
@@ -255,8 +255,8 @@
                                 </ScrollViewer>
                             </TabItem>
                             <TabItem Header="APPT2" Margin="-3" Style="{StaticResource SmallTab}">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3">
-                                    <DataGrid x:Name="Appointment2_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToAppointment2List" CanUserAddRows="False">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="-3" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                                    <DataGrid x:Name="Appointment2_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToAppointment2List" CanUserAddRows="False" CanUserDeleteRows="False">
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
                                                 <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
@@ -285,7 +285,7 @@
                         
                         <!-- Professor Color Key -->
                         <Label Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">Professor Key</Label>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="2" Margin="15,0,15,15">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="2" Margin="15,0,15,15" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                             <ListView Name="Professor_Key_List" ScrollViewer.CanContentScroll="True">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
@@ -357,8 +357,8 @@
                     <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
                         <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Classes</TextBlock>
                     </Viewbox>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
-                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False" CanUserDeleteRows="False">
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow">
                                     <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
@@ -414,8 +414,8 @@
                     <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
                         <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Professors</TextBlock>
                     </Viewbox>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15">
-                        <DataGrid x:Name="Full_Professors_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                        <DataGrid x:Name="Full_Professors_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False" CanUserDeleteRows="False">
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow">
                                     <Setter Property="ContextMenu" Value="{StaticResource ProfessorContextMenu}" />

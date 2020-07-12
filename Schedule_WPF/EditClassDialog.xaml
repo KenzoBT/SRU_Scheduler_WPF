@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Schedule_WPF"
         mc:Ignorable="d"
-        Title="EditClassDialog" Height="450" Width="750">
+        Title="EditClassDialog" Height="450" Width="750" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}" x:Key="SmallTextBox">
             <Setter Property="Width" Value="70"/>
