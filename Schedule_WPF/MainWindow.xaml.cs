@@ -52,6 +52,7 @@ namespace Schedule_WPF
             DrawTimeTables();
             FillDerivedLists();
             BindData();
+            GenerateClassListHashes();
             latestHashDigest = ComputeSha256Hash(classList.Serialize()); // initialize hash digest of classlist (used to see if changes have been made before closing application)
             Helper.CloseUniqueWindow<FileSelect>(); // Close File Select window
         }
@@ -328,8 +329,6 @@ namespace Schedule_WPF
                         // Create class and add to classlist
                         Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint);
                         classList.Add(tmpClass);
-                        // Compute hash digest and save CRN/Hash pair in list
-                        hashedClasses.Add(new ClassesHash(CRN, latestHashDigest));
                     }
                 }
             }
@@ -680,9 +679,43 @@ namespace Schedule_WPF
                 XLWorkbook wb = new XLWorkbook();
                 DataTable dt = getDataTableFromClasses();
                 var ws = wb.Worksheets.Add(dt);
+
+                // Colors
+                XLColor empty = XLColor.NoColor;
+                XLColor header = XLColor.FromHtml("#FF016648");
+                XLColor edited = XLColor.FromHtml("#FFFFCFCF");
+                XLColor added = XLColor.FromHtml("#FFD4FFC4");
+
+                // Styling
+                ws.Table(0).Theme = XLTableTheme.None;
+                ws.Row(1).Style.Fill.BackgroundColor = header;
+                ws.Row(1).Style.Font.Bold = true;
+                ws.Row(1).Style.Font.FontColor = XLColor.White;
                 ws.Column(7).AdjustToContents();
                 ws.Column(22).AdjustToContents();
                 ws.Column(23).AdjustToContents();
+
+                for (int i = 0; i < classList.Count; i++)
+                {
+                    ws.Row(i + 2).Style.Fill.BackgroundColor = added;
+                    // match CRN
+                    for (int n = 0; n < hashedClasses.Count; n++)
+                    {
+                        if (classList[i].CRN == hashedClasses[n].CRN)
+                        {
+                            // if hash is different change color to edited
+                            if (hashedClasses[n].Hash != ComputeSha256Hash(classList[i].Serialize()))
+                            {
+                                ws.Row(i + 2).Style.Fill.BackgroundColor = edited;
+                            }
+                            else
+                            {
+                                ws.Row(i + 2).Style.Fill.BackgroundColor = empty;
+                            }
+                            break;
+                        }
+                    }
+                }
 
                 wb.SaveAs(fileName);
             }
@@ -1840,6 +1873,15 @@ namespace Schedule_WPF
                 return builder.ToString();
             }
         }
+        public void GenerateClassListHashes() // Generate initial hashes for class list read from excel file (for comparison when writing to new file)
+        {
+            string hash;
+            for (int i = 0; i < classList.Count; i++)
+            {
+                hash = ComputeSha256Hash(classList[i].Serialize());
+                hashedClasses.Add(new ClassesHash(classList[i].CRN, hash));
+            }
+        }
         public void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e) // Set the scrolling speed for the lists using mousewheel 
         {
             ScrollViewer scv = (ScrollViewer)sender;
@@ -1859,6 +1901,5 @@ namespace Schedule_WPF
             public string ProfName { get; set; }
             public string Color { get; set; }
         }
-
     }
 }
