@@ -734,17 +734,20 @@ namespace Schedule_WPF
             string newDigest = ComputeSha256Hash(classList.Serialize());
             if (newDigest != latestHashDigest)
             {
-                string messageBoxText = "You have unsaved changes!\nAre you sure you want to exit without saving?";
+                string messageBoxText = "You have unsaved changes!\nWould you like to Save and Exit?";
                 string caption = "Unsaved changes";
-                MessageBoxButton button = MessageBoxButton.YesNo;
+                MessageBoxButton button = MessageBoxButton.YesNoCancel;
                 MessageBoxImage icon = MessageBoxImage.Question;
                 // Display + Process message box results
                 MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
                 switch (result)
                 {
                     case MessageBoxResult.Yes:
+                        SaveChanges();
                         break;
                     case MessageBoxResult.No:
+                        break;
+                    case MessageBoxResult.Cancel:
                         e.Cancel = true;
                         break;
                 }
