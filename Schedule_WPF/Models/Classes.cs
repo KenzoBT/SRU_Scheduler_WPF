@@ -23,6 +23,7 @@ namespace Schedule_WPF.Models
         private bool _Online;
         private bool _isAssigned;
         private bool _isAppointment;
+        private bool _hasChanged;
         private Professors _Prof;
         private ClassRoom _Classroom;
 
@@ -42,10 +43,11 @@ namespace Schedule_WPF.Models
             isAssigned = false;
             Online = false;
             isAppointment = false;
+            hasChanged = false;
         }
 
         public Classes(int crn, string deptName, int classNum, int secNum, string className, int credits,
-            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment)
+            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment, bool changed)
         {
             CRN = crn;
             DeptName = deptName;
@@ -61,11 +63,12 @@ namespace Schedule_WPF.Models
             isAssigned = false;
             Online = online;
             isAppointment = appointment;
+            hasChanged = changed;
         }
 
         public Classes DeepCopy()
         {
-            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment);
+            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged);
             return deepcopy;
         }
 
@@ -75,7 +78,7 @@ namespace Schedule_WPF.Models
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + Prof.FullName + Classroom.ClassID + Prof.Prof_Color.ToString());
+                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + hasChanged + Prof.FullName + Classroom.ClassID + Prof.Prof_Color.ToString());
                 }
                 return m.ToArray();
             }
@@ -93,6 +96,7 @@ namespace Schedule_WPF.Models
         public bool Online { get { return _Online; } set { _Online = value; OnPropertyChanged("Online"); } }
         public bool isAssigned { get { return _isAssigned; } set { _isAssigned = value; OnPropertyChanged("isAssigned"); } }
         public bool isAppointment { get { return _isAppointment; } set { _isAppointment = value; OnPropertyChanged("isAppointment"); } }
+        public bool hasChanged { get { return _hasChanged; } set { _hasChanged = value; OnPropertyChanged("hasChanged"); } }
         public Professors Prof { get { return _Prof; } set { _Prof = value; OnPropertyChanged("Prof"); } }
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }

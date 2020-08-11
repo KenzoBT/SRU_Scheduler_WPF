@@ -170,7 +170,7 @@ namespace Schedule_WPF
                 int CRN, ClassNum, Section, Credits, SeatsTaken;
                 int duplicate_CRN_indexer = -1;
                 string Dept, ClassName, ClassDay, classID, profName;
-                bool Online, Appoint;
+                bool Online, Appoint, Changed;
                 List<int> CRN_List = new List<int>();
                 foreach (var row in rows)
                 {
@@ -186,6 +186,7 @@ namespace Schedule_WPF
                     Timeslot time = new Timeslot();
                     Online = false;
                     Appoint = false;
+                    Changed = false;
 
                     // CRN 
                     // Primary Key, if CRN is empty, do not enter record.
@@ -326,8 +327,13 @@ namespace Schedule_WPF
                             string timePart = formatTime(rawTime.Split(' ')[0]);
                             time = DetermineTime(timePart, ClassDay);
                         }
+                        // Determine if it is higlighted red (changed) or not in the excel file
+                        if(row.Cell(1).Style.Fill.BackgroundColor == XLColor.FromHtml("#FFFFCFCF"))
+                        {
+                            Changed = true;
+                        }
                         // Create class and add to classlist
-                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint);
+                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed);
                         classList.Add(tmpClass);
                     }
                 }
@@ -695,20 +701,17 @@ namespace Schedule_WPF
                 ws.Column(22).AdjustToContents();
                 ws.Column(23).AdjustToContents();
 
+                // Iterate over classList to format the background of each row appropriately
                 for (int i = 0; i < classList.Count; i++)
                 {
-                    ws.Row(i + 2).Style.Fill.BackgroundColor = added;
+                    ws.Row(i + 2).Style.Fill.BackgroundColor = edited;
                     // match CRN
                     for (int n = 0; n < hashedClasses.Count; n++)
                     {
                         if (classList[i].CRN == hashedClasses[n].CRN)
                         {
                             // if hash is different change color to edited
-                            if (hashedClasses[n].Hash != ComputeSha256Hash(classList[i].Serialize()))
-                            {
-                                ws.Row(i + 2).Style.Fill.BackgroundColor = edited;
-                            }
-                            else
+                            if (hashedClasses[n].Hash == ComputeSha256Hash(classList[i].Serialize()) && !classList[i].hasChanged)
                             {
                                 ws.Row(i + 2).Style.Fill.BackgroundColor = empty;
                             }
@@ -995,7 +998,7 @@ namespace Schedule_WPF
                 {
                     CRoom = new ClassRoom();
                 }
-                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment));
+                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false));
                 Application.Current.Resources["Set_Class_Success"] = false;
             }
         }
