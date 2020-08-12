@@ -39,10 +39,10 @@ namespace Schedule_WPF
         List<ClassesHash> hashedClasses = new List<ClassesHash>();
         string term, session, filePath, latestHashDigest, colorFilePath;
         RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
-        Pairs colorPairs;
+        Pairs colorPairs = (Pairs)Application.Current.FindResource("ColorPairs_List_View");
 
         ////////////// START OF EXECUTION ////////////////
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -567,7 +567,7 @@ namespace Schedule_WPF
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorConfigurations9.xml";
+            string filename = "ColorConfigurations12.xml";
             colorFilePath = System.IO.Path.Combine(tempPath, filename);
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(colorFilePath))
@@ -641,8 +641,29 @@ namespace Schedule_WPF
                 }
             }
         }
+        public void UpdatePairs() // Update colorPairs list to account for any additions
+        {
+            for (int i = 0; i < professors.Count; i++)
+            {
+                for (int n = 0; n < colorPairs.ColorPairings.Count; n++)
+                {
+                    if (colorPairs.ColorPairings[n].ProfName == professors[i].FullName)
+                    {
+                        break;
+                    }
+                    if (n == (colorPairs.ColorPairings.Count - 1))
+                    {
+                        MessageBox.Show("Adding new color pair...\n\nProfessor: " + professors[i].FullName + "\nColor: " + professors[i].profRGB.colorString);
+                        // Add prof + color pairing
+                        colorPairs.ColorPairings.Add(new ProfColors { ProfName = professors[i].FullName, Color = professors[i].profRGB.colorString });
+                    }
+                }
+            }
+        }
         public void SerializePairs() // Save professor/color pairs to XML file 
         {
+            // Update colorPairs to account for any new professors
+            UpdatePairs();
             // Save changes to Colors.xml
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             using (FileStream fs = new FileStream(colorFilePath, FileMode.OpenOrCreate))
@@ -722,12 +743,12 @@ namespace Schedule_WPF
 
                 wb.SaveAs(fileName);
             }
+            SerializePairs();
         }
         public void Btn_SaveChanges_Click(object sender, RoutedEventArgs e) // Save changes button handler. Calls SaveChanges() 
         {
             SaveChanges();
             latestHashDigest = ComputeSha256Hash(classList.Serialize());
-            SerializePairs();
         }
         public void MainWindow_Closing(object sender, CancelEventArgs e) // Window close button handler. Prevents closing if user has unsaved changes 
         {
@@ -1004,6 +1025,15 @@ namespace Schedule_WPF
                 AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false));
                 Application.Current.Resources["Set_Class_Success"] = false;
             }
+            /*
+            // If new professor was added, add the professor/color pairing to the colorPairs list
+            if ((bool)Application.Current.Resources["Set_Prof_Success"])
+            {
+                colorPairs.ColorPairings.Add(new ProfColors { ProfName = professors[professors.Count - 1].FullName, Color = professors[professors.Count - 1].profRGB.colorString });
+                // Reset AddProfDialog success flag
+                Application.Current.Resources["Set_Prof_Success"] = false;
+            }
+            */
         }
         public void RemoveClass(int crn)
         {
@@ -1895,6 +1925,7 @@ namespace Schedule_WPF
             e.Handled = true;
         }
 
+        /*
         // Professor + Color pairings (Used for persistent memory storage in xml file)
         public class Pairs
         {
@@ -1907,5 +1938,6 @@ namespace Schedule_WPF
             public string ProfName { get; set; }
             public string Color { get; set; }
         }
+        */
     }
 }

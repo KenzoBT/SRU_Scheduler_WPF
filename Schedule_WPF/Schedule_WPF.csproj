@@ -140,6 +140,8 @@
     <Compile Include="Models\ClassRoomList.cs" />
     <Compile Include="Models\Helper.cs" />
     <Compile Include="Models\MainLoaded.cs" />
+    <Compile Include="Models\Pairs.cs" />
+    <Compile Include="Models\ProfColors.cs" />
     <Compile Include="Models\ProfessorList.cs" />
     <Compile Include="Models\Professors.cs" />
     <Compile Include="Models\RGB_Color.cs" />
@@ -270,6 +272,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="images\edit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\add-user.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

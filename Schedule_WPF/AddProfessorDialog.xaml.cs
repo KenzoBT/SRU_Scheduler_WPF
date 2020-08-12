@@ -39,7 +39,7 @@ namespace Schedule_WPF
                 Application.Current.Resources["Set_Prof_Color"] = color;
                 Application.Current.Resources["Set_Prof_Success"] = true;
                 
-                this.Close();
+                Close();
             }
         }
 
