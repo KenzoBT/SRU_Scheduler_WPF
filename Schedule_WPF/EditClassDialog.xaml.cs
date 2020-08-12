@@ -235,5 +235,31 @@ namespace Schedule_WPF
 
             return success;
         }
+
+        private void Add_Prof_Click(object sender, RoutedEventArgs e)
+        {
+            AddProfessorDialog addProfDialog = new AddProfessorDialog();
+            addProfDialog.Owner = this;
+            addProfDialog.ShowDialog();
+
+            ProfessorList professors = (ProfessorList)Application.Current.Resources["Professor_List_View"];
+
+            if ((bool)Application.Current.Resources["Set_Prof_Success"])
+            {
+                // Get data about new professor
+                string fName = (string)Application.Current.Resources["Set_Prof_FN"];
+                string lName = (string)Application.Current.Resources["Set_Prof_LN"];
+                string id = (string)Application.Current.Resources["Set_Prof_ID"];
+                string colorString = (string)Application.Current.Resources["Set_Prof_Color"];
+                // Create new professor object and add to professor list
+                Professors prof = new Professors(fName, lName, id);
+                prof.profRGB = new RGB_Color(colorString);
+                professors.Add(prof);
+                // Set the new professor as the comboBox selected value
+                Prof_Text.SelectedIndex = (professors.Count - 1);
+                // Reset Success flag for the addProfessorDialog
+                Application.Current.Resources["Set_Prof_Success"] = false;
+            }
+        }
     }
 }

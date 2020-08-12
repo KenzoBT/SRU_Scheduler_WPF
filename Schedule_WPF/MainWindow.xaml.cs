@@ -653,7 +653,7 @@ namespace Schedule_WPF
                     }
                     if (n == (colorPairs.ColorPairings.Count - 1))
                     {
-                        MessageBox.Show("Adding new color pair...\n\nProfessor: " + professors[i].FullName + "\nColor: " + professors[i].profRGB.colorString);
+                        //MessageBox.Show("Adding new color pair...\n\nProfessor: " + professors[i].FullName + "\nColor: " + professors[i].profRGB.colorString);
                         // Add prof + color pairing
                         colorPairs.ColorPairings.Add(new ProfColors { ProfName = professors[i].FullName, Color = professors[i].profRGB.colorString });
                     }
