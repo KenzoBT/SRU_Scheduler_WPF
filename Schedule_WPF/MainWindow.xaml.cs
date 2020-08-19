@@ -617,7 +617,14 @@ namespace Schedule_WPF
                     {
                         //MessageBox.Show("Random Color");
                         Random rand = new Random();
-                        professors[i].profRGB = new RGB_Color((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
+                        RGB_Color tempColor = new RGB_Color((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
+                        while (isColorTaken(tempColor))
+                        {
+                            tempColor.R = (byte)rand.Next(256);
+                            tempColor.G = (byte)rand.Next(256);
+                            tempColor.B = (byte)rand.Next(256);
+                        }
+                        professors[i].profRGB = tempColor;
                     }
                     // Add it to pairings list
                     colorPairs.ColorPairings.Add(new ProfColors { ProfName = professors[i].FullName, Color = professors[i].profRGB.colorString });
@@ -1696,6 +1703,26 @@ namespace Schedule_WPF
             String[] parts = s.Split('.');
             color = new RGB_Color(Byte.Parse(parts[0]), Byte.Parse(parts[1]), Byte.Parse(parts[2]));
             return color;
+        }
+        public bool isColorTaken(RGB_Color color)
+        {
+            for (int i = 0; i < professors.Count; i++)
+            {
+                if (withinColorRange(color, professors[i].profRGB))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool withinColorRange(RGB_Color c1, RGB_Color c2)
+        {
+            int threshold = 65;
+            if (Math.Abs(c1.R - c2.R) <= threshold && Math.Abs(c1.G - c2.G) <= threshold && Math.Abs(c1.B - c2.B) <= threshold)
+            {
+                return true;
+            }
+            return false;
         }
         public Timeslot DetermineTime(string startTime, string classDay) // Finds corresponding Timeslot object based on start time and class day 
         {

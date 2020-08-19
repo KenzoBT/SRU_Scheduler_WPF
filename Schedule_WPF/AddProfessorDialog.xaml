@@ -57,5 +57,11 @@
         <StackPanel Name="ID_Invalid" Grid.Row="4" Grid.Column="2" Height="20" Visibility="Hidden">
             <Image Source="images/warning.png" Height="20" ToolTip="Invalid SRU ID! (E.g. A09999999)" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
+        <StackPanel Name="Color_Invalid" Grid.Row="5" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Color is taken!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Color_Required" Grid.Row="5" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Color required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
     </Grid>
 </Window>
