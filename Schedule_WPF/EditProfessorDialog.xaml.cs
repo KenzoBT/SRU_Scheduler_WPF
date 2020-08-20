@@ -124,7 +124,7 @@ namespace Schedule_WPF.Models
         {
             for (int i = 0; i < professors.Count; i++)
             {
-                if (withinColorRange(color, professors[i].profRGB))
+                if (professors[i].SRUID != ID.Text && withinColorRange(color, professors[i].profRGB))
                 {
                     return true;
                 }
