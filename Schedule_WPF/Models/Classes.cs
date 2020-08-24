@@ -26,6 +26,7 @@ namespace Schedule_WPF.Models
         private bool _hasChanged;
         private Professors _Prof;
         private ClassRoom _Classroom;
+        private List<string> _extraData; // place for all excel fields that havent been computed (yet)
 
         public Classes()
         {
@@ -44,10 +45,11 @@ namespace Schedule_WPF.Models
             Online = false;
             isAppointment = false;
             hasChanged = false;
+            ExtraData = new List<string>();
         }
 
         public Classes(int crn, string deptName, int classNum, int secNum, string className, int credits,
-            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment, bool changed)
+            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment, bool changed, List<string> extras)
         {
             CRN = crn;
             DeptName = deptName;
@@ -64,11 +66,12 @@ namespace Schedule_WPF.Models
             Online = online;
             isAppointment = appointment;
             hasChanged = changed;
+            ExtraData = extras;
         }
 
         public Classes DeepCopy()
         {
-            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged);
+            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged, ExtraData);
             return deepcopy;
         }
 
@@ -78,7 +81,7 @@ namespace Schedule_WPF.Models
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + hasChanged + Prof.FullName + Classroom.ClassID + Prof.Prof_Color.ToString());
+                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + hasChanged + Prof.FullName + Classroom.ClassID);
                 }
                 return m.ToArray();
             }
@@ -102,6 +105,7 @@ namespace Schedule_WPF.Models
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
         public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName; } }
+        public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

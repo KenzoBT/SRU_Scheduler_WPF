@@ -37,7 +37,7 @@ namespace Schedule_WPF
         List<string> excelHeaders = new List<string>();
         List<Type> excelTypes = new List<Type>();
         List<ClassesHash> hashedClasses = new List<ClassesHash>();
-        string term, session, filePath, latestHashDigest, colorFilePath;
+        string filePath, latestHashDigest, colorFilePath;
         RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
         Pairs colorPairs = (Pairs)Application.Current.FindResource("ColorPairs_List_View");
 
@@ -68,10 +68,6 @@ namespace Schedule_WPF
                 var worksheet = excelWorkbook.Worksheet(1);
                 int columns = 33;
                 var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
-
-                // Get Term & Session // Temporary fix -- Should be data members of class objects
-                session = "1";
-                term = worksheet.Row(2).Cell(1).GetValue<string>();
 
                 // Populate excel headers array
                 var headerRow = worksheet.Row(1);
@@ -162,7 +158,7 @@ namespace Schedule_WPF
                             if (!classroomFound)
                             {
                                 classrooms.Add(new ClassRoom(bldg, room, capacity));
-                                MessageBox.Show("ROOM ADDED: " + bldg + " " + room + " " + capacity);
+                                //MessageBox.Show("ROOM ADDED: " + bldg + " " + room + " " + capacity);
                             }
                         }
                     }
@@ -334,8 +330,22 @@ namespace Schedule_WPF
                         {
                             Changed = true;
                         }
+                        // Get remaining extra data
+                        List<string> extras = new List<string>();
+                        extras.Add(row.Cell(1).GetValue<string>()); // Term
+                        extras.Add(row.Cell(2).GetValue<string>()); // Session
+                        extras.Add(row.Cell(8).GetValue<string>()); // CrossList
+                        extras.Add(row.Cell(10).GetValue<string>()); // MaxSeats
+                        extras.Add(row.Cell(11).GetValue<string>()); // WaitList
+                        extras.Add(row.Cell(12).GetValue<string>()); // ProjList
+                        extras.Add(row.Cell(14).GetFormattedString()); // CourseStartDate
+                        extras.Add(row.Cell(15).GetFormattedString()); // CourseEndDate
+                        for (int x = 24; x <= 33; x++) // last few misc fields
+                        {
+                            extras.Add(row.Cell(x).GetValue<string>());
+                        }
                         // Create class and add to classlist
-                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed);
+                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, extras);
                         classList.Add(tmpClass);
                     }
                 }
@@ -727,9 +737,12 @@ namespace Schedule_WPF
                 ws.Row(1).Style.Fill.BackgroundColor = header;
                 ws.Row(1).Style.Font.Bold = true;
                 ws.Row(1).Style.Font.FontColor = XLColor.White;
+                /*
                 ws.Column(7).AdjustToContents();
                 ws.Column(22).AdjustToContents();
                 ws.Column(23).AdjustToContents();
+                */
+                ws.Columns().AdjustToContents();
 
                 // Iterate over classList to format the background of each row appropriately
                 for (int i = 0; i < classList.Count; i++)
@@ -1031,7 +1044,7 @@ namespace Schedule_WPF
                 {
                     CRoom = new ClassRoom();
                 }
-                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false));
+                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false, new List<string>()));
                 Application.Current.Resources["Set_Class_Success"] = false;
             }
             /*
@@ -1913,10 +1926,17 @@ namespace Schedule_WPF
                 string end = classList[i].StartTime.End;
                 if (start == "-- ")
                 {
-                    start = "";
+                    start = "a";
                     end = "";
                 }
-                dt.Rows.Add(term, session, classList[i].DeptName, classList[i].ClassNumber, classList[i].SectionNumber, classList[i].CRN, classList[i].ClassName, "", classList[i].Credits, "", "", "", classList[i].SeatsTaken, "", "", classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats, classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID, "", "", "", "", "", "", "", "", "", "");
+                dt.Rows.Add(classList[i].ExtraData[0], classList[i].ExtraData[1], classList[i].DeptName, classList[i].ClassNumber, 
+                    classList[i].SectionNumber, classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[2], classList[i].Credits, 
+                    classList[i].ExtraData[3], classList[i].ExtraData[4], classList[i].ExtraData[5], classList[i].SeatsTaken, 
+                    classList[i].ExtraData[6], classList[i].ExtraData[7], classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats,
+                    classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID,
+                    classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10], classList[i].ExtraData[11],
+                    classList[i].ExtraData[12], classList[i].ExtraData[13], classList[i].ExtraData[14], classList[i].ExtraData[15],
+                    classList[i].ExtraData[16], classList[i].ExtraData[17]);
             }
             dt.AcceptChanges();
             return dt;
