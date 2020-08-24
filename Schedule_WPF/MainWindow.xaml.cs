@@ -1926,7 +1926,7 @@ namespace Schedule_WPF
                 string end = classList[i].StartTime.End;
                 if (start == "-- ")
                 {
-                    start = "a";
+                    start = "";
                     end = "";
                 }
                 dt.Rows.Add(classList[i].ExtraData[0], classList[i].ExtraData[1], classList[i].DeptName, classList[i].ClassNumber, 
