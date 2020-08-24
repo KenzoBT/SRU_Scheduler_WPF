@@ -61,6 +61,7 @@ namespace Schedule_WPF
         
         public void ReadExcel(string file) // Read excel file, create classes objects and append them to classList 
         {
+            
             using (var excelWorkbook = new XLWorkbook(file))
             {
                 // Select Worksheet
@@ -83,7 +84,7 @@ namespace Schedule_WPF
                         if (excelHeaders[n].ToUpper() == cellValue.ToUpper()) // if there is a duplicate column name
                         {
                             cellValue = cellValue + "(2)";
-                            break;
+                            break; 
                         }
                     }
                     excelHeaders.Add(cellValue);
@@ -161,6 +162,7 @@ namespace Schedule_WPF
                             if (!classroomFound)
                             {
                                 classrooms.Add(new ClassRoom(bldg, room, capacity));
+                                MessageBox.Show("ROOM ADDED: " + bldg + " " + room + " " + capacity);
                             }
                         }
                     }
@@ -567,7 +569,7 @@ namespace Schedule_WPF
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorConfigurations12.xml";
+            string filename = "ColorConfigurations13.xml";
             colorFilePath = System.IO.Path.Combine(tempPath, filename);
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(colorFilePath))

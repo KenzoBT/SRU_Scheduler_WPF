@@ -17,7 +17,7 @@ namespace Schedule_WPF.Models
         {
             RoomNum = 0;
             AvailableSeats = 0;
-            Location = "N/A";
+            Location = "";
         }
 
         public ClassRoom(string offCampus_ID, int seatCapacity)

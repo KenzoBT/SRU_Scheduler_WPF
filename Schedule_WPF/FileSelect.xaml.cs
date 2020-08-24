@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using Schedule_WPF.Models;
 using System.ComponentModel;
+using System.IO;
+using ClosedXML.Excel;
 
 namespace Schedule_WPF
 {
@@ -29,9 +31,20 @@ namespace Schedule_WPF
                 loadingIcon.Visibility = Visibility.Visible;
                 btn_OpenFile.Visibility = Visibility.Hidden;
                 Application.Current.Resources["FilePath"] = openFileDialog.FileName;
-
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.ShowDialog();
+                try
+                {
+                    using (var excelWorkbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                    }
+                    MainWindow mainWindow = new MainWindow();
+                    mainWindow.ShowDialog();
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
+                    loadingIcon.Visibility = Visibility.Hidden;
+                    btn_OpenFile.Visibility = Visibility.Visible;
+                }
 
                 /*
                 Thread newWindowThread = new Thread(new ThreadStart(ThreadStartingPoint));
