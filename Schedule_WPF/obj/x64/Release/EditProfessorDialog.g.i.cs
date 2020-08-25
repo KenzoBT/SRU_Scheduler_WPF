@@ -149,7 +149,7 @@ namespace Schedule_WPF.Models {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/Schedule_WPF;component/editprofessordialog.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/SRU Scheduler;component/editprofessordialog.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\EditProfessorDialog.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

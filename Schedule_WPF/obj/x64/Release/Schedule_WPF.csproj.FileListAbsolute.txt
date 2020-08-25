@@ -1,5 +1,3 @@
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\Schedule_WPF.exe.config
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\Schedule_WPF.exe
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\ClosedXML.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\DocumentFormat.OpenXml.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\ExcelNumberFormat.dll
@@ -37,8 +35,6 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\MainWindow
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditProfessorDialog.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\App.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\GeneratedInternalTypeHelper.g.cs
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF_MarkupCompile.cache
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF_MarkupCompile.lref
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\App.baml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\AddClassDialog.baml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\AddClassRoomDialog.baml
@@ -47,9 +43,13 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditClassD
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\FileSelect.baml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\MainWindow.baml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditProfessorDialog.baml
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.g.resources
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.Properties.Resources.resources
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.csproj.GenerateResource.cache
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.csproj.CoreCompileInputs.cache
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.csproj.CopyComplete
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\SRU Scheduler.exe.config
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\SRU Scheduler.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler_MarkupCompile.cache
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler_MarkupCompile.lref
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler.g.resources
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler.exe
