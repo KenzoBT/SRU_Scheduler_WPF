@@ -1911,7 +1911,7 @@ namespace Schedule_WPF
             for (int i = 0; i < excelHeaders.Count; i++)
             {
                 Type colType = typeof(string);
-                if (i == 0 || i == 1 || i == 3 || i == 4 || i == 5 || i == 8 || i == 12 || i == 18 || i == 20)
+                if (i == 3 || i == 4 || i == 5 || i == 8 || i == 12 || i == 18 || i == 20)
                 {
                     colType = typeof(int);
                 }
@@ -1922,9 +1922,17 @@ namespace Schedule_WPF
             {
                 dt.Columns.Add(excelHeaders[i], excelTypes[i]);
             }
-            //Add Rows in DataTable  
+            //Add Rows in DataTable
             for (int i = 0; i < classList.Count; i++)
             {
+                if (classList[i].ExtraData.Count == 0)
+                {
+                    int extraFields = 18; // number of extra fields in classes
+                    for (int n = 0; n < extraFields; n++)
+                    {
+                        classList[i].ExtraData.Add("");
+                    }
+                }
                 string start = classList[i].StartTime.Start;
                 string end = classList[i].StartTime.End;
                 if (start == "-- ")

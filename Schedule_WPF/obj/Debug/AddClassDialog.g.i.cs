@@ -236,7 +236,7 @@ namespace Schedule_WPF {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/Schedule_WPF;component/addclassdialog.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/SRU Scheduler;component/addclassdialog.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\AddClassDialog.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

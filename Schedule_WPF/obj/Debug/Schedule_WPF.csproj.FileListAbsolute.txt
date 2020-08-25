@@ -1,17 +1,9 @@
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\Schedule_WPF.exe.config
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\Schedule_WPF.exe
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\Schedule_WPF.pdb
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\MainWindow.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\App.g.cs
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF_MarkupCompile.cache
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF_MarkupCompile.lref
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\MainWindow.baml
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.g.resources
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.Properties.Resources.resources
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.csproj.GenerateResource.cache
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.csproj.CoreCompileInputs.cache
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.exe
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\Schedule_WPF.pdb
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\AddClassRoomDialog.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\AddClassRoomDialog.baml
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\AddProfessorDialog.g.cs
@@ -84,3 +76,11 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ro\Xceed.Wpf.Ava
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\ru\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\sv\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\SRU Scheduler.exe.config
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\SRU Scheduler.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\Debug\SRU Scheduler.pdb
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler_MarkupCompile.cache
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler_MarkupCompile.lref
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler.g.resources
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler.pdb
