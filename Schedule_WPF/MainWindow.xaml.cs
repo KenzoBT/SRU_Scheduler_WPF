@@ -582,7 +582,7 @@ namespace Schedule_WPF
             //MessageBox.Show("ColorIndex is currently: " + Settings.Default.ColorIndex);
             // Read from Colors file to see which professors we have already assigned a color. Store in colorPairings List.
             string tempPath = System.IO.Path.GetTempPath();
-            string filename = "ColorConfigurations15.xml";
+            string filename = "ColorConfigurations22.xml";
             colorFilePath = System.IO.Path.Combine(tempPath, filename);
             XmlSerializer ser = new XmlSerializer(typeof(Pairs));
             if (!File.Exists(colorFilePath))
@@ -1790,7 +1790,7 @@ namespace Schedule_WPF
                     return professors[i];
                 }
             }
-            MessageBox.Show("DEBUG: Couldnt find the referenced professor!");
+            //MessageBox.Show("DEBUG: Couldnt find the referenced professor!");
             return new Professors();
         }
         public Classes DetermineClass(int crn) // Finds corresponding Class object based on CRN 
