@@ -19,7 +19,7 @@ namespace Schedule_WPF.Models
         private Timeslot _StartTime;
         private int _SeatsTaken;
         private int _Credits;
-        private int _CRN;
+        private string _CRN;
         private bool _Online;
         private bool _isAssigned;
         private bool _isAppointment;
@@ -30,7 +30,7 @@ namespace Schedule_WPF.Models
 
         public Classes()
         {
-            CRN = 0;
+            CRN = "";
             DeptName = "";
             ClassNumber = 0;
             SectionNumber = 0;
@@ -48,7 +48,7 @@ namespace Schedule_WPF.Models
             ExtraData = new List<string>();
         }
 
-        public Classes(int crn, string deptName, int classNum, int secNum, string className, int credits,
+        public Classes(string crn, string deptName, int classNum, int secNum, string className, int credits,
             string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment, bool changed, List<string> extras)
         {
             CRN = crn;
@@ -81,7 +81,7 @@ namespace Schedule_WPF.Models
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + hasChanged + Prof.FullName + Classroom.ClassID);
+                    writer.Write(CRN + DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + hasChanged + Prof.FullName + Classroom.ClassID);
                 }
                 return m.ToArray();
             }
@@ -95,7 +95,7 @@ namespace Schedule_WPF.Models
         public Timeslot StartTime { get { return _StartTime; } set { _StartTime = value; OnPropertyChanged("StartTime"); } }
         public int SeatsTaken { get { return _SeatsTaken; } set { _SeatsTaken = value; OnPropertyChanged("SeatsTaken"); } }
         public int Credits { get { return _Credits; } set { _Credits = value; OnPropertyChanged("Credits"); } }
-        public int CRN { get { return _CRN; } set { _CRN = value; OnPropertyChanged("CRN"); } }
+        public string CRN { get { return _CRN; } set { _CRN = value; OnPropertyChanged("CRN"); } }
         public bool Online { get { return _Online; } set { _Online = value; OnPropertyChanged("Online"); } }
         public bool isAssigned { get { return _isAssigned; } set { _isAssigned = value; OnPropertyChanged("isAssigned"); } }
         public bool isAppointment { get { return _isAppointment; } set { _isAppointment = value; OnPropertyChanged("isAppointment"); } }
@@ -104,6 +104,7 @@ namespace Schedule_WPF.Models
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
+        public string ClassID { get { return ClassName + SectionNumber + ClassNumber; } }
         public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName; } }
         public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
 

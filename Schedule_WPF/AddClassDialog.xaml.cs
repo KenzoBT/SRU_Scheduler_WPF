@@ -32,7 +32,7 @@ namespace Schedule_WPF
             if (allRequiredFields())
             {
                 // Get information from input fields
-                int crn = Int32.Parse(CRN_Text.Text);
+                string crn = CRN_Text.Text;
                 string dpt = Dept_Text.Text;
                 int classNum = Int32.Parse(ClassNum_Text.Text);
                 int sectNum = Int32.Parse(Section_Text.Text);
@@ -80,9 +80,13 @@ namespace Schedule_WPF
             }
             else if (!Int32.TryParse(CRN_Text.Text, out tmp))
             {
-                CRN_Invalid.Visibility = Visibility.Visible;
-                CRN_Required.Visibility = Visibility.Hidden;
-                success = false;
+                CRN_Text.Text = CRN_Text.Text.ToUpper();
+                if (CRN_Text.Text != "NEW")
+                {
+                    CRN_Invalid.Visibility = Visibility.Visible;
+                    CRN_Required.Visibility = Visibility.Hidden;
+                    success = false;
+                }
             }
             else
             {

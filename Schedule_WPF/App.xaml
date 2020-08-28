@@ -32,7 +32,7 @@
         <sys:String x:Key="Set_Class_Dept">---</sys:String>
         <sys:String x:Key="Set_Class_Name">---</sys:String>
         <sys:String x:Key="Set_Class_Professor">---</sys:String>
-        <sys:Int32 x:Key="Set_Class_CRN">000</sys:Int32>
+        <sys:String x:Key="Set_Class_CRN">000</sys:String>
         <sys:Int32 x:Key="Set_Class_Number">000</sys:Int32>
         <sys:Int32 x:Key="Set_Class_Section">000</sys:Int32>
         <sys:Int32 x:Key="Set_Class_Credits">000</sys:Int32>

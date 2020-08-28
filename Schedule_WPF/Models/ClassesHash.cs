@@ -8,13 +8,13 @@ namespace Schedule_WPF.Models
 {
     class ClassesHash
     {
-        public ClassesHash(int crn, string hash)
+        public ClassesHash(string ID, string hash)
         {
-            CRN = crn;
+            ClassID = ID;
             Hash = hash;
         }
 
-        public int CRN { get; set; }
+        public string ClassID { get; set; }
         public string Hash { get; set; }
     }
 }

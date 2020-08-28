@@ -21,7 +21,7 @@ namespace Schedule_WPF
     public partial class EditClassDialog : Window
     {
         Classes targetClass = null;
-        int originalCRN = -1;
+        string originalCRN = "";
         bool originalOnline;
         bool originalAssigned;
         Professors oldProfessor;
@@ -88,7 +88,7 @@ namespace Schedule_WPF
                     Application.Current.Resources["Edit_Class_Check"] = true;
                 }
                 Application.Current.Resources["Set_Class_Success"] = true;
-                Application.Current.Resources["Set_Class_CRN"] = Int32.Parse(CRN_Text.Text.ToString());
+                Application.Current.Resources["Set_Class_CRN"] = CRN_Text.Text;
                 Application.Current.Resources["Set_Class_Dept"] = Dept_Text.Text;
                 Application.Current.Resources["Set_Class_Number"] = Int32.Parse(ClassNum_Text.Text.ToString());
                 Application.Current.Resources["Set_Class_Section"] = Int32.Parse(Section_Text.Text.ToString());
@@ -117,9 +117,13 @@ namespace Schedule_WPF
             }
             else if (!Int32.TryParse(CRN_Text.Text, out tmp))
             {
-                CRN_Invalid.Visibility = Visibility.Visible;
-                CRN_Required.Visibility = Visibility.Hidden;
-                success = false;
+                CRN_Text.Text = CRN_Text.Text.ToUpper();
+                if (CRN_Text.Text != "NEW")
+                {
+                    CRN_Invalid.Visibility = Visibility.Visible;
+                    CRN_Required.Visibility = Visibility.Hidden;
+                    success = false;
+                }
             }
             else
             {

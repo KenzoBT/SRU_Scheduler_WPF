@@ -81,10 +81,10 @@
         <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="9" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
         <!-- Validation Notifications -->
         <StackPanel Name="CRN_Required" Grid.Row="2" Grid.Column="3" Height="20" Visibility="Hidden">
-            <Image Source="images/warning_2.png" Height="20" ToolTip="CRN is required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+            <Image Source="images/warning_2.png" Height="20" ToolTip="CRN is required! --- If CRN has not been determined, enter NEW" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
         <StackPanel Name="CRN_Invalid" Grid.Row="2" Grid.Column="3" Height="20" Visibility="Hidden">
-            <Image Source="images/warning.png" Height="20" ToolTip="Invalid CRN! (It can only contain numbers)" RenderOptions.BitmapScalingMode="HighQuality"/>
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid CRN! --- If CRN has not been determined, enter NEW" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
         <StackPanel Name="Dept_Required" Grid.Row="3" Grid.Column="3" Height="20" Visibility="Hidden">
             <Image Source="images/warning_2.png" Height="20" ToolTip="Department is required!" RenderOptions.BitmapScalingMode="HighQuality"/>

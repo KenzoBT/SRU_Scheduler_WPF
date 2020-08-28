@@ -168,11 +168,11 @@ namespace Schedule_WPF
                 }
 
                 // Create Classes
-                int CRN, ClassNum, Section, Credits, SeatsTaken;
+                int ClassNum, Section, Credits, SeatsTaken;
                 int duplicate_CRN_indexer = -1;
-                string Dept, ClassName, ClassDay, classID, profName;
+                string CRN, Dept, ClassName, ClassDay, classID, profName;
                 bool Online, Appoint, Changed;
-                List<int> CRN_List = new List<int>();
+                List<string> CRN_List = new List<string>();
                 foreach (var row in rows)
                 {
                     ClassNum = -1;
@@ -197,7 +197,7 @@ namespace Schedule_WPF
                         parseResult = -1;
                         if (int.TryParse(row.Cell(6).GetValue<string>(), out parseResult))
                         {
-                            CRN = parseResult;
+                            CRN = row.Cell(6).GetValue<string>();
                             bool duplicate_CRN = false;
                             for (int n = 0; n < CRN_List.Count; n++)
                             {
@@ -213,14 +213,24 @@ namespace Schedule_WPF
                             }
                             else
                             {
-                                CRN = duplicate_CRN_indexer;
+                                MessageBox.Show("Duplicate CRN found in excel file./nCRN: " + CRN);
+                                CRN = duplicate_CRN_indexer.ToString(); // HANDLE THIS BETTER
                                 duplicate_CRN_indexer--;
                             }
                         }
                         else
                         {
-                            CRN = duplicate_CRN_indexer;
-                            duplicate_CRN_indexer--;
+                            string textCRN = row.Cell(6).GetValue<string>().ToUpper();
+                            if (textCRN == "NEW")
+                            {
+                                CRN = textCRN;
+                            }
+                            else
+                            {
+                                MessageBox.Show("CRN field is not a number or a string!./nCRN: " + row.Cell(6).GetValue<string>());
+                                CRN = duplicate_CRN_indexer.ToString();
+                                duplicate_CRN_indexer--;
+                            }
                         }
                         // DEPT
                         if (!row.Cell(3).IsEmpty())
@@ -331,6 +341,7 @@ namespace Schedule_WPF
                         // Determine if it is higlighted red (changed) or not in the excel file
                         if(row.Cell(1).Style.Fill.BackgroundColor == XLColor.FromHtml("#FFFFCFCF"))
                         {
+                            //MessageBox.Show("Excel Read: Class set to RED");
                             Changed = true;
                         }
                         // Get remaining extra data
@@ -490,7 +501,7 @@ namespace Schedule_WPF
                             {
                                 lbl.Content = classList[i].TextBoxName;
                                 lbl.Background = classList[i].Prof.Prof_Color;
-                                lbl.Tag = classList[i].CRN;
+                                lbl.Tag = classList[i].ClassID;
                                 lbl.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                                 lbl.ToolTip = classList[i].ToolTipText;
                                 classList[i].isAssigned = true;
@@ -751,10 +762,10 @@ namespace Schedule_WPF
                 for (int i = 0; i < classList.Count; i++)
                 {
                     ws.Row(i + 2).Style.Fill.BackgroundColor = edited;
-                    // match CRN
+                    // match ClassID
                     for (int n = 0; n < hashedClasses.Count; n++)
                     {
-                        if (classList[i].CRN == hashedClasses[n].CRN)
+                        if (classList[i].ClassID == hashedClasses[n].ClassID)
                         {
                             // if hash is different change color to edited
                             if (hashedClasses[n].Hash == ComputeSha256Hash(classList[i].Serialize()) && !classList[i].hasChanged)
@@ -1015,7 +1026,7 @@ namespace Schedule_WPF
 
             if (Application.Current.Resources["Set_Class_Success"] != null && (bool)Application.Current.Resources["Set_Class_Success"] == true)
             {
-                int crn = Int32.Parse(Application.Current.Resources["Set_Class_CRN"].ToString());
+                string crn = Application.Current.Resources["Set_Class_CRN"].ToString();
                 string dpt = Application.Current.Resources["Set_Class_Dept"].ToString();
                 int number = Int32.Parse(Application.Current.Resources["Set_Class_Number"].ToString());
                 int sect = Int32.Parse(Application.Current.Resources["Set_Class_Section"].ToString());
@@ -1060,12 +1071,12 @@ namespace Schedule_WPF
             }
             */
         }
-        public void RemoveClass(int crn)
+        public void RemoveClass(string ID)
         {
             Classes removalTarget;
             for (int i = 0; i < classList.Count; i++)
             {
-                if (classList[i].CRN == crn)
+                if (classList[i].ClassID == ID)
                 {
                     removalTarget = classList[i];
                     classList.RemoveAt(i);
@@ -1076,7 +1087,7 @@ namespace Schedule_WPF
         private void Btn_RemoveClass_Click(object sender, RoutedEventArgs e)
         {
             // find the class
-            int crn = -1;
+            string classID = "";
             MenuItem mi = sender as MenuItem;
             if (mi != null)
             {
@@ -1086,24 +1097,26 @@ namespace Schedule_WPF
                     Label source = cm.PlacementTarget as Label;
                     if (source != null) // Being called from a Label
                     {
-                        crn = Int32.Parse(source.Tag.ToString());
+                        classID = source.Tag.ToString();
                     }
                     else // Being called from a GridRow
                     {
                         DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
                         DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
-                        TextBlock crn_number = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
-                        crn = Int32.Parse(crn_number.Text);
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        classID = className.Text + classSection.Text + classNumber.Text;
                     }
-                    RemoveClass(crn);
+                    RemoveClass(classID);
                     RefreshGUI();
                 }
             }
         }
-        public void EditClass(int crn)
+        public void EditClass(string ID)
         {
             Unfocus_Overlay.Visibility = Visibility.Visible;
-            Classes toEdit = DetermineClass(crn);
+            Classes toEdit = DetermineClass(ID);
             EditClassDialog editClassDialog = new EditClassDialog(toEdit);
             editClassDialog.Owner = this;
             editClassDialog.ShowDialog();
@@ -1125,10 +1138,10 @@ namespace Schedule_WPF
                 {
                     bool originalOnline = toEdit.Online;
                     bool originalAssigned = toEdit.isAssigned;
-                    int originalCRN = toEdit.CRN;
+                    string originalCRN = toEdit.CRN;
                     string originalBldg = toEdit.Classroom.Location;
 
-                    toEdit.CRN = (int)Application.Current.Resources["Set_Class_CRN"];
+                    toEdit.CRN = (string)Application.Current.Resources["Set_Class_CRN"];
                     toEdit.DeptName = (string)Application.Current.Resources["Set_Class_Dept"];
                     toEdit.ClassNumber = (int)Application.Current.Resources["Set_Class_Number"];
                     toEdit.SectionNumber = (int)Application.Current.Resources["Set_Class_Section"];
@@ -1182,7 +1195,7 @@ namespace Schedule_WPF
         private void Btn_EditClass_Click(object sender, RoutedEventArgs e)
         {
             // find the class
-            int crn = -1;
+            string ID = "";
             MenuItem mi = sender as MenuItem;
             if (mi != null)
             {
@@ -1192,16 +1205,17 @@ namespace Schedule_WPF
                     Label source = cm.PlacementTarget as Label;
                     if (source != null) // Being called from a Label
                     {
-                        crn = Int32.Parse(source.Tag.ToString());
+                        ID = source.Tag.ToString();
                     }
                     else // Being called from a GridRow
                     {
                         DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
                         DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
-                        TextBlock crn_number = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
-                        crn = Int32.Parse(crn_number.Text);
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        ID = className.Text + classSection.Text;
                     }
-                    EditClass(crn);
+                    EditClass(ID);
                     RefreshGUI();
                 }
             }
@@ -1226,7 +1240,7 @@ namespace Schedule_WPF
                 // find index of class being represented by the label
                 for (int i = 0; i < classList.Count; i++)
                 {
-                    if (classList[i].CRN == Int32.Parse(labelUnderMouse.Tag.ToString()))
+                    if (classList[i].ClassID == labelUnderMouse.Tag.ToString())
                     {
                         classIndex = i;
                         break;
@@ -1259,13 +1273,15 @@ namespace Schedule_WPF
             }
             else
             {
-                int classCRN = 0;
+                string ID = "";
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
-                    TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
+                    TextBlock className = Unassigned_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classSection = Unassigned_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classNumber = Unassigned_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
+                    ID = className.Text + classSection.Text + classNumber.Text;
+                    Classes theClass = DetermineClass(ID);
                     string classType = "";
 
                     if (theClass.Online)
@@ -1288,7 +1304,7 @@ namespace Schedule_WPF
                             // Find the class
                             for (int i = 0; i < classList.Count; i++)
                             {
-                                if (classList[i].CRN == classCRN)
+                                if (classList[i].ClassID == ID)
                                 {
                                     if (classType == "Online")
                                     {
@@ -1358,7 +1374,7 @@ namespace Schedule_WPF
                 }
                 else
                 {
-                    int classCRN = 0;
+                    string ID = "";
                     DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                     if (droppedRow == null)
                     {
@@ -1366,9 +1382,10 @@ namespace Schedule_WPF
                     }
                     else
                     {
-                        TextBlock crn_number = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                        //MessageBox.Show(crn_number.Text);
-                        classCRN = Int32.Parse(crn_number.Text);
+                        TextBlock className = Unassigned_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
+                        TextBlock classSection = Unassigned_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
+                        TextBlock classNumber = Unassigned_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
+                        ID = className.Text + classSection.Text + classNumber.Text;
                     }
 
                     /// VALIDATION CHECKS GO HERE ///
@@ -1377,7 +1394,7 @@ namespace Schedule_WPF
                     int classIndex = -1;
                     for (int i = 0; i < classList.Count; i++)
                     {
-                        if (classList[i].CRN == classCRN)
+                        if (classList[i].ClassID == ID)
                         {
                             if (classList[i].Online || classList[i].isAppointment)
                             {
@@ -1456,7 +1473,7 @@ namespace Schedule_WPF
                             // Give the Label the class information
                             receiver.Content = classList[classIndex].TextBoxName;
                             receiver.Background = classList[classIndex].Prof.Prof_Color;
-                            receiver.Tag = classCRN;
+                            receiver.Tag = classList[classIndex].ClassID;
                             receiver.ToolTip = classList[classIndex].ToolTipText;
                             receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
                         }
@@ -1528,9 +1545,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
-                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    int classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
+                    TextBlock className = Online_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classSection = Online_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classNumber = Online_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
+                    string classID = className.Text + classSection.Text + classNumber.Text;
+                    Classes theClass = DetermineClass(classID);
                     if (!theClass.Online)
                     {
                         string messageBoxText = "Are you sure you want to change this\nCourse to Online format?";
@@ -1546,7 +1565,7 @@ namespace Schedule_WPF
                                 // Find the class
                                 for (int i = 0; i < classList.Count; i++)
                                 {
-                                    if (classList[i].CRN == classCRN)
+                                    if (classList[i].ClassID == classID)
                                     {
                                         classList[i].Online = true;
                                         classList[i].Classroom = new ClassRoom("WEB", 999);
@@ -1603,9 +1622,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
-                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    int classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
+                    TextBlock className = Online_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classSection = Online_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classNumber = Online_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
+                    string classID = className.Text + classSection.Text + classNumber.Text;
+                    Classes theClass = DetermineClass(classID);
                     if (!theClass.isAppointment)
                     {
                         string messageBoxText = "Are you sure you want to change this\nCourse to 'By Appointment' format?";
@@ -1621,7 +1642,7 @@ namespace Schedule_WPF
                                 // Find the class
                                 for (int i = 0; i < classList.Count; i++)
                                 {
-                                    if (classList[i].CRN == classCRN)
+                                    if (classList[i].ClassID == classID)
                                     {
                                         classList[i].isAppointment = true;
                                         classList[i].Classroom = new ClassRoom("APPT", 0);
@@ -1678,9 +1699,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
-                    TextBlock crn_number = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
-                    int classCRN = Int32.Parse(crn_number.Text);
-                    Classes theClass = DetermineClass(classCRN);
+                    TextBlock className = Online_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classSection = Online_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
+                    TextBlock classNumber = Online_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
+                    string classID = className.Text + classSection.Text + classNumber.Text;
+                    Classes theClass = DetermineClass(classID);
                     if (!theClass.isAppointment)
                     {
                         string messageBoxText = "Are you sure you want to change this\nCourse to 'By Appointment' format?";
@@ -1696,7 +1719,7 @@ namespace Schedule_WPF
                                 // Find the class
                                 for (int i = 0; i < classList.Count; i++)
                                 {
-                                    if (classList[i].CRN == classCRN)
+                                    if (classList[i].ClassID == classID)
                                     {
                                         classList[i].isAppointment = true;
                                         classList[i].Classroom = new ClassRoom("APPT2", 0);
@@ -1793,11 +1816,11 @@ namespace Schedule_WPF
             //MessageBox.Show("DEBUG: Couldnt find the referenced professor!");
             return new Professors();
         }
-        public Classes DetermineClass(int crn) // Finds corresponding Class object based on CRN 
+        public Classes DetermineClass(string classID) // Finds corresponding Class object based on CRN 
         {
             for (int i = 0; i < classList.Count; i++)
             {
-                if (classList[i].CRN == crn)
+                if (classList[i].ClassID == classID)
                 {
                     return classList[i];
                 }
@@ -1827,7 +1850,7 @@ namespace Schedule_WPF
                 //MessageBox.Show("Checking against " + rowID + "\nProf: " + profName);
                 string labelID = "";
                 Label lbl = null;
-                int classCRN = -1;
+                string classID = "";
                 for (int i = 0; i < classrooms.Count; i++)
                 {
                     labelID = rowID + "_" + classrooms[i].ClassID;
@@ -1836,12 +1859,12 @@ namespace Schedule_WPF
                     {
                         if (lbl.Tag != null)
                         {
-                            classCRN = Int32.Parse(lbl.Tag.ToString());
+                            classID = lbl.Tag.ToString();
                             for (int n = 0; n < classList.Count; n++)
                             {
-                                if (classList[n].CRN == classCRN)
+                                if (classList[n].ClassID == classID)
                                 {
-                                    if (classList[n].Prof.FullName == profName && _class.CRN != classCRN)
+                                    if (classList[n].Prof.FullName == profName && _class.ClassID != classID)
                                     {
                                         isConflict = true;
                                         break;
@@ -1911,7 +1934,7 @@ namespace Schedule_WPF
             for (int i = 0; i < excelHeaders.Count; i++)
             {
                 Type colType = typeof(string);
-                if (i == 3 || i == 4 || i == 5 || i == 8 || i == 12 || i == 18 || i == 20)
+                if (i == 3 || i == 4 || i == 8 || i == 12 || i == 18 || i == 20)
                 {
                     colType = typeof(int);
                 }
@@ -1975,7 +1998,7 @@ namespace Schedule_WPF
             for (int i = 0; i < classList.Count; i++)
             {
                 hash = ComputeSha256Hash(classList[i].Serialize());
-                hashedClasses.Add(new ClassesHash(classList[i].CRN, hash));
+                hashedClasses.Add(new ClassesHash(classList[i].ClassID, hash));
             }
         }
         public void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e) // Set the scrolling speed for the lists using mousewheel 
@@ -1984,20 +2007,5 @@ namespace Schedule_WPF
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta / 10);
             e.Handled = true;
         }
-
-        /*
-        // Professor + Color pairings (Used for persistent memory storage in xml file)
-        public class Pairs
-        {
-            [XmlArray("ColorPairings"), XmlArrayItem(typeof(ProfColors), ElementName = "ProfColors")]
-            public List<ProfColors> ColorPairings { get; set; }
-        } 
-        [XmlRoot("Pairs")]
-        public class ProfColors
-        {
-            public string ProfName { get; set; }
-            public string Color { get; set; }
-        }
-        */
     }
 }
