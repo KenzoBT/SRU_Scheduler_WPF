@@ -255,7 +255,10 @@ namespace Schedule_WPF
                         {
                             if (int.TryParse(row.Cell(5).GetValue<string>(), out parseResult))
                             {
-                                Section = parseResult;
+                                if (parseResult > 0 && parseResult < 100)
+                                {
+                                    Section = parseResult;
+                                }
                             }
                         }
                         // CREDITS
@@ -1934,7 +1937,7 @@ namespace Schedule_WPF
             for (int i = 0; i < excelHeaders.Count; i++)
             {
                 Type colType = typeof(string);
-                if (i == 3 || i == 4 || i == 8 || i == 12 || i == 18 || i == 20)
+                if (i == 3 || i == 8 || i == 12 || i == 18 || i == 20)
                 {
                     colType = typeof(int);
                 }
@@ -1964,7 +1967,7 @@ namespace Schedule_WPF
                     end = "";
                 }
                 dt.Rows.Add(classList[i].ExtraData[0], classList[i].ExtraData[1], classList[i].DeptName, classList[i].ClassNumber, 
-                    classList[i].SectionNumber, classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[2], classList[i].Credits, 
+                    classList[i].getSectionString(), classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[2], classList[i].Credits, 
                     classList[i].ExtraData[3], classList[i].ExtraData[4], classList[i].ExtraData[5], classList[i].SeatsTaken, 
                     classList[i].ExtraData[6], classList[i].ExtraData[7], classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats,
                     classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID,

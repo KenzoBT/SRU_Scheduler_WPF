@@ -196,8 +196,18 @@ namespace Schedule_WPF
             }
             else
             {
-                Section_Invalid.Visibility = Visibility.Hidden;
-                Section_Required.Visibility = Visibility.Hidden;
+                int sectionNum = Int32.Parse(Section_Text.Text);
+                if (sectionNum > 0 && sectionNum < 100)
+                {
+                    Section_Invalid.Visibility = Visibility.Hidden;
+                    Section_Required.Visibility = Visibility.Hidden;
+                }
+                else
+                {
+                    Section_Invalid.Visibility = Visibility.Visible;
+                    Section_Required.Visibility = Visibility.Hidden;
+                    success = false;
+                }
             }
             // Class Name
             if (Name_Text.Text == "")

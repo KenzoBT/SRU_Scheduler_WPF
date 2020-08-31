@@ -108,6 +108,23 @@ namespace Schedule_WPF.Models
         public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName; } }
         public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
 
+        public string getSectionString()
+        {
+            string output = "";
+            if (SectionNumber > 0 && SectionNumber < 100)
+            {
+                if (SectionNumber < 10)
+                {
+                    output = output + "0" + SectionNumber;
+                }
+                else
+                {
+                    output = output + SectionNumber;
+                }
+            }
+            return output;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void OnPropertyChanged(string propertyName)
