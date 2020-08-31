@@ -1216,7 +1216,8 @@ namespace Schedule_WPF
                         DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
                         TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
                         TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
-                        ID = className.Text + classSection.Text;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        ID = className.Text + classSection.Text + classNumber.Text;
                     }
                     EditClass(ID);
                     RefreshGUI();
