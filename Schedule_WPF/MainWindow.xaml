@@ -87,6 +87,24 @@
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
+        <!-- Context menu for GUI classes only -->
+        <ContextMenu x:Key="ClassContextMenuGUI">
+            <MenuItem Header="Edit Class" Click="Btn_EditClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/edit.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Remove Class" Click="Btn_RemoveClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/delete.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Copy to Unassigned List" Click="Btn_CopyClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/copy.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
         <!-- Context menu for professors -->
         <ContextMenu x:Key="ProfessorContextMenu">
             <MenuItem Header="Edit Professor" Click="Btn_EditProfessor_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">

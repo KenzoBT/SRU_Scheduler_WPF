@@ -505,7 +505,7 @@ namespace Schedule_WPF
                                 lbl.Content = classList[i].TextBoxName;
                                 lbl.Background = classList[i].Prof.Prof_Color;
                                 lbl.Tag = classList[i].ClassID;
-                                lbl.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
+                                lbl.ContextMenu = Resources["ClassContextMenuGUI"] as ContextMenu;
                                 lbl.ToolTip = classList[i].ToolTipText;
                                 classList[i].isAssigned = true;
                             }
@@ -1106,10 +1106,11 @@ namespace Schedule_WPF
                     {
                         DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
                         DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
                         TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
                         TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
                         TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
-                        classID = className.Text + classSection.Text + classNumber.Text;
+                        classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     }
                     RemoveClass(classID);
                     RefreshGUI();
@@ -1214,12 +1215,63 @@ namespace Schedule_WPF
                     {
                         DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
                         DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
                         TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
                         TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
                         TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
-                        ID = className.Text + classSection.Text + classNumber.Text;
+                        ID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     }
                     EditClass(ID);
+                    RefreshGUI();
+                }
+            }
+        }
+        public void CopyClass(string ID)
+        {
+            Classes copy;
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].ClassID == ID)
+                {
+                    copy = classList[i].DeepCopy();
+                    // Change copy properties
+                    copy.CRN = "NEW";
+                    copy.isAssigned = false;
+                    copy.ClassDay = "";
+                    copy.StartTime = new Timeslot();
+                    copy.Classroom = new ClassRoom();
+                    // Add to classlist
+                    classList.Add(copy);
+                    break;
+                }
+            }
+        }
+        private void Btn_CopyClass_Click(object sender, RoutedEventArgs e)
+        {
+            // find the class
+            string classID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        classID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
+                    }
+                    CopyClass(classID);
                     RefreshGUI();
                 }
             }
@@ -1281,10 +1333,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
+                    TextBlock classCRN = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                     TextBlock className = Unassigned_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classSection = Unassigned_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classNumber = Unassigned_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
-                    ID = className.Text + classSection.Text + classNumber.Text;
+                    ID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     Classes theClass = DetermineClass(ID);
                     string classType = "";
 
@@ -1386,10 +1439,11 @@ namespace Schedule_WPF
                     }
                     else
                     {
+                        TextBlock classCRN = Unassigned_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                         TextBlock className = Unassigned_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
                         TextBlock classSection = Unassigned_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
                         TextBlock classNumber = Unassigned_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
-                        ID = className.Text + classSection.Text + classNumber.Text;
+                        ID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     }
 
                     /// VALIDATION CHECKS GO HERE ///
@@ -1549,10 +1603,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
+                    TextBlock classCRN = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                     TextBlock className = Online_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classSection = Online_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classNumber = Online_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
-                    string classID = className.Text + classSection.Text + classNumber.Text;
+                    string classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     Classes theClass = DetermineClass(classID);
                     if (!theClass.Online)
                     {
@@ -1626,10 +1681,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
+                    TextBlock classCRN = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                     TextBlock className = Online_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classSection = Online_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classNumber = Online_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
-                    string classID = className.Text + classSection.Text + classNumber.Text;
+                    string classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     Classes theClass = DetermineClass(classID);
                     if (!theClass.isAppointment)
                     {
@@ -1703,10 +1759,11 @@ namespace Schedule_WPF
                 DataGridRow droppedRow = (DataGridRow)e.Data.GetData(typeof(DataGridRow));
                 if (droppedRow != null)
                 {
+                    TextBlock classCRN = Online_Classes_Grid.Columns[0].GetCellContent(droppedRow) as TextBlock;
                     TextBlock className = Online_Classes_Grid.Columns[4].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classSection = Online_Classes_Grid.Columns[3].GetCellContent(droppedRow) as TextBlock;
                     TextBlock classNumber = Online_Classes_Grid.Columns[2].GetCellContent(droppedRow) as TextBlock;
-                    string classID = className.Text + classSection.Text + classNumber.Text;
+                    string classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     Classes theClass = DetermineClass(classID);
                     if (!theClass.isAppointment)
                     {

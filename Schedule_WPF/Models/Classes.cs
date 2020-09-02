@@ -71,7 +71,12 @@ namespace Schedule_WPF.Models
 
         public Classes DeepCopy()
         {
-            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged, ExtraData);
+            List<string> extraCopy = new List<string>();
+            for (int i = 0; i < ExtraData.Count; i++)
+            {
+                extraCopy.Add(ExtraData[i]);
+            }
+            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged, extraCopy);
             return deepcopy;
         }
 
@@ -104,7 +109,7 @@ namespace Schedule_WPF.Models
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
-        public string ClassID { get { return ClassName + SectionNumber + ClassNumber; } }
+        public string ClassID { get { return CRN + ClassName + SectionNumber + ClassNumber; } }
         public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName; } }
         public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
 
