@@ -170,7 +170,7 @@ namespace Schedule_WPF
                 // Create Classes
                 int ClassNum, Section, Credits, SeatsTaken;
                 int duplicate_CRN_indexer = -1;
-                string CRN, Dept, ClassName, ClassDay, classID, profName;
+                string CRN, Dept, ClassName, ClassDay, classID, profName, notes, sectionNotes;
                 bool Online, Appoint, Changed;
                 List<string> CRN_List = new List<string>();
                 foreach (var row in rows)
@@ -188,6 +188,8 @@ namespace Schedule_WPF
                     Online = false;
                     Appoint = false;
                     Changed = false;
+                    notes = "";
+                    sectionNotes = "";
 
                     // CRN 
                     // Primary Key, if CRN is empty, do not enter record.
@@ -357,12 +359,14 @@ namespace Schedule_WPF
                         extras.Add(row.Cell(12).GetValue<string>()); // ProjList
                         extras.Add(row.Cell(14).GetFormattedString()); // CourseStartDate
                         extras.Add(row.Cell(15).GetFormattedString()); // CourseEndDate
-                        for (int x = 24; x <= 33; x++) // last few misc fields
+                        for (int x = 24; x <= 31; x++) // last few misc fields
                         {
                             extras.Add(row.Cell(x).GetValue<string>());
                         }
+                        sectionNotes = row.Cell(32).GetValue<string>();
+                        notes = row.Cell(33).GetValue<string>();
                         // Create class and add to classlist
-                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, extras);
+                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, notes, sectionNotes, extras);
                         classList.Add(tmpClass);
                     }
                 }
@@ -760,6 +764,7 @@ namespace Schedule_WPF
                 ws.Column(23).AdjustToContents();
                 */
                 ws.Columns().AdjustToContents();
+                ws.Column(5).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
                 // Iterate over classList to format the background of each row appropriately
                 for (int i = 0; i < classList.Count; i++)
@@ -1061,7 +1066,7 @@ namespace Schedule_WPF
                 {
                     CRoom = new ClassRoom();
                 }
-                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false, new List<string>()));
+                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false, "", "", new List<string>()));
                 Application.Current.Resources["Set_Class_Success"] = false;
             }
             /*
@@ -1272,6 +1277,45 @@ namespace Schedule_WPF
                         classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     }
                     CopyClass(classID);
+                    RefreshGUI();
+                }
+            }
+        }
+        public void EditNotes(string ID)
+        {
+            Classes c1 = DetermineClass(ID);
+            Unfocus_Overlay.Visibility = Visibility.Visible;
+            EditNotesDialog editNotesDialog = new EditNotesDialog(c1);
+            editNotesDialog.Owner = this;
+            editNotesDialog.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
+        }
+        private void Btn_EditNotes_Click(object sender, RoutedEventArgs e)
+        {
+            // find the class
+            string classID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        classID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
+                    }
+                    EditNotes(classID);
                     RefreshGUI();
                 }
             }
@@ -2031,7 +2075,7 @@ namespace Schedule_WPF
                     classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID,
                     classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10], classList[i].ExtraData[11],
                     classList[i].ExtraData[12], classList[i].ExtraData[13], classList[i].ExtraData[14], classList[i].ExtraData[15],
-                    classList[i].ExtraData[16], classList[i].ExtraData[17]);
+                    classList[i].SectionNotes, classList[i].Notes);
             }
             dt.AcceptChanges();
             return dt;

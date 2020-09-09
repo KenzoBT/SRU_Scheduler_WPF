@@ -130,6 +130,9 @@
     <Compile Include="EditClassDialog.xaml.cs">
       <DependentUpon>EditClassDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EditNotesDialog.xaml.cs">
+      <DependentUpon>EditNotesDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FileSelect.xaml.cs">
       <DependentUpon>FileSelect.xaml</DependentUpon>
     </Compile>
@@ -163,6 +166,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EditClassDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditNotesDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -293,6 +300,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\copy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\notes.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

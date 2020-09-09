@@ -53,3 +53,5 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Schedu
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler_MarkupCompile.lref
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler.g.resources
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler.exe
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditNotesDialog.g.cs
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditNotesDialog.baml
