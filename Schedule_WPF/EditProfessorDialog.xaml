@@ -15,8 +15,9 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="0.3*"/>
-            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.7*"/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -44,7 +45,13 @@
             <TextBlock FontSize="16" VerticalAlignment="Center">Color :</TextBlock>
             <xctk:ColorPicker Name="colorPicker" Height="30" Width="200" Margin="50,0,0,0" ShowAvailableColors="False"/>
         </WrapPanel>
-        <Button Grid.ColumnSpan="4" Grid.Row="7" Grid.Column="0" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
+        <WrapPanel Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" >
+            <TextBlock FontSize="16" VerticalAlignment="Center">Max Classes :</TextBlock>
+            <TextBox Name="Classes" Margin="10,0,22,0" Width="35" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
+            <TextBlock FontSize="16" VerticalAlignment="Center">Max Prep :</TextBlock>
+            <TextBox Name="Prep" Margin="25,0,0,0" Width="35" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
+        </WrapPanel>
+        <Button Grid.ColumnSpan="4" Grid.Row="8" Grid.Column="0" HorizontalAlignment="Center" Width="150" Click="Button_Click"  FontSize="16">Submit</Button>
         <StackPanel Name="FirstName_Required" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
             <Image Source="images/warning_2.png" Height="20" ToolTip="First name required!" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
@@ -62,6 +69,12 @@
         </StackPanel>
         <StackPanel Name="Color_Required" Grid.Row="5" Grid.Column="2" Height="20" Visibility="Hidden">
             <Image Source="images/warning_2.png" Height="20" ToolTip="Color required!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Max_Invalid" Grid.Row="6" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid Max classes/prep values!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Max_Required" Grid.Row="6" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Max Classes/Prep cannot be empty!" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
     </Grid>
 </Window>

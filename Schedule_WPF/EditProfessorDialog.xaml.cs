@@ -35,6 +35,8 @@ namespace Schedule_WPF.Models
                 LastName.Text = targetProfessor.LastName;
                 ID.Text = targetProfessor.SRUID;
                 colorPicker.SelectedColor = targetProfessor.profRGB.colorBrush;
+                Classes.Text = targetProfessor.MaxClasses.ToString();
+                Prep.Text = targetProfessor.MaxPrep.ToString();
             }
         }
 
@@ -46,6 +48,8 @@ namespace Schedule_WPF.Models
                 targetProfessor.LastName = LastName.Text;
                 targetProfessor.SRUID = ID.Text;
                 targetProfessor.profRGB = new RGB_Color(colorPicker.SelectedColor.ToString());
+                targetProfessor.MaxClasses = Int32.Parse(Classes.Text);
+                targetProfessor.MaxPrep = Int32.Parse(Prep.Text);
                 Close();
             }
         }
@@ -116,7 +120,28 @@ namespace Schedule_WPF.Models
                     Color_Required.Visibility = Visibility.Hidden;
                 }
             }
-
+            // Max Classes/Prep
+            if (Classes.Text == "" || Prep.Text == "")
+            {
+                Max_Required.Visibility = Visibility.Visible;
+                Max_Invalid.Visibility = Visibility.Hidden;
+                success = false;
+            }
+            else
+            {
+                int classParse, prepParse;
+                if (!Int32.TryParse(Classes.Text, out classParse) || !Int32.TryParse(Prep.Text, out prepParse))
+                {
+                    Max_Invalid.Visibility = Visibility.Visible;
+                    Max_Required.Visibility = Visibility.Hidden;
+                    success = false;
+                }
+                else
+                {
+                    Max_Invalid.Visibility = Visibility.Hidden;
+                    Max_Required.Visibility = Visibility.Hidden;
+                }
+            }
             return success;
         }
 

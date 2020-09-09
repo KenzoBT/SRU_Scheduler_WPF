@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
+
 namespace Schedule_WPF.Models
 {
     public class Professors : INotifyPropertyChanged
@@ -14,6 +15,10 @@ namespace Schedule_WPF.Models
         private string _LastName;
         private string _SRUID;
         private RGB_Color _profRGB;
+        private int _maxClasses;
+        private int _numClasses;
+        private int _maxPrep;
+        private int _numPrep;
 
         public Professors()
         {
@@ -21,6 +26,10 @@ namespace Schedule_WPF.Models
             LastName = "None";
             SRUID = "---";
             profRGB = new RGB_Color(255, 255, 255);
+            MaxClasses = 4;
+            NumClasses = 0;
+            MaxPrep = 4;
+            NumPrep = 0;
         }
 
         // CONSTRUCTOR FOR ADDING PROFESSORS
@@ -30,6 +39,10 @@ namespace Schedule_WPF.Models
             LastName = profLN;
             SRUID = profID;
             profRGB = new RGB_Color(255, 255, 255);
+            MaxClasses = 4;
+            NumClasses = 0;
+            MaxPrep = 4;
+            NumPrep = 0;
         }
 
         public string FirstName { get { return _FirstName; } set { _FirstName = value; OnPropertyChanged("FirstName"); OnPropertyChanged("FullName"); } }
@@ -39,6 +52,29 @@ namespace Schedule_WPF.Models
         public string FullName { get { return LastName + ", " + FirstName; } }
         public Brush Prof_Color { get { return profRGB.colorBrush2; } }
         public string colorString { get { return profRGB.colorString; } }
+        public int MaxClasses { get { return _maxClasses; } set { _maxClasses = value; OnPropertyChanged("MaxClasses"); OnPropertyChanged("classRatio"); } }
+        public int MaxPrep { get { return _maxPrep; } set { _maxPrep = value; OnPropertyChanged("MaxPrep"); OnPropertyChanged("prepRatio"); } }
+        public int NumClasses { get { return _numClasses; } set { _numClasses = value; OnPropertyChanged("NumClasses"); OnPropertyChanged("classRatio"); } }
+        public int NumPrep { get { return _numPrep; } set { _numPrep = value; OnPropertyChanged("NumPrep"); OnPropertyChanged("prepRatio"); } }
+        public string classRatio { get { return ("" + NumClasses + " / " + MaxClasses); } }
+        public string prepRatio { get { return ("" + NumPrep + " / " + MaxPrep); } }
+
+        public bool isClassOverload()
+        {
+            if (NumClasses > MaxClasses)
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool isPrepOverload()
+        {
+            if (NumPrep > MaxPrep)
+            {
+                return true;
+            }
+            return false;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

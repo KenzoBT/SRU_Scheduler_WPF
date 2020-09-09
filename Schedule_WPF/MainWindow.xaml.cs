@@ -51,6 +51,7 @@ namespace Schedule_WPF
             AssignProfColors();
             DrawTimeTables();
             FillDerivedLists();
+            UpdateProfessorCapacity();
             BindData();
             GenerateClassListHashes();
             latestHashDigest = ComputeSha256Hash(classList.Serialize()); // initialize hash digest of classlist (used to see if changes have been made before closing application)
@@ -711,6 +712,38 @@ namespace Schedule_WPF
                 ser.Serialize(fs, colorPairs);
             }
         }
+        public void UpdateProfessorCapacity() // Update professor's numClasses and numPrep values
+        {
+            // for each professor
+            for (int i = 0; i < professors.Count; i++)
+            {
+                // Reset class counters
+                professors[i].NumClasses = 0;
+                professors[i].NumPrep = 0;
+                List<string> uniqueClasses = new List<string>();
+                // check how many classes they are teaching
+                for (int n = 0; n < classList.Count; n++)
+                {
+                    if (professors[i].SRUID == classList[n].Prof.SRUID)
+                    {
+                        bool unique = true;
+                        for (int j = 0; j < uniqueClasses.Count; j++)
+                        {
+                            if (uniqueClasses[j] == classList[n].ClassName)
+                            {
+                                unique = false;
+                            }
+                        }
+                        if (unique)
+                        {
+                            professors[i].NumPrep++;
+                            uniqueClasses.Add(classList[n].ClassName);
+                        }
+                        professors[i].NumClasses++;
+                    }
+                }
+            }
+        }
         public void BindData() // Bind class/professor lists to GUI data tables 
         {
             Online_Classes_Grid.ItemsSource = onlineClasses; // Online classes GUI list
@@ -730,6 +763,7 @@ namespace Schedule_WPF
             PopulateTimeTable(timetable_MWF, times_MWF);
             PopulateTimeTable(timetable_TR, times_TR);
             FillDerivedLists();
+            UpdateProfessorCapacity();
         }
         public void SaveChanges() // Writes classList to an excel file 
         {
@@ -1068,6 +1102,7 @@ namespace Schedule_WPF
                 }
                 AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false, "", "", new List<string>()));
                 Application.Current.Resources["Set_Class_Success"] = false;
+                RefreshGUI();
             }
             /*
             // If new professor was added, add the professor/color pairing to the colorPairs list

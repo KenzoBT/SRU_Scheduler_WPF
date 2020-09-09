@@ -385,8 +385,8 @@
                     <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
                         <TextBlock Margin="10 6 0 6" Foreground="Black">Detailed List of Classes</TextBlock>
                     </Viewbox>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Visible" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Row="3" Grid.Column="1" Margin="15,0,15,15" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                        <DataGrid x:Name="Full_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="False" CanUserAddRows="False" CanUserDeleteRows="False">
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow">
                                     <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
@@ -467,6 +467,10 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                                <DataGridTextColumn Binding="{Binding classRatio}" Header="Classes" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Binding="{Binding prepRatio}" Header="Prep" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </ScrollViewer>
