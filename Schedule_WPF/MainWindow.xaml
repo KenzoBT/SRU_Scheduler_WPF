@@ -475,16 +475,21 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Binding="{Binding classRatio}" Header="Credits" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
-                                    <!--
-                                    <DataGridTextColumn.CellStyle>
-                                        <Style TargetType="DataGridCell">
-                                            <Setter Property="Background" Value="{Binding Path=NumClasses,Converter={StaticResource converter}}"/>
+                                <DataGridTextColumn Binding="{Binding classRatio}" Header="Credits" IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Background" Value="{Binding classRatio, Converter={StaticResource converter}}"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
                                         </Style>
-                                    </DataGridTextColumn.CellStyle>
-                                    -->
+                                    </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding prepRatio}" Header="Prep" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                <DataGridTextColumn Binding="{Binding prepRatio}" Header="Prep" IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Background" Value="{Binding prepRatio, Converter={StaticResource converter}}"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>

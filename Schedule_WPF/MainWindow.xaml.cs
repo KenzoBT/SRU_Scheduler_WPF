@@ -2164,14 +2164,15 @@ namespace Schedule_WPF
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            /*
+            
             string input = value.ToString();
-            MessageBox.Show(input);
+
+            // split string into numbers
+            string[] nums = input.Split(new string[] { " / " }, StringSplitOptions.None);
 
             //custom condition is checked based on data.
-            int current = Int32.Parse(input[0].ToString());
-            int max = Int32.Parse(input[4].ToString());
-
+            int current = Int32.Parse(nums[0].ToString());
+            int max = Int32.Parse(nums[1].ToString());
 
             if (current > max)
             {
@@ -2183,9 +2184,6 @@ namespace Schedule_WPF
                 return new SolidColorBrush(Colors.LightGreen);
             else
                 return DependencyProperty.UnsetValue;
-            */
-            return DependencyProperty.UnsetValue;
-
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
