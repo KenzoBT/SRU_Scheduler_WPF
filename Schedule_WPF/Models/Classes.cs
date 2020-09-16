@@ -24,6 +24,7 @@ namespace Schedule_WPF.Models
         private bool _isAssigned;
         private bool _isAppointment;
         private bool _hasChanged;
+        private bool _excludeCredits;
         private string _Notes;
         private string _SectionNotes;
         private Professors _Prof;
@@ -47,6 +48,7 @@ namespace Schedule_WPF.Models
             Online = false;
             isAppointment = false;
             hasChanged = false;
+            excludeCredits = false;
             ExtraData = new List<string>();
             Notes = "";
             SectionNotes = "";
@@ -92,7 +94,7 @@ namespace Schedule_WPF.Models
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(CRN + DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + hasChanged + Prof.FullName + Classroom.ClassID + Notes + SectionNotes);
+                    writer.Write(CRN + DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + excludeCredits + hasChanged + Prof.FullName + Classroom.ClassID + Notes + SectionNotes);
                 }
                 return m.ToArray();
             }
@@ -109,8 +111,9 @@ namespace Schedule_WPF.Models
         public string CRN { get { return _CRN; } set { _CRN = value; OnPropertyChanged("CRN"); } }
         public bool Online { get { return _Online; } set { _Online = value; OnPropertyChanged("Online"); } }
         public bool isAssigned { get { return _isAssigned; } set { _isAssigned = value; OnPropertyChanged("isAssigned"); } }
-        public bool isAppointment { get { return _isAppointment; } set { _isAppointment = value; OnPropertyChanged("isAppointment"); } }
+        public bool isAppointment { get { return _isAppointment; } set { _isAppointment = value; excludeCredits = value; OnPropertyChanged("isAppointment"); } }
         public bool hasChanged { get { return _hasChanged; } set { _hasChanged = value; OnPropertyChanged("hasChanged"); } }
+        public bool excludeCredits { get { return _excludeCredits; } set { _excludeCredits = value; OnPropertyChanged("excludeCredits"); } }
         public Professors Prof { get { return _Prof; } set { _Prof = value; OnPropertyChanged("Prof"); } }
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }

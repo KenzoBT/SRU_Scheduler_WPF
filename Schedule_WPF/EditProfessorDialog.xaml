@@ -46,7 +46,7 @@
             <xctk:ColorPicker Name="colorPicker" Height="30" Width="200" Margin="50,0,0,0" ShowAvailableColors="False"/>
         </WrapPanel>
         <WrapPanel Grid.Row="6" Grid.Column="1" VerticalAlignment="Center" >
-            <TextBlock FontSize="16" VerticalAlignment="Center">Max Classes :</TextBlock>
+            <TextBlock FontSize="16" VerticalAlignment="Center">Max Credits :</TextBlock>
             <TextBox Name="Classes" Margin="10,0,22,0" Width="35" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>
             <TextBlock FontSize="16" VerticalAlignment="Center">Max Prep :</TextBlock>
             <TextBox Name="Prep" Margin="25,0,0,0" Width="35" Height="30" VerticalContentAlignment="Center" Padding="10,0,0,0"></TextBox>

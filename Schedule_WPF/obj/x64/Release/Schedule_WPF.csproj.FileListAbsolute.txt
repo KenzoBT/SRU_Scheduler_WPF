@@ -25,7 +25,6 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\ro\Xceed.W
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\ru\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\sv\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\bin\x64\Release\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.csprojAssemblyReference.cache
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\AddClassDialog.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\AddClassRoomDialog.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\AddProfessorDialog.g.cs
@@ -55,3 +54,4 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Schedu
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\SRU Scheduler.exe
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditNotesDialog.g.cs
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\EditNotesDialog.baml
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Release\Schedule_WPF.csprojAssemblyReference.cache

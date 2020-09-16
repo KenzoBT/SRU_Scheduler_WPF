@@ -11,7 +11,8 @@
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>
-
+        <!-- Conditional formatting converter (professor class ratio) -->
+        <local:ColorConverter x:Key="converter"/>
         <!-- Custom styles for controls -->
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
             <Setter Property="TextAlignment" Value="Left"/>
@@ -417,7 +418,14 @@
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Binding="{Binding Classroom.AvailableSeats}" Header="Capacity" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Binding="{Binding SectionNotes}" Header="Section Notes" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
+                                <DataGridTemplateColumn Header="Exclude Credits" IsReadOnly="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding excludeCredits, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="CheckBox_Click" HorizontalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Binding="{Binding SectionNotes}" Header="Section Notes" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Binding="{Binding Notes}" Header="Notes" ElementStyle="{StaticResource LeftAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>
@@ -467,7 +475,14 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Binding="{Binding classRatio}" Header="Classes" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                <DataGridTextColumn Binding="{Binding classRatio}" Header="Credits" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
+                                    <!--
+                                    <DataGridTextColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Setter Property="Background" Value="{Binding Path=NumClasses,Converter={StaticResource converter}}"/>
+                                        </Style>
+                                    </DataGridTextColumn.CellStyle>
+                                    -->
                                 </DataGridTextColumn>
                                 <DataGridTextColumn Binding="{Binding prepRatio}" Header="Prep" ElementStyle="{StaticResource CenterAlign}" IsReadOnly="True">
                                 </DataGridTextColumn>

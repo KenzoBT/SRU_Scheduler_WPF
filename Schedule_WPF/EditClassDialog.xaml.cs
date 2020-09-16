@@ -76,6 +76,7 @@ namespace Schedule_WPF
             {
                 InClass_Box.IsChecked = true;
             }
+            //MessageBox.Show("excludeCredits: " + _class.excludeCredits);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

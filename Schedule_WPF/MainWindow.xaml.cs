@@ -15,6 +15,8 @@ using ClosedXML.Excel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows.Data;
+using System.Globalization;
 
 namespace Schedule_WPF
 {
@@ -739,7 +741,10 @@ namespace Schedule_WPF
                             professors[i].NumPrep++;
                             uniqueClasses.Add(classList[n].ClassName);
                         }
-                        professors[i].NumClasses++;
+                        if (!classList[n].excludeCredits)
+                        {
+                            professors[i].NumClasses += classList[n].Credits;
+                        }
                     }
                 }
             }
@@ -851,6 +856,10 @@ namespace Schedule_WPF
                         break;
                 }
             }
+        }
+        private void CheckBox_Click(object sender, RoutedEventArgs e) // When excludeCredits checkbox is clicked
+        {
+            RefreshGUI();
         }
 
         // ADD / REMOVE / EDIT functionality (Professors, Classrooms, Classes)
@@ -2146,6 +2155,42 @@ namespace Schedule_WPF
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta / 10);
             e.Handled = true;
+        }
+    }
+
+    // XAML converters
+    public class ColorConverter : IValueConverter
+    {
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            /*
+            string input = value.ToString();
+            MessageBox.Show(input);
+
+            //custom condition is checked based on data.
+            int current = Int32.Parse(input[0].ToString());
+            int max = Int32.Parse(input[4].ToString());
+
+
+            if (current > max)
+            {
+                //return "SeaGreen";
+                return new SolidColorBrush(Colors.LightPink);
+            }
+            else if (current <= max)
+                //return "LightGreen";
+                return new SolidColorBrush(Colors.LightGreen);
+            else
+                return DependencyProperty.UnsetValue;
+            */
+            return DependencyProperty.UnsetValue;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

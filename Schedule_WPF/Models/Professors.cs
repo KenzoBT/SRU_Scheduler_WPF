@@ -26,7 +26,7 @@ namespace Schedule_WPF.Models
             LastName = "None";
             SRUID = "---";
             profRGB = new RGB_Color(255, 255, 255);
-            MaxClasses = 4;
+            MaxClasses = 12;
             NumClasses = 0;
             MaxPrep = 4;
             NumPrep = 0;
@@ -39,7 +39,7 @@ namespace Schedule_WPF.Models
             LastName = profLN;
             SRUID = profID;
             profRGB = new RGB_Color(255, 255, 255);
-            MaxClasses = 4;
+            MaxClasses = 12;
             NumClasses = 0;
             MaxPrep = 4;
             NumPrep = 0;

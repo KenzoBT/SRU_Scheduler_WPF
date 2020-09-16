@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\x64\Debug\
 Schedule_WPF
 none
 false
-DEBUG;TRACE
+
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\App.xaml
 82061490202
 
-26120794527
+301113449838
 261190721950
 AddClassDialog.xaml;AddClassRoomDialog.xaml;AddProfessorDialog.xaml;EditClassDialog.xaml;EditNotesDialog.xaml;FileSelect.xaml;MainWindow.xaml;EditProfessorDialog.xaml;
 
-False
+True
 

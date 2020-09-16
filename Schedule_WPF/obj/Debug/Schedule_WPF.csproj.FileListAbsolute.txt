@@ -84,3 +84,5 @@ C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler_Ma
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler.g.resources
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler.exe
 C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\SRU Scheduler.pdb
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\EditNotesDialog.g.cs
+C:\Users\Kenzo\source\repos\Schedule_WPF\Schedule_WPF\obj\Debug\EditNotesDialog.baml
