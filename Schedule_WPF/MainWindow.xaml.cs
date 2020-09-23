@@ -770,6 +770,7 @@ namespace Schedule_WPF
             PopulateTimeTable(timetable_TR, times_TR);
             FillDerivedLists();
             UpdateProfessorCapacity();
+            ProcessProfessorPreferences();
         }
         public void SaveChanges() // Writes classList to an excel file 
         {
@@ -964,13 +965,42 @@ namespace Schedule_WPF
                 {
                     MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
                 }
+                MessageBox.Show("Preferences successfully submitted.");
                 ProcessProfessorPreferences();
             }
         }
-        // TODO:
-        private void ProcessProfessorPreferences()
+        private void ProcessProfessorPreferences() // Update classes to reflect the preferences of professors, (if any) 
         {
-            MessageBox.Show("IMPLEMENT: ProcessProfessorPreferences()");
+            // Update preference level for each class in classList
+            for (int i = 0; i < classList.Count; i++)
+            {
+                // Try and find a preference for this class+professor combo (professors are identified by last name in preference list)
+                string profID = classList[i].Prof.LastName;
+                string dept = classList[i].DeptName;
+                int num = classList[i].ClassNumber;
+                for (int n = 0; n < professorPreferences.Count; n++) // find the prof
+                {
+                    if (profID == professorPreferences[n].ProfessorID)
+                    {
+                        for (int x = 0; x < professorPreferences[n].PreferenceList.Count; x++) // find the class
+                        {
+                            if (professorPreferences[n].PreferenceList[x].Dept == dept && professorPreferences[n].PreferenceList[x].ClassNum == num)
+                            {
+                                classList[i].PreferenceLevel = professorPreferences[n].PreferenceList[x].Sentiment;
+                                //MessageBox.Show("" + classList[i].ClassID + " : " + classList[i].PreferenceLevel);
+                                classList[i].PreferenceMessage = professorPreferences[n].PreferenceList[x].Message;
+                                //MessageBox.Show("Found preference for " + profID + " in " + dept + " " + num);
+                                if (professorPreferences[n].PreferenceList[x].Message == "Taught before but prefer to teach on-line" && !classList[i].Online)
+                                {
+                                    classList[i].PreferenceLevel = -1;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         // ADD / REMOVE / EDIT functionality (Professors, Classrooms, Classes)
@@ -1033,7 +1063,6 @@ namespace Schedule_WPF
                     onlineClasses[i].Prof = new Professors();
                 }
             }
-            // update the GUI grid
         }
         private void Btn_RemoveProfessor_Click(object sender, RoutedEventArgs e)
         {
@@ -1144,7 +1173,6 @@ namespace Schedule_WPF
                     classrooms.RemoveAt(i);
                 }
             }
-            // update the GUI grid
         }
         private void Btn_RemoveClassroom_Click(object sender, RoutedEventArgs e)
         {
@@ -1224,15 +1252,6 @@ namespace Schedule_WPF
                 Application.Current.Resources["Set_Class_Success"] = false;
                 RefreshGUI();
             }
-            /*
-            // If new professor was added, add the professor/color pairing to the colorPairs list
-            if ((bool)Application.Current.Resources["Set_Prof_Success"])
-            {
-                colorPairs.ColorPairings.Add(new ProfColors { ProfName = professors[professors.Count - 1].FullName, Color = professors[professors.Count - 1].profRGB.colorString });
-                // Reset AddProfDialog success flag
-                Application.Current.Resources["Set_Prof_Success"] = false;
-            }
-            */
         }
         public void RemoveClass(string ID)
         {
@@ -2293,6 +2312,51 @@ namespace Schedule_WPF
             else if (current <= max)
                 //return "LightGreen";
                 return new SolidColorBrush(Colors.LightGreen);
+            else
+                return DependencyProperty.UnsetValue;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class PreferenceConverter : IValueConverter
+    {
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            int input = Int32.Parse(value.ToString());
+
+            if (input == -1)
+            {
+                return new SolidColorBrush(Colors.LightYellow);
+            }
+            else if (input == -2)
+                return new SolidColorBrush(Colors.Pink);
+            else
+                return new SolidColorBrush(Colors.White);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class PreferenceMessageConverter : IValueConverter
+    {
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+
+            string input = value.ToString();
+
+            if (input != "")
+            {
+                return input;
+            }
             else
                 return DependencyProperty.UnsetValue;
         }

@@ -29,6 +29,8 @@ namespace Schedule_WPF.Models
         private string _SectionNotes;
         private Professors _Prof;
         private ClassRoom _Classroom;
+        private int _preferenceLevel;
+        private string _preferenceMessage;
         private List<string> _extraData; // place for all excel fields that havent been computed (yet)
 
         public Classes()
@@ -75,6 +77,8 @@ namespace Schedule_WPF.Models
             ExtraData = extras;
             Notes = notes;
             SectionNotes = sectionNotes;
+            PreferenceLevel = 0;
+            PreferenceMessage = "";
         }
 
         public Classes DeepCopy()
@@ -123,6 +127,8 @@ namespace Schedule_WPF.Models
         public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
         public string Notes { get { return _Notes; } set { _Notes = value; OnPropertyChanged("Notes"); } }
         public string SectionNotes { get { return _SectionNotes; } set { _SectionNotes = value; OnPropertyChanged("SectionNotes"); } }
+        public int PreferenceLevel { get { return _preferenceLevel; } set { _preferenceLevel = value; OnPropertyChanged("PreferenceLevel"); } }
+        public string PreferenceMessage { get { return _preferenceMessage; } set { _preferenceMessage = value; OnPropertyChanged("PreferenceMessage"); } }
 
         public string getSectionString()
         {

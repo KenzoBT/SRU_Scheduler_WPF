@@ -11,8 +11,10 @@
     
     <!-- Resources (Data / Styles) of this specific window -->
     <Window.Resources>
-        <!-- Conditional formatting converter (professor class ratio) -->
+        <!-- Conditional formatting converters -->
         <local:ColorConverter x:Key="converter"/>
+        <local:PreferenceConverter x:Key="preferenceConverter"/>
+        <local:PreferenceMessageConverter x:Key="prefMessageConverter"/>
         <!-- Custom styles for controls -->
         <Style TargetType="{x:Type TextBlock}" x:Key="LeftAlign">
             <Setter Property="TextAlignment" Value="Left"/>
@@ -207,6 +209,8 @@
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
                                         <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                        <Setter Property="Background" Value="{Binding PreferenceLevel, Converter={StaticResource preferenceConverter}}"/>
+                                        <Setter Property="ToolTip" Value="{Binding PreferenceMessage, Converter={StaticResource prefMessageConverter}}"/>
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
@@ -235,6 +239,8 @@
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
                                                 <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                                <Setter Property="Background" Value="{Binding PreferenceLevel, Converter={StaticResource preferenceConverter}}"/>
+                                                <Setter Property="ToolTip" Value="{Binding PreferenceMessage, Converter={StaticResource prefMessageConverter}}"/>
                                             </Style>
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
@@ -262,6 +268,8 @@
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
                                                 <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                                <Setter Property="Background" Value="{Binding PreferenceLevel, Converter={StaticResource preferenceConverter}}"/>
+                                                <Setter Property="ToolTip" Value="{Binding PreferenceMessage, Converter={StaticResource prefMessageConverter}}"/>
                                             </Style>
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
@@ -391,6 +399,8 @@
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow">
                                     <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                    <Setter Property="Background" Value="{Binding PreferenceLevel, Converter={StaticResource preferenceConverter}}"/>
+                                    <Setter Property="ToolTip" Value="{Binding PreferenceMessage, Converter={StaticResource prefMessageConverter}}"/>
                                 </Style>
                             </DataGrid.RowStyle>
                             <DataGrid.Columns>
