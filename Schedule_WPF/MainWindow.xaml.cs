@@ -31,6 +31,7 @@ namespace Schedule_WPF
         Timeslot[] times_TR = { new Timeslot("08:00", "09:15", "AM"), new Timeslot("09:30", "10:45", "AM"), new Timeslot("11:00", "12:15", "AM"), new Timeslot("12:30", "01:45", "PM"), new Timeslot("02:00", "03:15", "PM"), new Timeslot("03:30", "04:45", "PM"), new Timeslot("05:00", "06:15", "PM") };
         ClassRoomList classrooms = (ClassRoomList)Application.Current.FindResource("ClassRoom_List_View");
         ProfessorList professors = (ProfessorList)Application.Current.FindResource("Professor_List_View");
+        ProfessorPreferenceList professorPreferences = (ProfessorPreferenceList)Application.Current.FindResource("ProfPreference_List_View");
         ClassList classList = (ClassList)Application.Current.FindResource("Classes_List_View");
         ClassList unassignedClasses = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
         ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
@@ -860,6 +861,116 @@ namespace Schedule_WPF
         private void CheckBox_Click(object sender, RoutedEventArgs e) // When excludeCredits checkbox is clicked
         {
             RefreshGUI();
+        }
+        private void Browse_Prof_Prefs_Click(object sender, RoutedEventArgs e) // Locate file where professor preferences is stored
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel File (*.xlsx)|*.xlsx";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Professor_Preference_Source.Text = openFileDialog.FileName;
+                try
+                {
+                    using (var excelWorkbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                    }
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
+                }
+            }
+        }
+        private void Submit_Prof_Prefs_Click(object sender, RoutedEventArgs e) // Get data from professor preference spreadsheet and create the preference list
+        {
+            if (Professor_Preference_Source.Text == "")
+            {
+                MessageBox.Show("Please select a professor preference excel file first!");
+            }
+            else
+            {
+                //MessageBox.Show("Loading excel file into appropriate data structure...");
+                try
+                {
+                    using (var excelWorkbook = new XLWorkbook(Professor_Preference_Source.Text))
+                    {
+                        // Select Worksheet
+                        var worksheet = excelWorkbook.Worksheet(1);
+                        var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
+                        // Determine number of columns
+                        var headerRow = worksheet.Row(1);
+                        int columns = 3;
+                        string headerString;
+                        while (true)
+                        {
+                            headerString = headerRow.Cell(columns + 1).GetValue<string>();
+                            if (headerString == "")
+                            {
+                                //MessageBox.Show("Ended prof col counts. Total : " + columns);
+                                break;
+                            }
+                            else
+                            {
+                                columns++;
+                            }
+                        }
+                        // Create one professor preference object for each professor in the preference file
+                        string profName;
+                        for (int i = 3; i < columns; i++)
+                        {
+                            profName = headerRow.Cell(i + 1).GetValue<string>(); // Currently last name is the best ID we have
+                            professorPreferences.Add(new ProfessorPreference(profName));
+                            //MessageBox.Show("Added Preference for Professor: " + profName);
+                        }
+                        // Create preference object for each class and add it to its respective professor preference list
+                        string dept, classString;
+                        int classNum;
+                        foreach (var row in rows)
+                        {
+                            if (row.Cell(1).GetValue<string>() != "")
+                            {
+                                string code;
+                                dept = row.Cell(1).GetValue<string>();
+                                classString = row.Cell(2).GetValue<string>();
+                                if (classString.Contains("/"))
+                                {
+                                    string[] classes = classString.Split('/');
+                                    for (int i = 0; i < classes.Length; i++)
+                                    {
+                                        classNum = Int32.Parse(classes[i]);
+                                        for (int n = 4; n <= columns; n++)
+                                        {
+                                            code = row.Cell(n).GetValue<string>();
+                                            professorPreferences[n - 4].PreferenceList.Add(new Preference(dept, classNum, code));
+                                            //MessageBox.Show("Added Preference\nProf: " + professorPreferences[n - 4].ProfessorID + "\nPrefs: " + dept + " " + classNum + " : " + code);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    classNum = row.Cell(2).GetValue<int>();
+                                    for (int i = 4; i <= columns; i++)
+                                    {
+                                        code = row.Cell(i).GetValue<string>();
+                                        professorPreferences[i - 4].PreferenceList.Add(new Preference(dept, classNum, code));
+                                        //MessageBox.Show("Added Preference\nProf: " + professorPreferences[i - 4].ProfessorID + "\nPrefs: " + dept + " " + classNum + " : " + code);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
+                }
+                ProcessProfessorPreferences();
+            }
+        }
+        // TODO:
+        private void ProcessProfessorPreferences()
+        {
+            MessageBox.Show("IMPLEMENT: ProcessProfessorPreferences()");
         }
 
         // ADD / REMOVE / EDIT functionality (Professors, Classrooms, Classes)

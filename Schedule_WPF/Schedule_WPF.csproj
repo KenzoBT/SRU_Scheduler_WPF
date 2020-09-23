@@ -147,8 +147,11 @@
     <Compile Include="Models\Helper.cs" />
     <Compile Include="Models\MainLoaded.cs" />
     <Compile Include="Models\Pairs.cs" />
+    <Compile Include="Models\Preference.cs" />
     <Compile Include="Models\ProfColors.cs" />
     <Compile Include="Models\ProfessorList.cs" />
+    <Compile Include="Models\ProfessorPreference.cs" />
+    <Compile Include="Models\ProfessorPreferenceList.cs" />
     <Compile Include="Models\Professors.cs" />
     <Compile Include="Models\RGB_Color.cs" />
     <Compile Include="Models\Timeslot.cs" />
