@@ -31,6 +31,7 @@ namespace Schedule_WPF.Models
         private ClassRoom _Classroom;
         private int _preferenceLevel;
         private string _preferenceMessage;
+        private string _preferenceCode;
         private List<string> _extraData; // place for all excel fields that havent been computed (yet)
 
         public Classes()
@@ -79,6 +80,7 @@ namespace Schedule_WPF.Models
             SectionNotes = sectionNotes;
             PreferenceLevel = 0;
             PreferenceMessage = "";
+            PreferenceCode = "";
         }
 
         public Classes DeepCopy()
@@ -120,7 +122,7 @@ namespace Schedule_WPF.Models
         public bool excludeCredits { get { return _excludeCredits; } set { _excludeCredits = value; OnPropertyChanged("excludeCredits"); } }
         public Professors Prof { get { return _Prof; } set { _Prof = value; OnPropertyChanged("Prof"); } }
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
-        public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "]"; } }
+        public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "] " + PreferenceCode; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
         public string ClassID { get { return CRN + ClassName + SectionNumber + ClassNumber; } }
         public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName; } }
@@ -129,6 +131,7 @@ namespace Schedule_WPF.Models
         public string SectionNotes { get { return _SectionNotes; } set { _SectionNotes = value; OnPropertyChanged("SectionNotes"); } }
         public int PreferenceLevel { get { return _preferenceLevel; } set { _preferenceLevel = value; OnPropertyChanged("PreferenceLevel"); } }
         public string PreferenceMessage { get { return _preferenceMessage; } set { _preferenceMessage = value; OnPropertyChanged("PreferenceMessage"); } }
+        public string PreferenceCode { get { return _preferenceCode; } set { _preferenceCode = value; OnPropertyChanged("PreferenceCode"); } }
 
         public string getSectionString()
         {

@@ -1006,6 +1006,7 @@ namespace Schedule_WPF
                 }
                 MessageBox.Show("Preferences successfully submitted.");
                 ProcessProfessorPreferences();
+                RefreshGUI();
             }
         }
         private void ProcessProfessorPreferences() // Update classes to reflect the preferences of professors, (if any) 
@@ -1029,6 +1030,7 @@ namespace Schedule_WPF
                                 //MessageBox.Show("" + classList[i].ClassID + " : " + classList[i].PreferenceLevel);
                                 classList[i].PreferenceMessage = professorPreferences[n].PreferenceList[x].Message;
                                 //MessageBox.Show("Found preference for " + profID + " in " + dept + " " + num);
+                                classList[i].PreferenceCode = professorPreferences[n].PreferenceList[x].Code;
                                 if (professorPreferences[n].PreferenceList[x].Message == "Taught before but prefer to teach on-line" && !classList[i].Online)
                                 {
                                     classList[i].PreferenceLevel = -1;
