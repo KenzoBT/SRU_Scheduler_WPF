@@ -1,0 +1,48 @@
+﻿<Window x:Class="Schedule_WPF.EditClassTimeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Schedule_WPF"
+        mc:Ignorable="d"
+        Title="EditClassTimeDialog" Height="300" Width="450" WindowStartupLocation="CenterOwner">
+    <Grid Background="#dddddd" Height="Auto">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="0.3*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="30"/>
+            <ColumnDefinition Width="30"/>
+        </Grid.ColumnDefinitions>
+        <Grid Background="#016648" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TextBlock VerticalAlignment="Center" FontSize="25" Margin="40,0,0,0" Foreground="#ffffff">Edit Online Class Time</TextBlock>
+        </Grid>
+        <WrapPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" >
+            <TextBlock FontSize="16" VerticalAlignment="Center">Select Time :</TextBlock>
+            <ComboBox x:Name="TimeComboBox" Margin="20 0 0 0" MinWidth="65" SelectionChanged="ComboBox_SelectionChanged">
+                <ComboBoxItem>MWF</ComboBoxItem>
+                <ComboBoxItem>TR</ComboBoxItem>
+            </ComboBox>
+            <ComboBox x:Name="TimeListComboBox" Margin="5 0 0 0" MinWidth="150">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding FullTime}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </WrapPanel>
+        <Button Grid.ColumnSpan="4" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center" Width="150" Height="30" Click="Button_Click"  FontSize="16">Submit</Button>
+        <StackPanel Name="Time_Invalid" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning.png" Height="20" ToolTip="Time conflict detected for professor!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+        <StackPanel Name="Time_Required" Grid.Row="2" Grid.Column="2" Height="20" Visibility="Hidden">
+            <Image Source="images/warning_2.png" Height="20" ToolTip="Please select a time!" RenderOptions.BitmapScalingMode="HighQuality"/>
+        </StackPanel>
+    </Grid>
+</Window>

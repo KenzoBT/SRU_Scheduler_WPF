@@ -95,6 +95,29 @@
                 </MenuItem.Icon>
             </MenuItem>
         </ContextMenu>
+        <!-- Context menu for Online classes only -->
+        <ContextMenu x:Key="OnlineClassContextMenu">
+            <MenuItem Header="Edit Time" Click="Btn_EditClassTime_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/time.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Edit Class" Click="Btn_EditClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/edit.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Remove Class" Click="Btn_RemoveClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/delete.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="View/Edit Notes" Click="Btn_EditNotes_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
+                <MenuItem.Icon>
+                    <Image Source="images/notes.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
         <!-- Context menu for GUI classes only -->
         <ContextMenu x:Key="ClassContextMenuGUI">
             <MenuItem Header="Edit Class" Click="Btn_EditClass_Click" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Parent}">
@@ -238,7 +261,7 @@
                                     <DataGrid x:Name="Online_Classes_Grid" ScrollViewer.CanContentScroll="True" AutoGenerateColumns="False" AllowDrop="True" Drop="HandleDropToOnlineList" CanUserAddRows="False" CanUserDeleteRows="False">
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
-                                                <Setter Property="ContextMenu" Value="{StaticResource ClassContextMenu}" />
+                                                <Setter Property="ContextMenu" Value="{StaticResource OnlineClassContextMenu}" />
                                                 <Setter Property="Background" Value="{Binding PreferenceLevel, Converter={StaticResource preferenceConverter}}"/>
                                                 <Setter Property="ToolTip" Value="{Binding PreferenceMessage, Converter={StaticResource prefMessageConverter}}"/>
                                             </Style>
@@ -257,6 +280,10 @@
                                             <DataGridTextColumn Binding="{Binding Prof.FullName}" Header="Professor" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                             </DataGridTextColumn>
                                             <DataGridTextColumn Binding="{Binding Credits}" Header="Credits" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding StartTime.FullTime}" Header="Time" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Binding="{Binding ClassDay}" Header="Days" ElementStyle="{StaticResource DragRow}" IsReadOnly="True">
                                             </DataGridTextColumn>
                                         </DataGrid.Columns>
                                     </DataGrid>

@@ -1487,6 +1487,47 @@ namespace Schedule_WPF
                 }
             }
         }
+        public void EditClassTime(string ID)
+        {
+            Unfocus_Overlay.Visibility = Visibility.Visible;
+            Classes toEdit = DetermineClass(ID);
+            EditClassTimeDialog editClassDialog = new EditClassTimeDialog(toEdit);
+            editClassDialog.Owner = this;
+            editClassDialog.ShowDialog();
+
+            
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
+        }
+        private void Btn_EditClassTime_Click(object sender, RoutedEventArgs e)
+        {
+            // find the class
+            string ID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        ID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        ID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
+                    }
+                    EditClassTime(ID);
+                    RefreshGUI();
+                }
+            }
+        }
         public void CopyClass(string ID)
         {
             Classes copy;
@@ -2241,6 +2282,24 @@ namespace Schedule_WPF
                     if (isConflict)
                     {
                         break;
+                    }
+                }
+                // go through classlist and see if the professor is assigned at the same time
+                Timeslot targetTime = DetermineTime(timeID, days);
+                for (int i = 0; i < classList.Count; i++)
+                {
+                    if (_class.ClassID != classList[i].ClassID)
+                    {
+                        if (classList[i].Prof.FullName == _class.Prof.FullName)
+                        {
+                            //MessageBox.Show("Prof Hit: " + _class.Prof.LastName);
+                            if (classList[i].StartTime.FullTime == targetTime.FullTime)
+                            {
+                                isConflict = true;
+                                MessageBox.Show("Professor is teaching an ONLINE class at that time...");
+                                break;
+                            }
+                        }
                     }
                 }
                 return isConflict;
