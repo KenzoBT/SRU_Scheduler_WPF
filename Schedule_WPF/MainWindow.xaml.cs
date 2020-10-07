@@ -395,7 +395,6 @@ namespace Schedule_WPF
                         }
                         // Get remaining extra data
                         List<string> extras = new List<string>();
-                        extras.Add(row.Cell(1).GetValue<string>()); // Term
                         extras.Add(row.Cell(2).GetValue<string>()); // Session
                         extras.Add(row.Cell(8).GetValue<string>()); // CrossList
                         extras.Add(row.Cell(10).GetValue<string>()); // MaxSeats
@@ -1034,12 +1033,55 @@ namespace Schedule_WPF
                                 {
                                     classList[i].PreferenceLevel = -1;
                                 }
+                                else if (professorPreferences[n].PreferenceList[x].Message == "Prefer not to teach this class in the Fall" && termString != "Fall")
+                                {
+                                    classList[i].PreferenceLevel = 0;
+                                }
+                                else if (professorPreferences[n].PreferenceList[x].Message == "Prefer not to teach this class in the Spring" && termString != "Spring")
+                                {
+                                    classList[i].PreferenceLevel = 0;
+                                }
                                 break;
                             }
                         }
                         break;
                     }
                 }
+            }
+        }
+        private void SubmitChangeTerm_Click(object sender, RoutedEventArgs e) // update term and year from user input
+        {
+            if (TermYearBox.Text.Length == 4)
+            {
+                termString = TermComboBox.Text;
+                switch (termString)
+                {
+                    case "Spring":
+                        term = "01";
+                        break;
+                    case "Summer":
+                        term = "06";
+                        break;
+                    case "Fall":
+                        term = "09";
+                        break;
+                    case "Winter":
+                        term = "12";
+                        break;
+                    default:
+                        MessageBox.Show("Unexpected term name!");
+                        term = "00";
+                        termString = "None";
+                        break;
+                }
+                termYear = TermYearBox.Text;
+                ProcessProfessorPreferences();
+                MessageBox.Show("Changed Term to: " + termString + " " + termYear);
+                
+            }
+            else
+            {
+                MessageBox.Show("Please enter a valid year (e.g. 2020)");
             }
         }
 
@@ -2269,7 +2311,7 @@ namespace Schedule_WPF
             {
                 if (classList[i].ExtraData.Count == 0)
                 {
-                    int extraFields = 18; // number of extra fields in classes
+                    int extraFields = 15; // number of extra fields in classes
                     for (int n = 0; n < extraFields; n++)
                     {
                         classList[i].ExtraData.Add("");
@@ -2282,13 +2324,13 @@ namespace Schedule_WPF
                     start = "";
                     end = "";
                 }
-                dt.Rows.Add(classList[i].ExtraData[0], classList[i].ExtraData[1], classList[i].DeptName, classList[i].ClassNumber, 
-                    classList[i].getSectionString(), classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[2], classList[i].Credits, 
-                    classList[i].ExtraData[3], classList[i].ExtraData[4], classList[i].ExtraData[5], classList[i].SeatsTaken, 
-                    classList[i].ExtraData[6], classList[i].ExtraData[7], classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats,
+                dt.Rows.Add(termYear + term, classList[i].ExtraData[0], classList[i].DeptName, classList[i].ClassNumber, 
+                    classList[i].getSectionString(), classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[1], classList[i].Credits, 
+                    classList[i].ExtraData[2], classList[i].ExtraData[3], classList[i].ExtraData[4], classList[i].SeatsTaken, 
+                    classList[i].ExtraData[5], classList[i].ExtraData[6], classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats,
                     classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID,
-                    classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10], classList[i].ExtraData[11],
-                    classList[i].ExtraData[12], classList[i].ExtraData[13], classList[i].ExtraData[14], classList[i].ExtraData[15],
+                    classList[i].ExtraData[7], classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10],
+                    classList[i].ExtraData[11], classList[i].ExtraData[12], classList[i].ExtraData[13], classList[i].ExtraData[14],
                     classList[i].SectionNotes, classList[i].Notes);
             }
             dt.AcceptChanges();
@@ -2311,12 +2353,6 @@ namespace Schedule_WPF
                 return builder.ToString();
             }
         }
-
-        private void SubmitChangeTerm_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         public void GenerateClassListHashes() // Generate initial hashes for class list read from excel file (for comparison when writing to new file)
         {
             string hash;

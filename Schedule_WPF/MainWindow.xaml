@@ -544,7 +544,7 @@
                     <StackPanel Grid.Row="6" Grid.Column="1">
                         <TextBlock Foreground="Black" Margin="19 0 0 0" FontSize="13">Allows you to select the term and year that you would like to schedule for:</TextBlock>
                         <WrapPanel Margin="19 10 0 0" Height="25">
-                            <ComboBox x:Name="TermComboBox" Height="25">
+                            <ComboBox x:Name="TermComboBox" Height="25" MinWidth="65">
                                 <ComboBoxItem>Spring</ComboBoxItem>
                                 <ComboBoxItem>Summer</ComboBoxItem>
                                 <ComboBoxItem>Fall</ComboBoxItem>
