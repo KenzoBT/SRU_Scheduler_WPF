@@ -514,6 +514,10 @@
                         <RowDefinition Height="30"/>
                         <RowDefinition Height="50"/>
                         <RowDefinition Height="5"/>
+                        <RowDefinition Height="80"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="80"/>
                         <RowDefinition Height="1*"/>
                         <RowDefinition Height="60"/>
                     </Grid.RowDefinitions>
@@ -529,9 +533,25 @@
                     <StackPanel Grid.Row="3" Grid.Column="1">
                         <TextBlock Foreground="Black" Margin="19 0 0 0" FontSize="13">Include a spreadsheet that specifies the preference/comfort level each professor has towards teaching specific classes:</TextBlock>
                         <WrapPanel Margin="19 10 0 0">
-                            <TextBox x:Name="Professor_Preference_Source" Width="500" HorizontalAlignment="Left" Height="25"/>
+                            <TextBox x:Name="Professor_Preference_Source" Width="500" HorizontalAlignment="Left" Height="25" VerticalContentAlignment="Center" Padding="5 0 0 0"/>
                             <Button x:Name="Browse_Prof_Prefs" Margin="10 0 0 0" Padding="10 0 10 0" Click="Browse_Prof_Prefs_Click">Browse</Button>
                             <Button x:Name="Submit_Prof_Prefs" Margin="10 0 0 0" Padding="10 0 10 0" Click="Submit_Prof_Prefs_Click">Submit preferences</Button>
+                        </WrapPanel>
+                    </StackPanel>
+                    <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
+                        <TextBlock Margin="10 6 0 6" Foreground="Black">Change Term</TextBlock>
+                    </Viewbox>
+                    <StackPanel Grid.Row="6" Grid.Column="1">
+                        <TextBlock Foreground="Black" Margin="19 0 0 0" FontSize="13">Allows you to select the term and year that you would like to schedule for:</TextBlock>
+                        <WrapPanel Margin="19 10 0 0" Height="25">
+                            <ComboBox x:Name="TermComboBox" Height="25">
+                                <ComboBoxItem>Spring</ComboBoxItem>
+                                <ComboBoxItem>Summer</ComboBoxItem>
+                                <ComboBoxItem>Fall</ComboBoxItem>
+                                <ComboBoxItem>Winter</ComboBoxItem>
+                            </ComboBox>
+                            <TextBox x:Name="TermYearBox" MinWidth="65" Margin="10 0 0 0" Height="25" VerticalContentAlignment="Center" Padding="5 0 0 0"></TextBox>
+                            <Button x:Name="SubmitChangeTerm" Height="25" Margin="10 0 0 0" Padding="10 0 10 0" Click="SubmitChangeTerm_Click">Submit</Button>
                         </WrapPanel>
                     </StackPanel>
                 </Grid>

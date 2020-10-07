@@ -43,6 +43,7 @@ namespace Schedule_WPF
         string filePath, latestHashDigest, colorFilePath;
         RGB_Color[] colorPalette = { new RGB_Color(244, 67, 54), new RGB_Color(156, 39, 176), new RGB_Color(63, 81, 181), new RGB_Color(3, 169, 244), new RGB_Color(0, 150, 136), new RGB_Color(139, 195, 74), new RGB_Color(255, 235, 59), new RGB_Color(255, 152, 0), new RGB_Color(233, 30, 99), new RGB_Color(103, 58, 183), new RGB_Color(33, 150, 243), new RGB_Color(0, 188, 212), new RGB_Color(76, 175, 80), new RGB_Color(205, 220, 57), new RGB_Color(255, 193, 7), new RGB_Color(255, 87, 34) };
         Pairs colorPairs = (Pairs)Application.Current.FindResource("ColorPairs_List_View");
+        string term, termString, termYear;
 
         ////////////// START OF EXECUTION ////////////////
 
@@ -72,6 +73,45 @@ namespace Schedule_WPF
                 var worksheet = excelWorkbook.Worksheet(1);
                 int columns = 33;
                 var rows = worksheet.RangeUsed().RowsUsed().Skip(1);
+
+                // Determine term
+                string termCode = worksheet.Row(2).Cell(1).GetValue<string>();
+                if (termCode.Length == 6)
+                {
+                    termYear = termCode.Substring(0, termCode.Length - 2);
+                    TermYearBox.Text = termYear;
+                    term = termCode.Substring(termCode.Length - 2);
+                    switch (term)
+                    {
+                        case "01":
+                            termString = "Spring";
+                            TermComboBox.SelectedIndex = 0;
+                            break;
+                        case "06":
+                            termString = "Summer";
+                            TermComboBox.SelectedIndex = 1;
+                            break;
+                        case "09":
+                            termString = "Fall";
+                            TermComboBox.SelectedIndex = 2;
+                            break;
+                        case "12":
+                            termString = "Winter";
+                            TermComboBox.SelectedIndex = 3;
+                            break;
+                        default:
+                            termString = "None";
+                            TermComboBox.SelectedIndex = 0;
+                            break;
+                    }
+                    //MessageBox.Show("Term: " + term + "\nYear: " + termYear);
+                }
+                else
+                {
+                    term = "00";
+                    termString = "None";
+                    termYear = "0000";
+                }
 
                 // Populate excel headers array
                 var headerRow = worksheet.Row(1);
@@ -2271,6 +2311,12 @@ namespace Schedule_WPF
                 return builder.ToString();
             }
         }
+
+        private void SubmitChangeTerm_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         public void GenerateClassListHashes() // Generate initial hashes for class list read from excel file (for comparison when writing to new file)
         {
             string hash;
@@ -2321,7 +2367,6 @@ namespace Schedule_WPF
             throw new NotImplementedException();
         }
     }
-
     public class PreferenceConverter : IValueConverter
     {
 
@@ -2331,7 +2376,7 @@ namespace Schedule_WPF
 
             if (input == -1)
             {
-                return new SolidColorBrush(Colors.LightYellow);
+                return new SolidColorBrush(Colors.PaleGoldenrod);
             }
             else if (input == -2)
                 return new SolidColorBrush(Colors.Pink);
@@ -2344,7 +2389,6 @@ namespace Schedule_WPF
             throw new NotImplementedException();
         }
     }
-
     public class PreferenceMessageConverter : IValueConverter
     {
 
