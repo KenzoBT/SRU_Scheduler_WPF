@@ -776,14 +776,11 @@ namespace Schedule_WPF
                                 unique = false;
                             }
                         }
-                        if (unique)
+                        if (unique && !classList[n].excludeCredits)
                         {
                             professors[i].NumPrep++;
-                            uniqueClasses.Add(classList[n].ClassName);
-                        }
-                        if (!classList[n].excludeCredits)
-                        {
                             professors[i].NumClasses += classList[n].Credits;
+                            uniqueClasses.Add(classList[n].ClassName);
                         }
                     }
                 }
@@ -1079,7 +1076,7 @@ namespace Schedule_WPF
                 termYear = TermYearBox.Text;
                 ProcessProfessorPreferences();
                 MessageBox.Show("Changed Term to: " + termString + " " + termYear);
-                
+                RefreshGUI();
             }
             else
             {

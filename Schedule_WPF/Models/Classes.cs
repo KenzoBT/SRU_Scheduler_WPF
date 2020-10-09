@@ -122,17 +122,18 @@ namespace Schedule_WPF.Models
         public bool excludeCredits { get { return _excludeCredits; } set { _excludeCredits = value; OnPropertyChanged("excludeCredits"); } }
         public Professors Prof { get { return _Prof; } set { _Prof = value; OnPropertyChanged("Prof"); } }
         public ClassRoom Classroom { get { return _Classroom; } set { _Classroom = value; OnPropertyChanged("Classroom"); } }
-        public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "] " + PreferenceCode; } }
+        public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "] " + PreferenceCodeFormatted; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
         public string ClassID { get { return CRN + ClassName + SectionNumber + ClassNumber; } }
-        public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName + PreferenceFormatted; } }
+        public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName + PreferenceMessageFormatted; } }
         public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
         public string Notes { get { return _Notes; } set { _Notes = value; OnPropertyChanged("Notes"); } }
         public string SectionNotes { get { return _SectionNotes; } set { _SectionNotes = value; OnPropertyChanged("SectionNotes"); } }
         public int PreferenceLevel { get { return _preferenceLevel; } set { _preferenceLevel = value; OnPropertyChanged("PreferenceLevel"); } }
         public string PreferenceMessage { get { return _preferenceMessage; } set { _preferenceMessage = value; OnPropertyChanged("PreferenceMessage"); } }
+        public string PreferenceMessageFormatted { get { if (PreferenceLevel < 0) { return "\nPreference: " + PreferenceMessage; } else { return ""; } } }
         public string PreferenceCode { get { return _preferenceCode; } set { _preferenceCode = value; OnPropertyChanged("PreferenceCode"); } }
-        public string PreferenceFormatted { get { if (PreferenceMessage == "") { return ""; } else { return "\nPreference: " + PreferenceMessage; } } }
+        public string PreferenceCodeFormatted { get { if (PreferenceLevel < 0) { return _preferenceCode; } else { return ""; } } }
 
         public string getSectionString()
         {
