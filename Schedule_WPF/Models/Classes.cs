@@ -33,6 +33,7 @@ namespace Schedule_WPF.Models
         private string _preferenceMessage;
         private string _preferenceCode;
         private List<string> _extraData; // place for all excel fields that havent been computed (yet)
+        private bool _isCrossFirst;
 
         public Classes()
         {
@@ -55,6 +56,7 @@ namespace Schedule_WPF.Models
             ExtraData = new List<string>();
             Notes = "";
             SectionNotes = "";
+            isCrossFirst = false;
         }
 
         public Classes(string crn, string deptName, int classNum, int secNum, string className, int credits,
@@ -81,6 +83,7 @@ namespace Schedule_WPF.Models
             PreferenceLevel = 0;
             PreferenceMessage = "";
             PreferenceCode = "";
+            isCrossFirst = false;
         }
 
         public Classes DeepCopy()
@@ -134,6 +137,9 @@ namespace Schedule_WPF.Models
         public string PreferenceMessageFormatted { get { if (PreferenceLevel < 0) { return "\nPreference: " + PreferenceMessage; } else { return ""; } } }
         public string PreferenceCode { get { return _preferenceCode; } set { _preferenceCode = value; OnPropertyChanged("PreferenceCode"); } }
         public string PreferenceCodeFormatted { get { if (PreferenceLevel < 0) { return _preferenceCode; } else { return ""; } } }
+        public bool isCrossListed { get { if (_extraData[1] != "") { return true; } else { return false; } } }
+        public string CrossListCode { get { return _extraData[1]; } }
+        public bool isCrossFirst { get { return _isCrossFirst; } set { _isCrossFirst = value; } }
 
         public string getSectionString()
         {

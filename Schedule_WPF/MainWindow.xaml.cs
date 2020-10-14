@@ -13,7 +13,7 @@ using Schedule_WPF.Models;
 using Microsoft.Win32;
 using ClosedXML.Excel;
 using System.Linq;
-using System.Security.Cryptography;
+using System.Security.Cryptography;                                                      
 using System.Text;
 using System.Windows.Data;
 using System.Globalization;
@@ -217,6 +217,7 @@ namespace Schedule_WPF
                 string CRN, Dept, ClassName, ClassDay, classID, profName, notes, sectionNotes;
                 bool Online, Appoint, Changed;
                 List<string> CRN_List = new List<string>();
+                List<string> CrossListCodes = new List<string>();
                 foreach (var row in rows)
                 {
                     ClassNum = -1;
@@ -393,6 +394,24 @@ namespace Schedule_WPF
                             //MessageBox.Show("Excel Read: Class set to RED");
                             Changed = true;
                         }
+                        // Crosslist handling
+                        bool isCrossFirst = false;
+                        string crossCode = row.Cell(8).GetValue<string>();
+                        if (crossCode != "")
+                        {
+                            for (int i = 0; i < CrossListCodes.Count; i++)
+                            {
+                                if (crossCode == CrossListCodes[i])
+                                {
+                                    break;
+                                }
+                                if (i == (CrossListCodes.Count - 1))
+                                {
+                                    isCrossFirst = true;
+                                    CrossListCodes.Add(crossCode);
+                                }
+                            }
+                        }
                         // Get remaining extra data
                         List<string> extras = new List<string>();
                         extras.Add(row.Cell(2).GetValue<string>()); // Session
@@ -410,6 +429,7 @@ namespace Schedule_WPF
                         notes = row.Cell(33).GetValue<string>();
                         // Create class and add to classlist
                         Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, notes, sectionNotes, extras);
+                        tmpClass.isCrossFirst = isCrossFirst;
                         classList.Add(tmpClass);
                     }
                 }
@@ -778,9 +798,21 @@ namespace Schedule_WPF
                         }
                         if (unique && !classList[n].excludeCredits)
                         {
-                            professors[i].NumPrep++;
-                            professors[i].NumClasses += classList[n].Credits;
-                            uniqueClasses.Add(classList[n].ClassName);
+                            if (classList[n].isCrossListed)
+                            {
+                                if (classList[n].isCrossFirst)
+                                {
+                                    professors[i].NumPrep++;
+                                }
+                                professors[i].NumClasses += classList[n].Credits; // delete if no credits too
+                                uniqueClasses.Add(classList[n].ClassName);
+                            }
+                            else
+                            {
+                                professors[i].NumPrep++;
+                                professors[i].NumClasses += classList[n].Credits;
+                                uniqueClasses.Add(classList[n].ClassName);
+                            }
                         }
                     }
                 }
