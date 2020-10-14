@@ -803,8 +803,8 @@ namespace Schedule_WPF
                                 if (classList[n].isCrossFirst)
                                 {
                                     professors[i].NumPrep++;
+                                    professors[i].NumClasses += classList[n].Credits;
                                 }
-                                professors[i].NumClasses += classList[n].Credits; // delete if no credits too
                                 uniqueClasses.Add(classList[n].ClassName);
                             }
                             else
