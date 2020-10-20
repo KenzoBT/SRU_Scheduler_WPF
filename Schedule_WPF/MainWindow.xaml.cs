@@ -427,8 +427,10 @@ namespace Schedule_WPF
                         }
                         sectionNotes = row.Cell(32).GetValue<string>();
                         notes = row.Cell(33).GetValue<string>();
+                        string maxSeats = row.Cell(10).GetValue<string>();
+                        string projSeats = row.Cell(12).GetValue<string>();
                         // Create class and add to classlist
-                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, notes, sectionNotes, extras);
+                        Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, notes, sectionNotes, extras, maxSeats, projSeats);
                         tmpClass.isCrossFirst = isCrossFirst;
                         classList.Add(tmpClass);
                     }
@@ -570,7 +572,14 @@ namespace Schedule_WPF
                             if (!DetermineTimeConflict(classList[i], days, classList[i].StartTime.TimeID))
                             {
                                 lbl.Content = classList[i].TextBoxName;
-                                lbl.Background = classList[i].Prof.Prof_Color;
+                                if (classList[i].isHidden)
+                                {
+                                    lbl.Background = stripedBackground(classList[i].Prof.profRGB.colorBrush);
+                                }
+                                else
+                                {
+                                    lbl.Background = classList[i].Prof.Prof_Color;
+                                }
                                 lbl.Tag = classList[i].ClassID;
                                 lbl.ContextMenu = Resources["ClassContextMenuGUI"] as ContextMenu;
                                 lbl.ToolTip = classList[i].ToolTipText;
@@ -1361,7 +1370,7 @@ namespace Schedule_WPF
                 {
                     CRoom = new ClassRoom();
                 }
-                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false, "", "", new List<string>()));
+                AddClass(new Classes(crn, dpt, number, sect, name, credits, "", new Timeslot(), 0, CRoom, DetermineProfessor(prof), online, appointment, false, "", "", new List<string>(), "0", "0"));
                 Application.Current.Resources["Set_Class_Success"] = false;
                 RefreshGUI();
             }
@@ -1525,8 +1534,6 @@ namespace Schedule_WPF
             EditClassTimeDialog editClassDialog = new EditClassTimeDialog(toEdit);
             editClassDialog.Owner = this;
             editClassDialog.ShowDialog();
-
-            
             Unfocus_Overlay.Visibility = Visibility.Hidden;
         }
         private void Btn_EditClassTime_Click(object sender, RoutedEventArgs e)
@@ -1644,6 +1651,89 @@ namespace Schedule_WPF
                         classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     }
                     EditNotes(classID);
+                    RefreshGUI();
+                }
+            }
+        }
+        public void HideClass(string ID)
+        {
+            Classes c1 = DetermineClass(ID);
+            // maxseats = ExtraData[2]
+            // if hidden -> unhide / else hide
+            if (c1.isHidden)
+            {
+                c1.MaxSeats = "1";
+            }
+            else
+            {
+                c1.MaxSeats = "0";
+            }
+        }
+        private void Btn_HideClass_Click(object sender, RoutedEventArgs e)
+        {
+            // find the class
+            string classID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        classID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
+                    }
+                    HideClass(classID);
+                    RefreshGUI();
+                }
+            }
+        }
+        private void EditSeats(string ID)
+        {
+            Unfocus_Overlay.Visibility = Visibility.Visible;
+            Classes toEdit = DetermineClass(ID);
+            EditClassSeating editClassSeating = new EditClassSeating(toEdit);
+            editClassSeating.Owner = this;
+            editClassSeating.ShowDialog();
+            Unfocus_Overlay.Visibility = Visibility.Hidden;
+        }
+        private void Btn_EditSeats_Click(object sender, RoutedEventArgs e)
+        {
+            // find the class
+            string classID = "";
+            MenuItem mi = sender as MenuItem;
+            if (mi != null)
+            {
+                ContextMenu cm = mi.CommandParameter as ContextMenu;
+                if (cm != null)
+                {
+                    Label source = cm.PlacementTarget as Label;
+                    if (source != null) // Being called from a Label
+                    {
+                        classID = source.Tag.ToString();
+                    }
+                    else // Being called from a GridRow
+                    {
+                        DataGridRow sourceRow = cm.PlacementTarget as DataGridRow;
+                        DataGrid parentGrid = GetParent<DataGrid>(sourceRow as DependencyObject);
+                        TextBlock classCRN = parentGrid.Columns[0].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock className = parentGrid.Columns[4].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classSection = parentGrid.Columns[3].GetCellContent(sourceRow) as TextBlock;
+                        TextBlock classNumber = parentGrid.Columns[2].GetCellContent(sourceRow) as TextBlock;
+                        classID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
+                    }
+                    EditSeats(classID);
                     RefreshGUI();
                 }
             }
@@ -1902,7 +1992,14 @@ namespace Schedule_WPF
                             classList[classIndex].Classroom = DetermineClassroom(bldg, room);
                             // Give the Label the class information
                             receiver.Content = classList[classIndex].TextBoxName;
-                            receiver.Background = classList[classIndex].Prof.Prof_Color;
+                            if (classList[classIndex].isHidden)
+                            {
+                                receiver.Background = stripedBackground(classList[classIndex].Prof.profRGB.colorBrush);
+                            }
+                            else
+                            {
+                                receiver.Background = classList[classIndex].Prof.Prof_Color;
+                            }
                             receiver.Tag = classList[classIndex].ClassID;
                             receiver.ToolTip = classList[classIndex].ToolTipText;
                             receiver.ContextMenu = Resources["ClassContextMenu"] as ContextMenu;
@@ -2327,7 +2424,10 @@ namespace Schedule_WPF
                             if (classList[i].StartTime.FullTime == targetTime.FullTime)
                             {
                                 isConflict = true;
-                                MessageBox.Show("Professor is teaching an ONLINE class at that time...");
+                                if (classList[i].Online)
+                                {
+                                    MessageBox.Show("Professor is teaching an ONLINE class at that time...");
+                                }
                                 break;
                             }
                         }
@@ -2416,7 +2516,7 @@ namespace Schedule_WPF
                 }
                 dt.Rows.Add(termYear + term, classList[i].ExtraData[0], classList[i].DeptName, classList[i].ClassNumber, 
                     classList[i].getSectionString(), classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[1], classList[i].Credits, 
-                    classList[i].ExtraData[2], classList[i].ExtraData[3], classList[i].ExtraData[4], classList[i].SeatsTaken, 
+                    classList[i].MaxSeats, classList[i].ExtraData[3], classList[i].ProjSeats, classList[i].SeatsTaken, 
                     classList[i].ExtraData[5], classList[i].ExtraData[6], classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats,
                     classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID,
                     classList[i].ExtraData[7], classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10],
@@ -2457,6 +2557,23 @@ namespace Schedule_WPF
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta / 10);
             e.Handled = true;
+        }
+
+        // Custom Brushes
+        LinearGradientBrush stripedBackground(Color baseBackground)
+        {
+            LinearGradientBrush output = new LinearGradientBrush();
+            /* Stripy
+            output.MappingMode = BrushMappingMode.Absolute;
+            output.SpreadMethod = GradientSpreadMethod.Repeat;
+            output.StartPoint = new Point(0, 0);
+            output.EndPoint = new Point(4, 4);
+            */
+            output.GradientStops.Add(new GradientStop(baseBackground, 0.0));
+            output.GradientStops.Add(new GradientStop(baseBackground, 0.5));
+            output.GradientStops.Add(new GradientStop(Colors.LightGray, 0.5));
+            output.GradientStops.Add(new GradientStop(Colors.LightGray, 1.0));
+            return output;
         }
     }
 

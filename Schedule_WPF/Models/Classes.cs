@@ -34,6 +34,8 @@ namespace Schedule_WPF.Models
         private string _preferenceCode;
         private List<string> _extraData; // place for all excel fields that havent been computed (yet)
         private bool _isCrossFirst;
+        private string _maxSeats;
+        private string _projSeats;
 
         public Classes()
         {
@@ -57,10 +59,12 @@ namespace Schedule_WPF.Models
             Notes = "";
             SectionNotes = "";
             isCrossFirst = false;
+            MaxSeats = "0";
+            ProjSeats = "0";
         }
 
         public Classes(string crn, string deptName, int classNum, int secNum, string className, int credits,
-            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment, bool changed, string sectionNotes, string notes, List<string> extras)
+            string classDay, Timeslot startTime, int seatsTaken, ClassRoom classroom, Professors professor, bool online, bool appointment, bool changed, string sectionNotes, string notes, List<string> extras, string maxSeats, string projSeats)
         {
             CRN = crn;
             DeptName = deptName;
@@ -84,6 +88,8 @@ namespace Schedule_WPF.Models
             PreferenceMessage = "";
             PreferenceCode = "";
             isCrossFirst = false;
+            MaxSeats = maxSeats;
+            ProjSeats = projSeats;
         }
 
         public Classes DeepCopy()
@@ -93,7 +99,7 @@ namespace Schedule_WPF.Models
             {
                 extraCopy.Add(ExtraData[i]);
             }
-            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged, SectionNotes, Notes, extraCopy);
+            Classes deepcopy = new Classes(CRN, DeptName, ClassNumber, SectionNumber, ClassName, Credits, ClassDay, StartTime, SeatsTaken, Classroom, Prof, Online, isAppointment, hasChanged, SectionNotes, Notes, extraCopy, MaxSeats, ProjSeats);
             return deepcopy;
         }
 
@@ -103,7 +109,7 @@ namespace Schedule_WPF.Models
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(CRN + DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + excludeCredits + hasChanged + Prof.FullName + Classroom.ClassID + Notes + SectionNotes);
+                    writer.Write(CRN + DeptName + ClassNumber + SectionNumber + ClassName + ClassDay + StartTime.FullTime + SeatsTaken + Credits + Online + isAssigned + isAppointment + excludeCredits + hasChanged + Prof.FullName + Classroom.ClassID + Notes + SectionNotes + isHidden + MaxSeats + ProjSeats);
                 }
                 return m.ToArray();
             }
@@ -128,7 +134,7 @@ namespace Schedule_WPF.Models
         public string TextBoxName { get { return DeptName + " " + ClassNumber + " [" + SectionNumber + "] " + PreferenceCodeFormatted; } }
         public int SeatsLeft { get { return Classroom.AvailableSeats - SeatsTaken; } }
         public string ClassID { get { return CRN + ClassName + SectionNumber + ClassNumber; } }
-        public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName + PreferenceMessageFormatted; } }
+        public string ToolTipText { get { return "Name: " + ClassName + "\nProfessor: " + Prof.FullName + PreferenceMessageFormatted + HiddenMessage; } }
         public List<string> ExtraData { get { return _extraData; } set { _extraData = value; } }
         public string Notes { get { return _Notes; } set { _Notes = value; OnPropertyChanged("Notes"); } }
         public string SectionNotes { get { return _SectionNotes; } set { _SectionNotes = value; OnPropertyChanged("SectionNotes"); } }
@@ -140,6 +146,10 @@ namespace Schedule_WPF.Models
         public bool isCrossListed { get { if (_extraData[1] != "") { return true; } else { return false; } } }
         public string CrossListCode { get { return _extraData[1]; } }
         public bool isCrossFirst { get { return _isCrossFirst; } set { _isCrossFirst = value; } }
+        public bool isHidden { get { if (MaxSeats == "0") { return true; } else { return false; } } }
+        public string HiddenMessage { get { if (isHidden) { return "\n[ HIDDEN ]"; } else { return ""; } } }
+        public string MaxSeats { get { return _maxSeats; } set { _maxSeats = value; OnPropertyChanged("MaxSeats"); } }
+        public string ProjSeats { get { return _projSeats; } set { _projSeats = value; OnPropertyChanged("ProjSeats"); } }
 
         public string getSectionString()
         {
