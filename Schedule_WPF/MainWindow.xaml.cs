@@ -2563,12 +2563,12 @@ namespace Schedule_WPF
         LinearGradientBrush stripedBackground(Color baseBackground)
         {
             LinearGradientBrush output = new LinearGradientBrush();
-            /* Stripy
+            
             output.MappingMode = BrushMappingMode.Absolute;
             output.SpreadMethod = GradientSpreadMethod.Repeat;
             output.StartPoint = new Point(0, 0);
-            output.EndPoint = new Point(4, 4);
-            */
+            output.EndPoint = new Point(8, 8);
+            
             output.GradientStops.Add(new GradientStop(baseBackground, 0.0));
             output.GradientStops.Add(new GradientStop(baseBackground, 0.5));
             output.GradientStops.Add(new GradientStop(Colors.LightGray, 0.5));
