@@ -12,6 +12,7 @@
         <kz:ClassList x:Key="Online_Classes_List_View"/>
         <kz:ClassList x:Key="Appointment_Classes_List_View"/>
         <kz:ClassList x:Key="Appointment2_Classes_List_View"/>
+        <kz:ClassList x:Key="Deleted_Classes_List_View"/>
         <kz:ClassRoomList x:Key="ClassRoom_List_View"/>
         <kz:Pairs x:Key="ColorPairs_List_View"/>
         <kz:ProfessorPreferenceList x:Key="ProfPreference_List_View"/>

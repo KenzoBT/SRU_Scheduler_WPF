@@ -37,6 +37,7 @@ namespace Schedule_WPF
         ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
         ClassList appointmentClasses = (ClassList)Application.Current.FindResource("Appointment_Classes_List_View");
         ClassList appointment2Classes = (ClassList)Application.Current.FindResource("Appointment2_Classes_List_View");
+        ClassList deletedClasses = (ClassList)Application.Current.FindResource("Deleted_Classes_List_View");
         List<string> excelHeaders = new List<string>();
         List<Type> excelTypes = new List<Type>();
         List<ClassesHash> hashedClasses = new List<ClassesHash>();
@@ -432,7 +433,15 @@ namespace Schedule_WPF
                         // Create class and add to classlist
                         Classes tmpClass = new Classes(CRN, Dept, ClassNum, Section, ClassName, Credits, ClassDay, time, SeatsTaken, classroom, prof, Online, Appoint, Changed, notes, sectionNotes, extras, maxSeats, projSeats);
                         tmpClass.isCrossFirst = isCrossFirst;
-                        classList.Add(tmpClass);
+                        // check if it is a deleted class
+                        if (row.Cell(1).Style.Font.Strikethrough == false)
+                        {
+                            classList.Add(tmpClass);
+                        }
+                        else
+                        {
+                            deletedClasses.Add(tmpClass);
+                        }
                     }
                 }
             }
@@ -901,6 +910,13 @@ namespace Schedule_WPF
                             break;
                         }
                     }
+                }
+                // Iterate over deletedclasses to format the background of each row appropriately
+                for (int i = 0; i < deletedClasses.Count; i++)
+                {
+                    ws.Row(classList.Count + i + 2).Style.Fill.BackgroundColor = edited;
+                    ws.Row(classList.Count + i + 2).Style.Font.Strikethrough = true;
+                    ws.Row(classList.Count + i + 2).Style.Font.FontColor = XLColor.Red;
                 }
 
                 wb.SaveAs(fileName);
@@ -1383,6 +1399,7 @@ namespace Schedule_WPF
                 if (classList[i].ClassID == ID)
                 {
                     removalTarget = classList[i];
+                    deletedClasses.Add(removalTarget);
                     classList.RemoveAt(i);
                     break;
                 }
@@ -2522,6 +2539,33 @@ namespace Schedule_WPF
                     classList[i].ExtraData[7], classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10],
                     classList[i].ExtraData[11], classList[i].ExtraData[12], classList[i].ExtraData[13], classList[i].ExtraData[14],
                     classList[i].SectionNotes, classList[i].Notes);
+            }
+            //Add Deleted classes to DataTable
+            for (int i = 0; i < deletedClasses.Count; i++)
+            {
+                if (deletedClasses[i].ExtraData.Count == 0)
+                {
+                    int extraFields = 15; // number of extra fields in classes
+                    for (int n = 0; n < extraFields; n++)
+                    {
+                        deletedClasses[i].ExtraData.Add("");
+                    }
+                }
+                string start = deletedClasses[i].StartTime.Start;
+                string end = deletedClasses[i].StartTime.End;
+                if (start == "-- ")
+                {
+                    start = "";
+                    end = "";
+                }
+                dt.Rows.Add(termYear + term, deletedClasses[i].ExtraData[0], deletedClasses[i].DeptName, deletedClasses[i].ClassNumber,
+                    deletedClasses[i].getSectionString(), deletedClasses[i].CRN, deletedClasses[i].ClassName, deletedClasses[i].ExtraData[1], deletedClasses[i].Credits,
+                    deletedClasses[i].MaxSeats, deletedClasses[i].ExtraData[3], deletedClasses[i].ProjSeats, deletedClasses[i].SeatsTaken,
+                    deletedClasses[i].ExtraData[5], deletedClasses[i].ExtraData[6], deletedClasses[i].ClassDay, start, end, deletedClasses[i].Classroom.AvailableSeats,
+                    deletedClasses[i].Classroom.Location, deletedClasses[i].Classroom.RoomNum, deletedClasses[i].Prof.FullName, deletedClasses[i].Prof.SRUID,
+                    deletedClasses[i].ExtraData[7], deletedClasses[i].ExtraData[8], deletedClasses[i].ExtraData[9], deletedClasses[i].ExtraData[10],
+                    deletedClasses[i].ExtraData[11], deletedClasses[i].ExtraData[12], deletedClasses[i].ExtraData[13], deletedClasses[i].ExtraData[14],
+                    deletedClasses[i].SectionNotes, deletedClasses[i].Notes);
             }
             dt.AcceptChanges();
             return dt;
