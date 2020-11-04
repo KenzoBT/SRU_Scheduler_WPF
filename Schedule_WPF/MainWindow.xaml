@@ -580,6 +580,7 @@
                             <Button x:Name="Browse_Prof_Prefs" Margin="10 0 0 0" Padding="10 0 10 0" Click="Browse_Prof_Prefs_Click">Browse</Button>
                             <Button x:Name="Submit_Prof_Prefs" Margin="10 0 0 0" Padding="10 0 10 0" Click="Submit_Prof_Prefs_Click">Submit preferences</Button>
                         </WrapPanel>
+                        <TextBlock x:Name="Loaded_URL_Preferences" Foreground="Gray" Margin="39 10 0 0" FontSize="13"></TextBlock>
                     </StackPanel>
                     <Viewbox HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" MinHeight="40" MaxHeight="80">
                         <TextBlock Margin="10 6 0 6" Foreground="Black">Change Term</TextBlock>

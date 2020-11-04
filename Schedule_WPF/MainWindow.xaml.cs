@@ -1069,6 +1069,7 @@ namespace Schedule_WPF
                             }
                         }
                     }
+                    Loaded_URL_Preferences.Text = "Loaded file: " + Professor_Preference_Source.Text;
                 }
                 catch (IOException ex)
                 {
