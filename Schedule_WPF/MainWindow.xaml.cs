@@ -1850,45 +1850,47 @@ namespace Schedule_WPF
                     ID = classCRN.Text + className.Text + classSection.Text + classNumber.Text;
                     Classes theClass = DetermineClass(ID);
                     string classType = "";
-
-                    if (theClass.Online)
+                    if (theClass.Online || theClass.isAppointment)
                     {
-                        classType = "Online";
-                    }
-                    else if (theClass.isAppointment)
-                    {
-                        classType = "Appointment";
-                    }
-                    string messageBoxText = "Are you sure you want to change this class\nfrom " + classType + " to In-Class?";
-                    string caption = classType + " class alteration";
-                    MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                    MessageBoxImage icon = MessageBoxImage.Question;
-                    // Display + Process message box results
-                    MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-                    switch (result)
-                    {
-                        case MessageBoxResult.Yes:
-                            // Find the class
-                            for (int i = 0; i < classList.Count; i++)
-                            {
-                                if (classList[i].ClassID == ID)
+                        if (theClass.Online)
+                        {
+                            classType = "Online";
+                        }
+                        else if (theClass.isAppointment)
+                        {
+                            classType = "Appointment";
+                        }
+                        string messageBoxText = "Are you sure you want to change this class\nfrom " + classType + " to In-Class?";
+                        string caption = classType + " class alteration";
+                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                        MessageBoxImage icon = MessageBoxImage.Question;
+                        // Display + Process message box results
+                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                // Find the class
+                                for (int i = 0; i < classList.Count; i++)
                                 {
-                                    if (classType == "Online")
+                                    if (classList[i].ClassID == ID)
                                     {
-                                        classList[i].Online = false;
+                                        if (classType == "Online")
+                                        {
+                                            classList[i].Online = false;
+                                        }
+                                        else if (classType == "Appointment")
+                                        {
+                                            classList[i].isAppointment = false;
+                                        }
+                                        classList[i].Classroom = new ClassRoom();
                                     }
-                                    else if (classType == "Appointment")
-                                    {
-                                        classList[i].isAppointment = false;
-                                    }
-                                    classList[i].Classroom = new ClassRoom();
                                 }
-                            }
-                            break;
-                        case MessageBoxResult.No:
-                            break;
-                        case MessageBoxResult.Cancel:
-                            break;
+                                break;
+                            case MessageBoxResult.No:
+                                break;
+                            case MessageBoxResult.Cancel:
+                                break;
+                        }
                     }
                 }
             }
