@@ -896,16 +896,23 @@ namespace Schedule_WPF
                 // Iterate over classList to format the background of each row appropriately
                 for (int i = 0; i < classList.Count; i++)
                 {
-                    ws.Row(i + 2).Style.Fill.BackgroundColor = edited;
+                    ws.Row(i + 2).Style.Fill.BackgroundColor = empty;
                     // match ClassID
                     for (int n = 0; n < hashedClasses.Count; n++)
                     {
                         if (classList[i].ClassID == hashedClasses[n].ClassID)
                         {
                             // if hash is different change color to edited
-                            if (hashedClasses[n].Hash == ComputeSha256Hash(classList[i].Serialize()) && !classList[i].hasChanged)
+                            if (hashedClasses[n].Hash != ComputeSha256Hash(classList[i].Serialize()))
                             {
-                                ws.Row(i + 2).Style.Fill.BackgroundColor = empty;
+                                for (int j = 0; j < classList[i].ChangedData.Count; j++)
+                                {
+                                    if (classList[i].ChangedData[j])
+                                    {
+                                        ws.Row(i + 2).Cell(j + 1).Style.Fill.BackgroundColor = edited;
+                                    }
+                                }
+                                //ws.Row(i + 2).Cell().Style.Fill.BackgroundColor = empty;
                             }
                             break;
                         }
@@ -1463,14 +1470,38 @@ namespace Schedule_WPF
                     string originalCRN = toEdit.CRN;
                     string originalBldg = toEdit.Classroom.Location;
 
-                    toEdit.CRN = (string)Application.Current.Resources["Set_Class_CRN"];
-                    toEdit.DeptName = (string)Application.Current.Resources["Set_Class_Dept"];
-                    toEdit.ClassNumber = (int)Application.Current.Resources["Set_Class_Number"];
-                    toEdit.SectionNumber = (int)Application.Current.Resources["Set_Class_Section"];
-                    toEdit.ClassName = (string)Application.Current.Resources["Set_Class_Name"];
-                    toEdit.Credits = (int)Application.Current.Resources["Set_Class_Credits"];
-                    toEdit.Prof = DetermineProfessor((string)Application.Current.Resources["Set_Class_Professor"]);
-                    toEdit.Online = (bool)Application.Current.Resources["Set_Class_Online"];
+                    if ((string)Application.Current.Resources["Set_Class_CRN"] != toEdit.CRN)
+                    {
+                        toEdit.CRN = (string)Application.Current.Resources["Set_Class_CRN"];
+                    }
+                    if ((string)Application.Current.Resources["Set_Class_Dept"] != toEdit.DeptName)
+                    {
+                        toEdit.DeptName = (string)Application.Current.Resources["Set_Class_Dept"];
+                    }
+                    if ((int)Application.Current.Resources["Set_Class_Number"] != toEdit.ClassNumber)
+                    {
+                        toEdit.ClassNumber = (int)Application.Current.Resources["Set_Class_Number"];
+                    }
+                    if ((int)Application.Current.Resources["Set_Class_Section"] != toEdit.SectionNumber)
+                    {
+                        toEdit.SectionNumber = (int)Application.Current.Resources["Set_Class_Section"];
+                    }
+                    if ((string)Application.Current.Resources["Set_Class_Name"] != toEdit.ClassName)
+                    {
+                        toEdit.ClassName = (string)Application.Current.Resources["Set_Class_Name"];
+                    }
+                    if ((int)Application.Current.Resources["Set_Class_Credits"] != toEdit.Credits)
+                    {
+                        toEdit.Credits = (int)Application.Current.Resources["Set_Class_Credits"];
+                    }
+                    if ((string)Application.Current.Resources["Set_Class_Professor"] != toEdit.Prof.SRUID)
+                    {
+                        toEdit.Prof = DetermineProfessor((string)Application.Current.Resources["Set_Class_Professor"]);
+                    }
+                    if ((bool)Application.Current.Resources["Set_Class_Online"] != toEdit.Online)
+                    {
+                        toEdit.Online = (bool)Application.Current.Resources["Set_Class_Online"];
+                    }
                     bool appointment = false;
                     bool appt = (bool)Application.Current.Resources["Set_Class_Appointment"];
                     bool appt2 = (bool)Application.Current.Resources["Set_Class_Appointment2"];
