@@ -303,7 +303,7 @@ namespace Schedule_WPF
                         {
                             if (int.TryParse(row.Cell(5).GetValue<string>(), out parseResult))
                             {
-                                if (parseResult > 0 && parseResult < 100)
+                                if (parseResult > 0)
                                 {
                                     Section = parseResult;
                                 }

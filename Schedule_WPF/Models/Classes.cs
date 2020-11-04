@@ -178,7 +178,7 @@ namespace Schedule_WPF.Models
         public string getSectionString()
         {
             string output = "";
-            if (SectionNumber > 0 && SectionNumber < 100)
+            if (SectionNumber > 0)
             {
                 if (SectionNumber < 10)
                 {

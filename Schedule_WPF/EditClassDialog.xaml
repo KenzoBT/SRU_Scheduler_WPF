@@ -104,7 +104,7 @@
             <Image Source="images/warning_2.png" Height="20" ToolTip="Class section required!" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
         <StackPanel Name="Section_Invalid" Grid.Row="5" Grid.Column="3" Height="20" Visibility="Hidden">
-            <Image Source="images/warning.png" Height="20" ToolTip="Invalid section number! (0-99)" RenderOptions.BitmapScalingMode="HighQuality"/>
+            <Image Source="images/warning.png" Height="20" ToolTip="Invalid section number! (0-999)" RenderOptions.BitmapScalingMode="HighQuality"/>
         </StackPanel>
         <StackPanel Name="Name_Required" Grid.Row="2" Grid.Column="7" Height="20" Visibility="Hidden">
             <Image Source="images/warning_2.png" Height="20" ToolTip="Class name is required!" RenderOptions.BitmapScalingMode="HighQuality"/>

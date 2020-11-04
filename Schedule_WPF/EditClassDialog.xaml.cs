@@ -198,7 +198,7 @@ namespace Schedule_WPF
             else
             {
                 int sectionNum = Int32.Parse(Section_Text.Text);
-                if (sectionNum > 0 && sectionNum < 100)
+                if (sectionNum > 0)
                 {
                     Section_Invalid.Visibility = Visibility.Hidden;
                     Section_Required.Visibility = Visibility.Hidden;
