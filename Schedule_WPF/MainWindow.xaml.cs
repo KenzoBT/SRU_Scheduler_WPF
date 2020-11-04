@@ -897,6 +897,14 @@ namespace Schedule_WPF
                 for (int i = 0; i < classList.Count; i++)
                 {
                     ws.Row(i + 2).Style.Fill.BackgroundColor = empty;
+                    for (int j = 0; j < classList[i].ChangedData.Count; j++)
+                    {
+                        if (classList[i].ChangedData[j])
+                        {
+                            ws.Row(i + 2).Cell(j + 1).Style.Fill.BackgroundColor = edited;
+                        }
+                    }
+                    /*
                     // match ClassID
                     for (int n = 0; n < hashedClasses.Count; n++)
                     {
@@ -917,6 +925,7 @@ namespace Schedule_WPF
                             break;
                         }
                     }
+                    */
                 }
                 // Iterate over deletedclasses to format the background of each row appropriately
                 for (int i = 0; i < deletedClasses.Count; i++)
