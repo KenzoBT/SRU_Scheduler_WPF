@@ -26,12 +26,13 @@ namespace Schedule_WPF
     public partial class MainWindow : Window
     {
         ////////////// GLOBAL VARIABLES ////////////////
-        
+
         Timeslot[] times_MWF = { new Timeslot("08:00", "08:50", "AM"), new Timeslot("09:00", "09:50", "AM"), new Timeslot("10:00", "10:50", "AM"), new Timeslot("11:00", "11:50", "AM"), new Timeslot("12:00", "12:50", "PM"), new Timeslot("01:00", "01:50", "PM"), new Timeslot("02:00", "02:50", "PM"), new Timeslot("03:00", "03:50", "PM"), new Timeslot("04:00", "04:50", "PM"), new Timeslot("05:00", "05:50", "PM"), new Timeslot("06:00", "06:50", "PM") };
         Timeslot[] times_TR = { new Timeslot("08:00", "09:15", "AM"), new Timeslot("09:30", "10:45", "AM"), new Timeslot("11:00", "12:15", "AM"), new Timeslot("12:30", "01:45", "PM"), new Timeslot("02:00", "03:15", "PM"), new Timeslot("03:30", "04:45", "PM"), new Timeslot("05:00", "06:15", "PM") };
         ClassRoomList classrooms = (ClassRoomList)Application.Current.FindResource("ClassRoom_List_View");
         ProfessorList professors = (ProfessorList)Application.Current.FindResource("Professor_List_View");
         ProfessorPreferenceList professorPreferences = (ProfessorPreferenceList)Application.Current.FindResource("ProfPreference_List_View");
+        ClassGroupList classGroupings = (ClassGroupList)Application.Current.FindResource("ClassGroup_List_View");
         ClassList classList = (ClassList)Application.Current.FindResource("Classes_List_View");
         ClassList unassignedClasses = (ClassList)Application.Current.FindResource("Unassigned_Classes_List_View");
         ClassList onlineClasses = (ClassList)Application.Current.FindResource("Online_Classes_List_View");
@@ -64,10 +65,10 @@ namespace Schedule_WPF
         }
 
         ////////////// FUNCTIONS ////////////////
-        
+
         public void ReadExcel(string file) // Read excel file, create classes objects and append them to classList 
         {
-            
+
             using (var excelWorkbook = new XLWorkbook(file))
             {
                 // Select Worksheet
@@ -125,7 +126,7 @@ namespace Schedule_WPF
                         if (excelHeaders[n].ToUpper() == cellValue.ToUpper()) // if there is a duplicate column name
                         {
                             cellValue = cellValue + "(2)";
-                            break; 
+                            break;
                         }
                     }
                     excelHeaders.Add(cellValue);
@@ -390,7 +391,7 @@ namespace Schedule_WPF
                             time = DetermineTime(timePart, ClassDay);
                         }
                         // Determine if it is higlighted red (changed) or not in the excel file
-                        if(row.Cell(1).Style.Fill.BackgroundColor == XLColor.FromHtml("#FFFFCFCF"))
+                        if (row.Cell(1).Style.Fill.BackgroundColor == XLColor.FromHtml("#FFFFCFCF"))
                         {
                             //MessageBox.Show("Excel Read: Class set to RED");
                             Changed = true;
@@ -598,7 +599,7 @@ namespace Schedule_WPF
                             {
                                 MessageBoxButton button = MessageBoxButton.OK;
                                 MessageBoxImage icon = MessageBoxImage.Exclamation;
-                                MessageBox.Show("Conflict: " + classList[i].DeptName + " " + classList[i].ClassNumber + 
+                                MessageBox.Show("Conflict: " + classList[i].DeptName + " " + classList[i].ClassNumber +
                                     "\nAt: " + classList[i].ClassDay + " " + classList[i].StartTime.FullTime +
                                     "\nProfessor is already teaching at that time!\n\nMoving class to unassigned classes list", "Timeslot Conflict", button, icon);
                                 classList[i].Classroom = new ClassRoom();
@@ -689,7 +690,7 @@ namespace Schedule_WPF
                 Settings.Default.Reset();
                 colorPairs = new Pairs();
                 colorPairs.ColorPairings = new List<ProfColors>();
-                
+
                 using (FileStream fs = new FileStream(colorFilePath, FileMode.OpenOrCreate))
                 {
                     ser.Serialize(fs, colorPairs);
@@ -807,6 +808,7 @@ namespace Schedule_WPF
                     if (professors[i].SRUID == classList[n].Prof.SRUID)
                     {
                         bool unique = true;
+                        //MessageBox.Show("" + uniqueClasses.Count);
                         for (int j = 0; j < uniqueClasses.Count; j++)
                         {
                             if (uniqueClasses[j] == classList[n].ClassName)
@@ -1120,6 +1122,104 @@ namespace Schedule_WPF
                         break;
                     }
                 }
+            }
+        }
+        private void Browse_Class_Groups_Click(object sender, RoutedEventArgs e) // Locate file where professor preferences is stored
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel File (*.xlsx)|*.xlsx";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Class_Groups_Source.Text = openFileDialog.FileName;
+                try
+                {
+                    using (var excelWorkbook = new XLWorkbook(openFileDialog.FileName))
+                    {
+                    }
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
+                }
+            }
+        }
+        private void Submit_Class_Groups_Click(object sender, RoutedEventArgs e) // Get data from professor preference spreadsheet and create the preference list
+        {
+            if (Class_Groups_Source.Text == "")
+            {
+                MessageBox.Show("Please select a class groupings excel file first!");
+            }
+            else
+            {
+                //MessageBox.Show("Loading excel file into appropriate data structure...");
+                try
+                {
+                    using (var excelWorkbook = new XLWorkbook(Class_Groups_Source.Text))
+                    {
+                        // Select Worksheet
+                        var worksheet = excelWorkbook.Worksheet(1);
+                        var rows = worksheet.RangeUsed().RowsUsed();
+                        //MessageBox.Show("" + rows.Count());
+
+                        // Create a class group object for each row in grouping file
+                        foreach (var row in rows)
+                        {
+                            if (row.Cell(1).GetValue<string>() != "")
+                            {
+                                ClassGroup group = new ClassGroup();
+                                // Add the classes to the newly created group
+                                bool rowEnd = false;
+                                int i = 1;
+                                while (!rowEnd)
+                                {
+                                    if (row.Cell(i).GetValue<string>() != "")
+                                    {
+                                        string classInfo = row.Cell(i).GetValue<string>();
+                                        // Separte dept and classnum
+                                        string dept = classInfo.Split(' ')[0].ToUpper();
+                                        string num = classInfo.Split(' ')[1];
+                                        // insert data into classgroup
+                                        group.AddEntry(dept, num);
+                                        i++;
+                                    }
+                                    else
+                                    {
+                                        rowEnd = true;
+                                    }
+                                }
+                                classGroupings.Add(group);
+                            }
+                        }
+                    }
+                    Loaded_URL_Groups.Text = "Loaded file: " + Class_Groups_Source.Text;
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
+                }
+                MessageBox.Show("Class groupings successfully submitted.");
+                ProcessClassGroupings();
+                RefreshGUI();
+            }
+        }
+        private void ProcessClassGroupings() // Update classes to reflect the preferences of professors, (if any) 
+        {
+            soft_constraint_log.Text = "";
+            // Go through classlist and see if any class is scheduled at the same time as another in the same group
+            for (int i = 0; i < classList.Count; i++)
+            {
+                for (int n = 0; n < classGroupings.Count; n++)
+                {
+                    if (isGroupMember(classList[i], n))
+                    {
+                        // class found inside this particular group -> check if scheduled at the same day / time as others
+                        checkGroupConflict(classList[i], n);
+                    }
+                }
+            }
+            if (soft_constraint_log.Text == "")
+            {
+                soft_constraint_log.Text = "> None";
             }
         }
         private void SubmitChangeTerm_Click(object sender, RoutedEventArgs e) // update term and year from user input
@@ -2574,9 +2674,9 @@ namespace Schedule_WPF
                     start = "";
                     end = "";
                 }
-                dt.Rows.Add(termYear + term, classList[i].ExtraData[0], classList[i].DeptName, classList[i].ClassNumber, 
-                    classList[i].getSectionString(), classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[1], classList[i].Credits, 
-                    classList[i].MaxSeats, classList[i].ExtraData[3], classList[i].ProjSeats, classList[i].SeatsTaken, 
+                dt.Rows.Add(termYear + term, classList[i].ExtraData[0], classList[i].DeptName, classList[i].ClassNumber,
+                    classList[i].getSectionString(), classList[i].CRN, classList[i].ClassName, classList[i].ExtraData[1], classList[i].Credits,
+                    classList[i].MaxSeats, classList[i].ExtraData[3], classList[i].ProjSeats, classList[i].SeatsTaken,
                     classList[i].ExtraData[5], classList[i].ExtraData[6], classList[i].ClassDay, start, end, classList[i].Classroom.AvailableSeats,
                     classList[i].Classroom.Location, classList[i].Classroom.RoomNum, classList[i].Prof.FullName, classList[i].Prof.SRUID,
                     classList[i].ExtraData[7], classList[i].ExtraData[8], classList[i].ExtraData[9], classList[i].ExtraData[10],
@@ -2644,6 +2744,57 @@ namespace Schedule_WPF
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta / 10);
             e.Handled = true;
+        }
+        public bool isGroupMember(Classes _class, int groupIndex)
+        {
+            for (int i = 0; i < classGroupings[groupIndex].ClassDept.Count; i++)
+            {
+                if (_class.DeptName == classGroupings[groupIndex].ClassDept[i] && _class.ClassNumber == Int32.Parse(classGroupings[groupIndex].ClassNum[i]))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void checkGroupConflict(Classes _class, int groupIndex)
+        {
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].DeptName != _class.DeptName || classList[i].ClassNumber != _class.ClassNumber)
+                {
+                    if (isGroupMember(classList[i], groupIndex))
+                    {
+                        if (classList[i].StartTime.FullTime == _class.StartTime.FullTime)
+                        {
+                            // check if there is another section at another time
+                            if (!hasAlternativeSection(_class) && !hasAlternativeSection(classList[i]))
+                            {
+                                // Log conflict
+                                soft_constraint_log.Text = soft_constraint_log.Text + "\n> " + "[Group Conflict] " + classList[i].DeptName + " " + classList[i].ClassNumber + " section " +
+                                    classList[i].SectionNumber + "  <---> " + _class.DeptName + " " + _class.ClassNumber + " section " + _class.SectionNumber;
+                                break;
+                            }    
+                        }
+                    }
+                }
+            }
+        }
+        public bool hasAlternativeSection(Classes _class)
+        {
+            for (int i = 0; i < classList.Count; i++)
+            {
+                if (classList[i].DeptName == _class.DeptName && classList[i].ClassNumber == _class.ClassNumber)
+                {
+                    if (classList[i].StartTime != null && _class.StartTime != null)
+                    {
+                        if (classList[i].StartTime.FullTime != _class.StartTime.FullTime)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         // Custom Brushes

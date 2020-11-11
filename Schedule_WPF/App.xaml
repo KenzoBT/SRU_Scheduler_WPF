@@ -16,6 +16,7 @@
         <kz:ClassRoomList x:Key="ClassRoom_List_View"/>
         <kz:Pairs x:Key="ColorPairs_List_View"/>
         <kz:ProfessorPreferenceList x:Key="ProfPreference_List_View"/>
+        <kz:ClassGroupList x:Key="ClassGroup_List_View"/>
         <sys:String x:Key="FilePath">none</sys:String>
         <sys:Boolean x:Key="MainLoaded">false</sys:Boolean>
         <!-- Variables to store info from AddClassRoomDialog -->
