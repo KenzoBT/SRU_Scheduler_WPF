@@ -2764,7 +2764,7 @@ namespace Schedule_WPF
                 {
                     if (isGroupMember(classList[i], groupIndex))
                     {
-                        if (classList[i].StartTime.FullTime == _class.StartTime.FullTime)
+                        if (classList[i].StartTime.FullTime == _class.StartTime.FullTime && classList[i].StartTime.Time != "--")
                         {
                             // check if there is another section at another time
                             if (!hasAlternativeSection(_class) && !hasAlternativeSection(classList[i]))
