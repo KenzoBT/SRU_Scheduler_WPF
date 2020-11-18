@@ -95,6 +95,14 @@ namespace Schedule_WPF.Models
             isAppointment = appointment;
             hasChanged = changed;
             ExtraData = extras;
+            if (extras.Count == 0)
+            {
+                // Initialize
+                for (int i = 0; i < 15; i++)
+                {
+                    extras.Add("");
+                }
+            }
             Notes = notes;
             SectionNotes = sectionNotes;
             PreferenceLevel = 0;

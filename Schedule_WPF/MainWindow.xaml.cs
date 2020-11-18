@@ -796,19 +796,20 @@ namespace Schedule_WPF
         public void UpdateProfessorCapacity() // Update professor's numClasses and numPrep values
         {
             // for each professor
-            for (int i = 0; i < professors.Count; i++)
+            for (int i = 0; i < professors.Count; i++) // Wont be a problem. professors wont + or -
             {
                 // Reset class counters
                 professors[i].NumClasses = 0;
                 professors[i].NumPrep = 0;
                 List<string> uniqueClasses = new List<string>();
                 // check how many classes they are teaching
-                for (int n = 0; n < classList.Count; n++)
+                for (int n = 0; n < classList.Count; n++) // Wont be a problem. class has already been added previously
                 {
                     if (professors[i].SRUID == classList[n].Prof.SRUID)
                     {
                         bool unique = true;
                         //MessageBox.Show("" + uniqueClasses.Count);
+                        
                         for (int j = 0; j < uniqueClasses.Count; j++)
                         {
                             if (uniqueClasses[j] == classList[n].ClassName)
@@ -816,6 +817,7 @@ namespace Schedule_WPF
                                 unique = false;
                             }
                         }
+                        
                         if (unique && !classList[n].excludeCredits)
                         {
                             if (classList[n].isCrossListed)
@@ -832,6 +834,20 @@ namespace Schedule_WPF
                                 professors[i].NumPrep++;
                                 professors[i].NumClasses += classList[n].Credits;
                                 uniqueClasses.Add(classList[n].ClassName);
+                            }
+                        }
+                        else if (!unique && !classList[n].excludeCredits)
+                        {
+                            if (classList[n].isCrossListed)
+                            {
+                                if (classList[n].isCrossFirst)
+                                {
+                                    professors[i].NumClasses += classList[n].Credits;
+                                }
+                            }
+                            else
+                            {
+                                professors[i].NumClasses += classList[n].Credits;
                             }
                         }
                     }
@@ -859,6 +875,7 @@ namespace Schedule_WPF
             FillDerivedLists();
             UpdateProfessorCapacity();
             ProcessProfessorPreferences();
+            ProcessClassGroupings();
         }
         public void SaveChanges() // Writes classList to an excel file 
         {
@@ -1198,12 +1215,12 @@ namespace Schedule_WPF
                     MessageBox.Show("Excel file is currently open!\n\nPlease close it before proceeding...");
                 }
                 MessageBox.Show("Class groupings successfully submitted.");
-                ProcessClassGroupings();
                 RefreshGUI();
             }
         }
         private void ProcessClassGroupings() // Update classes to reflect the preferences of professors, (if any) 
         {
+            string oldText = soft_constraint_log.Text;
             soft_constraint_log.Text = "";
             // Go through classlist and see if any class is scheduled at the same time as another in the same group
             for (int i = 0; i < classList.Count; i++)
@@ -1220,6 +1237,13 @@ namespace Schedule_WPF
             if (soft_constraint_log.Text == "")
             {
                 soft_constraint_log.Text = "> None";
+            }
+            else
+            {
+                if (oldText != soft_constraint_log.Text)
+                {
+                    MessageBox.Show("Class group conflicts detected.\nPlease refer to the Conflicts tab for details.");
+                }
             }
         }
         private void SubmitChangeTerm_Click(object sender, RoutedEventArgs e) // update term and year from user input

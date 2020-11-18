@@ -158,7 +158,7 @@ namespace Schedule_WPF.Models
         }
         public bool withinColorRange(RGB_Color c1, RGB_Color c2)
         {
-            int threshold = 65;
+            int threshold = 40;
             if (Math.Abs(c1.R - c2.R) <= threshold && Math.Abs(c1.G - c2.G) <= threshold && Math.Abs(c1.B - c2.B) <= threshold)
             {
                 return true;
